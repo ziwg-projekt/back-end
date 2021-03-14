@@ -1,4 +1,4 @@
-package pl.ziwg.backend.test;
+package pl.ziwg.backend.testendpoint;
 
 
 public class Greeting {
