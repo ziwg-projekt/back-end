@@ -1,6 +1,11 @@
-# back-end
 
-//test
+| Jenkins status  |
+| ------------- | 
+| ![alt text](http://40.112.78.100:7070/buildStatus/icon?job=backend-pipeline)  |
+
+
+
+# Dev Info
 
 Chyba tutaj leci też serwer?
 
