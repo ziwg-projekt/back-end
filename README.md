@@ -1,6 +1,6 @@
 # back-end
 
-//tes
+//test
 
 Chyba tutaj leci też serwer?
 
