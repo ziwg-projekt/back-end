@@ -14,10 +14,5 @@ public class PropertiesTest {
     @Test
     public void contextLoads() {
     }
-
-    @Test
-    public void testTakingDatabaseProperties(){
-        assertTrue(databaseProperties.getUsername().equals("spring_user"));
-        assertTrue(databaseProperties.getPassword().equals("test"));
-    }
+    
 }
