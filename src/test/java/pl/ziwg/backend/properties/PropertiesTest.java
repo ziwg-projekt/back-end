@@ -17,7 +17,7 @@ public class PropertiesTest {
 
     @Test
     public void testTakingDatabaseProperties(){
-        assertTrue(databaseProperties.getPort()==3006);
-        assertTrue(databaseProperties.getName().equals("ziwg-db"));
+        assertTrue(databaseProperties.getUsername().equals("spring_user"));
+        assertTrue(databaseProperties.getPassword().equals("test"));
     }
 }
