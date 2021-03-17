@@ -17,11 +17,11 @@ public class AddressService {
         this.addressRepository = addressRepository;
     }
 
-    public List<Address> findAll(){
+    public List<Address> findAll() {
         return addressRepository.findAll();
     }
 
-    public Optional<Address> findById(Long id){
+    public Optional<Address> findById(Long id) {
         return addressRepository.findById(id);
     }
 }
