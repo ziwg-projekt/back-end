@@ -6,6 +6,7 @@
 
 
 # Dev Info
+[Endpointy w Swagger UI](http://40.112.78.100:8080/swagger-ui/)
 
 Żeby dostać się do mysqla:
 ```
