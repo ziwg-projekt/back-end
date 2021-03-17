@@ -14,10 +14,5 @@ public class PropertiesTest {
     @Test
     public void contextLoads() {
     }
-
-    @Test
-    public void testTakingDatabaseProperties(){
-        assertTrue(databaseProperties.getPort()==3006);
-        assertTrue(databaseProperties.getName().equals("ziwg-db"));
-    }
+    
 }
