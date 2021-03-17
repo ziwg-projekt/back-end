@@ -1,26 +1,27 @@
 package pl.ziwg.backend.properties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "database")
+@ConfigurationProperties(prefix = "spring.datasource")
 public class DatabaseProperties {
-    private int port;
-    private String name;
+    private String username;
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-
-
-    public int getPort(){
-        return port;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPort(int port){
-        this.port = port;
+    public void setPassword(String password) {
+        this.password = password;
     }
+
+    private String password;
+
 }
+
