@@ -1,4 +1,4 @@
-package pl.ziwg.exception;
+package pl.ziwg.backend.exception;
 
 public class AddressNotFoundException extends RuntimeException {
 

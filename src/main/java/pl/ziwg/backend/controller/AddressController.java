@@ -4,15 +4,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pl.ziwg.backend.exception.InvalidRequestException;
+import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepository;
+import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepositoryImpl;
+import pl.ziwg.backend.externalapi.opencagedata.entity.GeocodeResponse;
 import pl.ziwg.backend.model.entity.Address;
 import pl.ziwg.backend.model.modelassembler.AddressModelAssembler;
 import pl.ziwg.backend.service.AddressService;
-import pl.ziwg.exception.AddressNotFoundException;
+import pl.ziwg.backend.exception.AddressNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -24,6 +28,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class AddressController {
     private AddressService addressService;
     private AddressModelAssembler assembler;
+
 
     @Autowired
     public AddressController(AddressService addressService, AddressModelAssembler assembler) {
@@ -78,6 +83,28 @@ public class AddressController {
                 .orElseThrow(() -> new AddressNotFoundException(id));
 
         return assembler.toModel(address);
+    }
+
+    @GetMapping("/generate")
+    @ResponseBody
+    public GeocodeResponse generateAddress(@RequestParam(required = false) Optional<String> lat,
+                                           @RequestParam(required = false) Optional<String> lon,
+                                           @RequestParam(required = false) Optional<String> title){
+        String query = "";
+//        String apiKey = System.getenv("OPENCAGEDATA_API_KEY");
+        String apiKey = "84aa8a50b45c4ec7b1c9f39164b39521";
+        if(title.isPresent()){
+            query = title.get();
+        }
+        else if(lon.isPresent() && lat.isPresent()){
+            query = lat.get() + "+" + lon.get();
+        }
+        else{
+            throw new InvalidRequestException("You must title or latitude and longitude in request parameters!");
+        }
+
+        GeocodeRepository geocodeRepository = new GeocodeRepositoryImpl(apiKey);
+        return geocodeRepository.query(query);
     }
 
 }
