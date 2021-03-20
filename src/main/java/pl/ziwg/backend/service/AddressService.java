@@ -1,6 +1,8 @@
 package pl.ziwg.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pl.ziwg.backend.model.entity.Address;
 import pl.ziwg.backend.model.repository.AddressRepository;
@@ -17,8 +19,8 @@ public class AddressService {
         this.addressRepository = addressRepository;
     }
 
-    public List<Address> findAll(){
-        return addressRepository.findAll();
+    public Page<Address> findAll(Pageable pageable){
+        return addressRepository.findAll(pageable);
     }
 
     public Optional<Address> findById(Long id){

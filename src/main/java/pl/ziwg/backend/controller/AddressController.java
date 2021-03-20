@@ -2,6 +2,10 @@ package pl.ziwg.backend.controller;
 
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -16,11 +20,9 @@ import pl.ziwg.backend.model.entity.Address;
 import pl.ziwg.backend.service.AddressService;
 import pl.ziwg.backend.exception.AddressNotFoundException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/addresses")
@@ -34,11 +36,11 @@ public class AddressController {
 
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
-    public Collection<Address> getAll() {
-        return addressService.findAll();
+    public Page<Address> getAll(@PageableDefault(size = Integer.MAX_VALUE) Pageable pageRequest) {
+            return addressService.findAll(pageRequest);
     }
 
-    @PostMapping(value = "", produces = "application/json", consumes = "application/json")
+    @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     public Address newAddress(@Valid @RequestBody Address newAddress) {
         return addressService.save(newAddress);
