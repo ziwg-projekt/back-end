@@ -11,10 +11,8 @@ public class OpencageComponent
 {
     private String city;
 
-    @JsonProperty("town")
     private String town;
 
-    @JsonProperty("postcode")
     private String postcode;
 
     private String country;
@@ -26,6 +24,8 @@ public class OpencageComponent
 
     private String state;
 
+    private String village;
+
     @JsonProperty("state_district")
     private String stateDistrict;
 
@@ -34,6 +34,7 @@ public class OpencageComponent
         return "OpencageComponent{" +
                 "city='" + city + '\'' +
                 ", town='" + town + '\'' +
+                ", village='" + village + '\'' +
                 ", postcode='" + postcode + '\'' +
                 ", country='" + country + '\'' +
                 ", countryCode='" + countryCode + '\'' +
