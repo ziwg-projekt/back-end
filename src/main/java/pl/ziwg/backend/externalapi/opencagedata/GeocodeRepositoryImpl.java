@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
@@ -67,7 +66,6 @@ public class GeocodeRepositoryImpl implements GeocodeRepository
                 .toUri();
 
         log.debug("geocoding query: {}", serviceUrl);
-
         GeocodeResponse result = new GeocodeResponse();
 
         try
@@ -76,7 +74,6 @@ public class GeocodeRepositoryImpl implements GeocodeRepository
 
             switch (response.getStatusCode())
             {
-                // TODO proper handling of quota excessions
                 case OK:
                     result = response.getBody();
 

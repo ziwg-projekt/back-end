@@ -3,16 +3,17 @@ package pl.ziwg.backend.externalapi.opencagedata;
 import org.junit.jupiter.api.Test;
 import pl.ziwg.backend.externalapi.opencagedata.entity.GeocodeResponse;
 
+import java.text.ChoiceFormat;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class OpencageTest {
-    String apiKey = "84aa8a50b45c4ec7b1c9f39164b39521";
-    GeocodeRepository geocodeRepository = new GeocodeRepositoryImpl(apiKey);
+    GeocodeRepository geocodeRepository = new GeocodeRepositoryImpl(System.getenv("OPENCAGEDATA_API_KEY"));
 
     @Test
     public void testIfApiKeyIsInEnvironmentVariables(){
         System.out.println(System.getenv("OPENCAGEDATA_API_KEY"));
-//        assertNotEquals(null, System.getenv("OPENCAGEDATA_API_KEY"));
+        assertNotEquals(null, System.getenv("OPENCAGEDATA_API_KEY"));
     }
     @Test
     public void getInfoByCoords() {
