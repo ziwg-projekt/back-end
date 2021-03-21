@@ -6,12 +6,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.entity.Vaccine;
 import pl.ziwg.backend.service.VaccineService;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/vaccines")
@@ -38,5 +43,10 @@ public class VaccineController {
     @PostMapping("")
     public ResponseEntity<Vaccine> newAddress(@Valid @RequestBody Vaccine newVaccine) {
         return new ResponseEntity<>(vaccineService.save(newVaccine), HttpStatus.CREATED);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException exception) {
+        return new ResponseEntity<>(new ApiError(exception), HttpStatus.BAD_REQUEST);
     }
 }
