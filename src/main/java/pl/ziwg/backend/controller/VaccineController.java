@@ -40,9 +40,22 @@ public class VaccineController {
         return new ResponseEntity<>(vaccine, HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Vaccine> delete(@PathVariable Long id) {
+        Vaccine vaccine = vaccineService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "vaccine"));
+        vaccineService.delete(vaccine);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @PostMapping("")
-    public ResponseEntity<Vaccine> newAddress(@Valid @RequestBody Vaccine newVaccine) {
+    public ResponseEntity<Vaccine> newVaccine(@Valid @RequestBody Vaccine newVaccine) {
         return new ResponseEntity<>(vaccineService.save(newVaccine), HttpStatus.CREATED);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiError> handleNoSuchResourceException(ResourceNotFoundException exception) {
+        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

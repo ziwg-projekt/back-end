@@ -92,7 +92,7 @@ public class AddressController {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiError> handleNoSuchAddressException(ResourceNotFoundException exception) {
+    public ResponseEntity<ApiError> handleNoSuchResourceException(ResourceNotFoundException exception) {
         return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.NOT_FOUND);
     }
 
