@@ -1,5 +1,6 @@
 package pl.ziwg.backend.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+
 @Entity
 @Table(name = "address")
 @Getter
@@ -23,15 +25,28 @@ import javax.persistence.Table;
 public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private long ID;
+    private long Id;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "address")
     private Hospital hospital;
 
+    @NotEmpty
     private String city;
+
+    @NotEmpty
     private String street;
+
+    @JsonProperty(value="house_number")
+    @NotEmpty
     private String houseNumber;
+
+
+    @NotNull
+    @Valid
     private float latitude;
+
+    @NotNull
+    @Valid
     private float longitude;
 
 }
