@@ -4,10 +4,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import pl.ziwg.backend.model.entity.Address;
-
+import pl.ziwg.backend.model.entity.Vaccine;
 
 @Repository
-public interface AddressRepository extends JpaRepository<Address, Long> {
-    Page<Address> findAll(Pageable pageable);
+public interface VaccineRepository extends JpaRepository<Vaccine, Long> {
+    Page<Vaccine> findAll(Pageable pageable);
 }
