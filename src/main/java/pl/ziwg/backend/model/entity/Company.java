@@ -9,7 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 
 @Entity
-@Table(name = "vaccine")
+@Table(name = "company")
 @Getter
 @ToString
 @Setter
