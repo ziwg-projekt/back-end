@@ -97,7 +97,7 @@ public class AddressController {
     }
 
     @ExceptionHandler(InvalidRequestException.class)
-    public ResponseEntity<ApiError> handleNoSuchAddressException(InvalidRequestException exception) {
+    public ResponseEntity<ApiError> handleInvalidRequestException(InvalidRequestException exception) {
         return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
