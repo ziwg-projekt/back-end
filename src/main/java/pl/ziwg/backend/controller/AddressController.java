@@ -102,14 +102,8 @@ public class AddressController {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return new ResponseEntity<>(new ApiError(errors.toString()), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException exception) {
+        return new ResponseEntity<>(new ApiError(exception), HttpStatus.BAD_REQUEST);
     }
 
 }
