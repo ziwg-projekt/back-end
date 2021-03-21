@@ -23,7 +23,7 @@ public class AddressService {
         return addressRepository.findAll(pageable);
     }
 
-    public Optional<Address> findById(Long id){
+    public Optional<Address> findById(Long id) {
         return addressRepository.findById(id);
     }
 
