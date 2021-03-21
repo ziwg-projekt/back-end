@@ -16,10 +16,12 @@ public class ApiError {
     private LocalDateTime timestamp;
 
     public ApiError(String message) {
+        this();
         this.message = message;
     }
 
     public ApiError(MethodArgumentNotValidException ex){
+        this();
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();

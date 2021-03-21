@@ -29,4 +29,10 @@ public class VaccineService {
     public Vaccine save(Vaccine vaccine) {
         return vaccineRepository.save(vaccine);
     }
+
+    public void delete(Vaccine vaccine) {
+        vaccineRepository.delete(vaccine);
+    }
+
+
 }
