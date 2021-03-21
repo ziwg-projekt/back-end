@@ -96,13 +96,13 @@ public class AddressController {
     @ExceptionHandler(AddressNotFoundException.class)
     @ResponseBody
     public ResponseEntity<Object> handleNoSuchAddressException(AddressNotFoundException exception) {
-        return ApiError.buildResponseEntity(exception.getMessage(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(InvalidRequestException.class)
     @ResponseBody
     public ResponseEntity<Object> handleNoSuchAddressException(InvalidRequestException exception) {
-        return ApiError.buildResponseEntity(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -113,7 +113,7 @@ public class AddressController {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        return ApiError.buildResponseEntity(errors.toString(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ApiError(errors.toString()), HttpStatus.BAD_REQUEST);
     }
 
 }

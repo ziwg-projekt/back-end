@@ -2,8 +2,6 @@ package pl.ziwg.backend.exception;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 
 @Getter
@@ -11,19 +9,21 @@ import java.time.LocalDateTime;
 public class ApiError {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private LocalDateTime timestamp;
+
+    public ApiError(String message) {
+        this.message = message;
+    }
+
     private String message;
     private String debugMessage;
-
-    public static ResponseEntity<Object> buildResponseEntity(String message, HttpStatus httpStatus) {
-        return new ResponseEntity<>(new ApiError(message), httpStatus);
-    }
 
     private ApiError() {
         timestamp = LocalDateTime.now();
     }
 
-    public ApiError(String message) {
+    public ApiError(String message, String debugMessage) {
         this();
         this.message = message;
+        this.debugMessage = debugMessage;
     }
 }
