@@ -32,22 +32,22 @@ public class CompanyController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Company> getOne(@PathVariable Long id) {
-        Company vaccine = companyService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id, "vaccine"));
-        return new ResponseEntity<>(vaccine, HttpStatus.OK);
+        Company company = companyService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
+        return new ResponseEntity<>(company, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Company> delete(@PathVariable Long id) {
-        Company vaccine = companyService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id, "vaccine"));
-        companyService.delete(vaccine);
+        Company company = companyService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
+        companyService.delete(company);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("")
-    public ResponseEntity<Company> newVaccine(@Valid @RequestBody Company newVaccine) {
-        return new ResponseEntity<>(companyService.save(newVaccine), HttpStatus.CREATED);
+    public ResponseEntity<Company> newCompany(@Valid @RequestBody Company newCompany) {
+        return new ResponseEntity<>(companyService.save(newCompany), HttpStatus.CREATED);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
