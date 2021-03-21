@@ -14,7 +14,7 @@ import javax.validation.constraints.NotEmpty;
 @ToString
 @Setter
 @NoArgsConstructor
-public class Vaccine {
+public class Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @javax.persistence.Id
     private long Id;
