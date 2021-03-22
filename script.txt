@@ -1,3 +1,17 @@
+delete from address;
+delete from citizen;
+delete from company;
+delete from hospital;
+delete from doctor;
+delete from vaccine;
+delete from appointment;
+alter table address AUTO_INCREMENT=1;
+alter table citizen AUTO_INCREMENT=1;
+alter table company AUTO_INCREMENT=1;
+alter table hospital AUTO_INCREMENT=1;
+alter table doctor AUTO_INCREMENT=1;
+alter table vaccine AUTO_INCREMENT=1;
+alter table appointment AUTO_INCREMENT=1;
 INSERT INTO address (city, street, house_number, latitude, longitude) VALUES ("Wroclaw", "Grunwaldzka", "13c", 50.65, 13.05);
 INSERT INTO citizen (name, surname, pesel, phone_number) VALUE ("Jerzy", "Pietraszko", "98071134901", "123456789");
 INSERT INTO company (name) VALUE ("AstraZeneca");
