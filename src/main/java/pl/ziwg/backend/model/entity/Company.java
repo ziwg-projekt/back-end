@@ -1,5 +1,6 @@
 package pl.ziwg.backend.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,6 +27,7 @@ public class Company {
     @Column(length = 1000)
     private byte[] logoByte;
 
+    @JsonIgnore
     @OneToMany(mappedBy="company")
     private Set<Vaccine> vaccines;
 
