@@ -8,12 +8,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.model.ImageHandler;
 import pl.ziwg.backend.model.entity.Company;
 import pl.ziwg.backend.service.CompanyService;
 
 import javax.validation.Valid;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/companies")
@@ -35,6 +38,23 @@ public class CompanyController {
         Company company = companyService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
         return new ResponseEntity<>(company, HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/logo")
+    public ResponseEntity<Company> uploadImage(@PathVariable Long id, @RequestParam("imageFile") MultipartFile file) throws IOException {
+        System.out.println("Original Image Byte Size - " + file.getBytes().length);
+        Company company = companyService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
+        company.setLogoByte(ImageHandler.compressBytes(file.getBytes()));
+        companyService.save(company);
+        return new ResponseEntity<>(company, HttpStatus.CREATED);
+    }
+
+    @GetMapping(path = { "/{id}/logo" })
+    public ResponseEntity<byte[]> getImage(@PathVariable Long id){
+        Company company = companyService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
+        return new ResponseEntity<>(ImageHandler.decompressBytes(company.getLogoByte()), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

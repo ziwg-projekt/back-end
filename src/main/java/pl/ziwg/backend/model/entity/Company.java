@@ -22,4 +22,7 @@ public class Company {
     @NotEmpty
     private String name;
 
+    @Column(length = 1000)
+    private byte[] logoByte;
+
 }
