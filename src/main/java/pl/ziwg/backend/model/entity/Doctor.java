@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Entity
@@ -20,8 +21,9 @@ public class Doctor {
     @Id
     private long Id;
 
+    @NotNull
     @ManyToOne()
-    @JoinColumn(name = "hospital", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "hospital", referencedColumnName = "id")
     private Hospital hospital;
 
     @JsonIgnore
