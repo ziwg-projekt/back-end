@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
@@ -17,6 +18,7 @@ import pl.ziwg.backend.service.CompanyService;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/companies")
@@ -50,7 +52,7 @@ public class CompanyController {
         return new ResponseEntity<>(company, HttpStatus.CREATED);
     }
 
-    @GetMapping(path = { "/{id}/logo" })
+    @GetMapping("/{id}/logo")
     public ResponseEntity<byte[]> getImage(@PathVariable Long id){
         Company company = companyService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
@@ -59,9 +61,8 @@ public class CompanyController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Company> delete(@PathVariable Long id) {
-        Company company = companyService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
-        companyService.delete(company);
+        Optional<Company> company = companyService.findById(id);
+        company.ifPresent(value -> companyService.delete(value));
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -78,5 +79,10 @@ public class CompanyController {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException exception) {
         return new ResponseEntity<>(new ApiError(exception), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ApiError> handleMultipartException(MultipartException exception) {
+        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.BAD_REQUEST);
     }
 }

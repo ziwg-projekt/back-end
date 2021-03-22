@@ -1,5 +1,6 @@
 package pl.ziwg.backend.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,11 +26,12 @@ import javax.validation.constraints.NotNull;
 @ToString
 @Setter
 @NoArgsConstructor
-public class Address {
+public class Address  {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private long Id;
 
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "address")
     private Hospital hospital;
 
@@ -42,7 +44,6 @@ public class Address {
     @JsonProperty(value="house_number")
     @NotEmpty
     private String houseNumber;
-
 
     @NotNull
     @Valid
