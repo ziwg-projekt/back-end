@@ -76,4 +76,5 @@ public class HospitalController {
     public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException exception) {
         return new ResponseEntity<>(new ApiError(exception), HttpStatus.BAD_REQUEST);
     }
+
 }

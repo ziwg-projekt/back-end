@@ -1,0 +1,7 @@
+INSERT INTO address (city, street, house_number, latitude, longitude) VALUES ("Wroclaw", "Grunwaldzka", "13c", 50.65, 13.05);
+INSERT INTO citizen (name, surname, pesel, phone_number) VALUE ("Jerzy", "Pietraszko", "98071134901", "123456789");
+INSERT INTO company (name) VALUE ("AstraZeneca");
+INSERT INTO hospital(name, address) VALUES ("Szpital im. prof. Janusza Biernata", 1);
+INSERT INTO doctor(hospital) VALUES (1);
+INSERT INTO vaccine(code, state, company, hospital) VALUES ("123456", 0, 1, 1);
+INSERT INTO appointment(date, state, citizen, vaccine, doctor) VALUES ("2016-03-04 11:30", 0, "98071134901", "123456", 1);

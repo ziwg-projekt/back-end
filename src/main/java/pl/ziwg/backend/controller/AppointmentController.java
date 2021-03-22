@@ -1,5 +1,6 @@
 package pl.ziwg.backend.controller;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.hibernate.id.IdentifierGenerationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -66,13 +67,11 @@ public class AppointmentController {
 
     @ExceptionHandler(IdentifierGenerationException.class)
     public ResponseEntity<ApiError> handleIdentifierGenerationException(IdentifierGenerationException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getCause().toString()  + " (probably wrong PK column name)", exception.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ApiError("Probably wrong PK column name", exception.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiError> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+    @ExceptionHandler(InvalidFormatException.class)
+    public ResponseEntity<ApiError> handleInvalidFormatException(InvalidFormatException exception) {
         return new ResponseEntity<>(new ApiError(exception.getCause().toString(), exception.getMessage()), HttpStatus.BAD_REQUEST);
     }
-
-
 }

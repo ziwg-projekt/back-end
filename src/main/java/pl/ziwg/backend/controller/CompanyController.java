@@ -96,4 +96,5 @@ public class CompanyController {
     public ResponseEntity<ApiError> handleMultipartException(MultipartException exception) {
         return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.BAD_REQUEST);
     }
+
 }

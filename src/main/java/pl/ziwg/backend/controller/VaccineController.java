@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.model.entity.Appointment;
 import pl.ziwg.backend.model.entity.Doctor;
 import pl.ziwg.backend.model.entity.Vaccine;
 import pl.ziwg.backend.model.enumerates.VaccineState;
@@ -40,6 +41,13 @@ public class VaccineController {
         return new ResponseEntity<>(vaccine, HttpStatus.OK);
     }
 
+    @GetMapping("/{code}/appointment")
+    public ResponseEntity<Appointment> getAppointment(@PathVariable String code) {
+        Vaccine vaccine = vaccineService.findByCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException(code, "vaccine"));
+        return new ResponseEntity<>(vaccine.getAppointment(), HttpStatus.OK);
+    }
+
     @PostMapping("")
     public ResponseEntity<Vaccine> newVaccine(@Valid @RequestBody Vaccine newVaccine) {
         newVaccine.setState(VaccineState.AVAILABLE);
@@ -55,5 +63,6 @@ public class VaccineController {
     public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException exception) {
         return new ResponseEntity<>(new ApiError(exception), HttpStatus.BAD_REQUEST);
     }
+
 
 }
