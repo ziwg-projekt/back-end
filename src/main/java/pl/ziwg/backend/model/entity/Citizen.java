@@ -1,6 +1,7 @@
 package pl.ziwg.backend.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,12 +29,13 @@ public class Citizen {
     private String surname;
 
     @NotNull
+    @JsonProperty(value="phone_number")
     private String phoneNumber;
 
     private String email;
 
     @ManyToOne()
-    @JoinColumn(name = "hospital", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "hospital", referencedColumnName = "id")
     private Hospital hospital;
 
     private CitizenState state;
