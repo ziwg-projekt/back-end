@@ -66,12 +66,12 @@ public class AppointmentController {
 
     @ExceptionHandler(IdentifierGenerationException.class)
     public ResponseEntity<ApiError> handleIdentifierGenerationException(IdentifierGenerationException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getMessage() + " (probably wrong PK column name)"), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ApiError(exception.getCause().toString()  + " (probably wrong PK column name)", exception.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ApiError(exception.getCause().toString(), exception.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
 
