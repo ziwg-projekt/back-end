@@ -14,11 +14,14 @@ import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.ImageHandler;
 import pl.ziwg.backend.model.entity.Company;
+import pl.ziwg.backend.model.entity.Hospital;
+import pl.ziwg.backend.model.entity.Vaccine;
 import pl.ziwg.backend.service.CompanyService;
 
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/companies")
@@ -58,6 +61,14 @@ public class CompanyController {
                 .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
         return new ResponseEntity<>(ImageHandler.decompressBytes(company.getLogoByte()), HttpStatus.OK);
     }
+
+    @GetMapping("/{id}/vaccines")
+    public ResponseEntity<Set<Vaccine>> getVaccines(@PathVariable Long id) {
+        Company company = companyService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
+        return new ResponseEntity<>(company.getVaccines(), HttpStatus.OK);
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Company> delete(@PathVariable Long id) {
