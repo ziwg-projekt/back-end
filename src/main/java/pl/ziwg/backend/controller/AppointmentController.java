@@ -1,11 +1,13 @@
 package pl.ziwg.backend.controller;
 
+import org.hibernate.id.IdentifierGenerationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.ApiError;
@@ -61,5 +63,16 @@ public class AppointmentController {
     public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException exception) {
         return new ResponseEntity<>(new ApiError(exception), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(IdentifierGenerationException.class)
+    public ResponseEntity<ApiError> handleIdentifierGenerationException(IdentifierGenerationException exception) {
+        return new ResponseEntity<>(new ApiError(exception.getMessage() + " (probably wrong PK column name)"), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
 
 }
