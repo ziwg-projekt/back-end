@@ -6,8 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pl.ziwg.backend.model.entity.Address;
 import pl.ziwg.backend.model.repository.AddressRepository;
-
-import java.util.List;
 import java.util.Optional;
 
 @Service

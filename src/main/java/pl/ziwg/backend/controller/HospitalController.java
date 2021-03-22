@@ -10,10 +10,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.model.entity.Citizen;
+import pl.ziwg.backend.model.entity.Doctor;
 import pl.ziwg.backend.model.entity.Hospital;
+import pl.ziwg.backend.model.entity.Vaccine;
 import pl.ziwg.backend.service.HospitalService;
 
 import javax.validation.Valid;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/hospitals")
@@ -35,6 +39,27 @@ public class HospitalController {
         Hospital hospital = hospitalService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
         return new ResponseEntity<>(hospital, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/vaccines")
+    public ResponseEntity<Set<Vaccine>> getVaccines(@PathVariable Long id) {
+        Hospital hospital = hospitalService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
+        return new ResponseEntity<>(hospital.getVaccines(), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/citizens")
+    public ResponseEntity<Set<Citizen>> getCitizens(@PathVariable Long id) {
+        Hospital hospital = hospitalService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
+        return new ResponseEntity<>(hospital.getCitizens(), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/doctors")
+    public ResponseEntity<Set<Doctor>> getDoctors(@PathVariable Long id) {
+        Hospital hospital = hospitalService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
+        return new ResponseEntity<>(hospital.getDoctors(), HttpStatus.OK);
     }
 
     @PostMapping("")
