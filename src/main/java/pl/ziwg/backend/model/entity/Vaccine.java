@@ -1,5 +1,6 @@
 package pl.ziwg.backend.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,6 +34,7 @@ public class Vaccine implements Serializable {
 
     private VaccineState state;
 
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "vaccine")
     private Appointment appointment;
 
