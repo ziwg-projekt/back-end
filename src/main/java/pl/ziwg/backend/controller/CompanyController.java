@@ -12,16 +12,14 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.model.EntityConverter;
 import pl.ziwg.backend.model.ImageHandler;
-import pl.ziwg.backend.model.entity.Company;
-import pl.ziwg.backend.model.entity.Hospital;
-import pl.ziwg.backend.model.entity.Vaccine;
+import pl.ziwg.backend.model.entity.*;
 import pl.ziwg.backend.service.CompanyService;
 
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/companies")
@@ -35,7 +33,7 @@ public class CompanyController {
 
     @GetMapping("")
     public ResponseEntity<Page<Company>> getAll(@PageableDefault(size = Integer.MAX_VALUE) Pageable pageRequest) {
-        return new ResponseEntity<>(companyService.findAll(pageRequest), HttpStatus.OK);
+        return new ResponseEntity<>(companyService.findAllFromPage(pageRequest), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -63,12 +61,12 @@ public class CompanyController {
     }
 
     @GetMapping("/{id}/vaccines")
-    public ResponseEntity<Set<Vaccine>> getVaccines(@PathVariable Long id) {
+    public ResponseEntity<List<Map<String, Object>>> getVaccines(@PathVariable Long id) throws IllegalAccessException {
         Company company = companyService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
-        return new ResponseEntity<>(company.getVaccines(), HttpStatus.OK);
+        List<Map<String, Object>> response = EntityConverter.getListRepresentationWithoutChosenFields(company.getVaccines(), Arrays.asList("company", "appointment"));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Company> delete(@PathVariable Long id) {
