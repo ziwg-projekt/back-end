@@ -27,8 +27,8 @@ public class CitizenService {
         return citizenRepository.findAll();
     }
 
-    public Optional<Citizen> findById(Long id) {
-        return citizenRepository.findById(id);
+    public Optional<Citizen> findByPesel(String pesel) {
+        return citizenRepository.findByPesel(pesel);
     }
 
     public Citizen save(Citizen citizen) {

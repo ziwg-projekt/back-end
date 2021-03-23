@@ -10,12 +10,16 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.model.EntityConverter;
 import pl.ziwg.backend.model.entity.Appointment;
 import pl.ziwg.backend.model.entity.Citizen;
 import pl.ziwg.backend.model.entity.Doctor;
 import pl.ziwg.backend.service.DoctorService;
 
 import javax.validation.Valid;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -46,10 +50,11 @@ public class DoctorController {
     }
 
     @GetMapping("/{id}/appointments")
-    public ResponseEntity<Set<Appointment>> getCitizenAppointments(@PathVariable Long id) {
+    public ResponseEntity<List<Map<String, Object>>> getCitizenAppointments(@PathVariable Long id) throws IllegalAccessException {
         Doctor doctor = doctorService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "doctor"));
-        return new ResponseEntity<>(doctor.getAppointments(), HttpStatus.OK);
+        List<Map<String, Object>> response = EntityConverter.getListRepresentationWithoutChosenFields(doctor.getAppointments(), Arrays.asList("doctor"));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

@@ -11,6 +11,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+
 @Entity
 @Table(name = "appointment")
 @Getter
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
 public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private long Id;
+    private long id;
 
     @NotNull
     @JsonFormat(pattern="yyyy-MM-dd HH:mm", timezone = "Europe/Warsaw")

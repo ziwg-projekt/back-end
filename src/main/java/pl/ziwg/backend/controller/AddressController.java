@@ -35,7 +35,7 @@ public class AddressController {
 
     @GetMapping("")
     public ResponseEntity<Page<Address>> getAll(@PageableDefault(size = Integer.MAX_VALUE) Pageable pageRequest) {
-            return new ResponseEntity<>(addressService.findAll(pageRequest), HttpStatus.OK);
+            return new ResponseEntity<>(addressService.findAllFromPage(pageRequest), HttpStatus.OK);
     }
 
 

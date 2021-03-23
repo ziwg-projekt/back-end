@@ -19,7 +19,7 @@ import java.util.Set;
 public class Doctor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private long Id;
+    private long id;
 
     @NotNull
     @ManyToOne()

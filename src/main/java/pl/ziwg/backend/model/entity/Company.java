@@ -19,11 +19,12 @@ import java.util.Set;
 public class Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private long Id;
+    private long id;
 
     @NotEmpty
     private String name;
 
+    @JsonIgnore
     @Column(length = 1000)
     private byte[] logoByte;
 
