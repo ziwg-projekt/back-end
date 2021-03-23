@@ -12,6 +12,10 @@
 ```
 docker exec -it mysql_container mysql -u root -p
 ```
+Żeby wykonać skrypt z przykładowymi danymi:
+```
+docker exec -it mysql_container mysql -u root -p -e "use ziwg_db; $(cat /var/lib/jenkins/workspace/backend-pipeline/script.txt)"
+```
 
 Publiczne IP maszyny:
 ```
