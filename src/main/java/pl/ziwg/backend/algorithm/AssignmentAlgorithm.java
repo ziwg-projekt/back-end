@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 public class AssignmentAlgorithm implements Runnable, DisposableBean {
     protected static final Logger log = Logger.getLogger(AssignmentAlgorithm.class);
-    private volatile boolean active = false;
+    private volatile boolean active = true;  // set to 'true' to run algorithm
     private Thread thread;
     private VaccineService vaccineService;
     private CitizenService citizenService;
@@ -46,8 +46,6 @@ public class AssignmentAlgorithm implements Runnable, DisposableBean {
 
         }
     }
-
-
 
     @Override
     public void destroy() {
