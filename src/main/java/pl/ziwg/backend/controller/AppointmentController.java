@@ -68,7 +68,7 @@ public class AppointmentController {
 
     @ExceptionHandler(IdentifierGenerationException.class)
     public ResponseEntity<ApiError> handleIdentifierGenerationException(IdentifierGenerationException exception) {
-        return new ResponseEntity<>(new ApiError("Probably wrong PK column name", exception.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ApiError("Probably wrong PK column name!", exception.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InvalidFormatException.class)
