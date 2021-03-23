@@ -46,6 +46,7 @@ public class AppointmentController {
         Appointment appointment = appointmentService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
         appointment.setState(AppointmentState.CANCELLED);
+        appointmentService.save(appointment);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
