@@ -9,6 +9,7 @@ import pl.ziwg.backend.model.entity.Company;
 import pl.ziwg.backend.model.entity.Hospital;
 import pl.ziwg.backend.model.repository.HospitalRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,9 +26,14 @@ public class HospitalService {
         return hospitalRepository.save(hospital);
     }
 
-    public Page<Hospital> findAll(Pageable pageable){
+    public Page<Hospital> findAllFromPage(Pageable pageable){
         return hospitalRepository.findAll(pageable);
     }
+
+    public List<Hospital> findAll(){
+        return hospitalRepository.findAll();
+    }
+
 
     public Optional<Hospital> findById(Long id) {
         return hospitalRepository.findById(id);

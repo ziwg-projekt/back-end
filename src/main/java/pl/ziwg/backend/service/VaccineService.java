@@ -5,7 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pl.ziwg.backend.model.entity.Doctor;
+import pl.ziwg.backend.model.entity.Hospital;
 import pl.ziwg.backend.model.entity.Vaccine;
+import pl.ziwg.backend.model.enumerates.VaccineState;
 import pl.ziwg.backend.model.repository.VaccineRepository;
 
 import java.util.List;
@@ -28,6 +30,9 @@ public class VaccineService {
         return vaccineRepository.findAll();
     }
 
+    public List<Vaccine> findAllAvailableFromHospital(Hospital hospital){
+        return vaccineRepository.findByHospitalAndState(hospital, VaccineState.AVAILABLE);
+    }
 
     public Optional<Vaccine> findByCode(String code) {
         return vaccineRepository.findByCode(code);

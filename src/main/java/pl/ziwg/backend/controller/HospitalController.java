@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.model.EntityConverter;
 import pl.ziwg.backend.model.entity.Citizen;
 import pl.ziwg.backend.model.entity.Doctor;
 import pl.ziwg.backend.model.entity.Hospital;
@@ -17,6 +18,9 @@ import pl.ziwg.backend.model.entity.Vaccine;
 import pl.ziwg.backend.service.HospitalService;
 
 import javax.validation.Valid;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -31,7 +35,7 @@ public class HospitalController {
 
     @GetMapping("")
     public ResponseEntity<Page<Hospital>> getAll(@PageableDefault(size = Integer.MAX_VALUE) Pageable pageRequest) {
-        return new ResponseEntity<>(hospitalService.findAll(pageRequest), HttpStatus.OK);
+        return new ResponseEntity<>(hospitalService.findAllFromPage(pageRequest), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -42,24 +46,27 @@ public class HospitalController {
     }
 
     @GetMapping("/{id}/vaccines")
-    public ResponseEntity<Set<Vaccine>> getVaccines(@PathVariable Long id) {
+    public ResponseEntity<List<Map<String, Object>>> getVaccines(@PathVariable Long id) throws IllegalAccessException {
         Hospital hospital = hospitalService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
-        return new ResponseEntity<>(hospital.getVaccines(), HttpStatus.OK);
+        List<Map<String, Object>> response = EntityConverter.getListRepresentationWithoutChosenFields(hospital.getVaccines(), Arrays.asList("hospital", "appointment"));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/{id}/citizens")
-    public ResponseEntity<Set<Citizen>> getCitizens(@PathVariable Long id) {
+    public ResponseEntity<List<Map<String, Object>>> getCitizens(@PathVariable Long id) throws IllegalAccessException {
         Hospital hospital = hospitalService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
-        return new ResponseEntity<>(hospital.getCitizens(), HttpStatus.OK);
+        List<Map<String, Object>> response = EntityConverter.getListRepresentationWithoutChosenFields(hospital.getCitizens(), Arrays.asList("hospital", "appointments"));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/{id}/doctors")
-    public ResponseEntity<Set<Doctor>> getDoctors(@PathVariable Long id) {
+    public ResponseEntity<List<Map<String, Object>>> getDoctors(@PathVariable Long id) throws IllegalAccessException {
         Hospital hospital = hospitalService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
-        return new ResponseEntity<>(hospital.getDoctors(), HttpStatus.OK);
+        List<Map<String, Object>> response = EntityConverter.getListRepresentationWithoutChosenFields(hospital.getDoctors(), Arrays.asList("hospital", "appointments"));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("")
