@@ -6,7 +6,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pl.ziwg.backend.model.entity.Address;
 import pl.ziwg.backend.model.repository.AddressRepository;
+
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class AddressService {
@@ -17,8 +20,12 @@ public class AddressService {
         this.addressRepository = addressRepository;
     }
 
-    public Page<Address> findAll(Pageable pageable){
+    public Page<Address> findAllFromPage(Pageable pageable){
         return addressRepository.findAll(pageable);
+    }
+
+    public List<Address> findAll(){
+        return addressRepository.findAll();
     }
 
     public Optional<Address> findById(Long id) {

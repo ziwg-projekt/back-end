@@ -31,7 +31,7 @@ public class AppointmentController {
 
     @GetMapping("")
     public ResponseEntity<Page<Appointment>> getAll(@PageableDefault(size = Integer.MAX_VALUE) Pageable pageRequest) {
-        return new ResponseEntity<>(appointmentService.findAll(pageRequest), HttpStatus.OK);
+        return new ResponseEntity<>(appointmentService.findAllFromPage(pageRequest), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

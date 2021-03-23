@@ -10,13 +10,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.model.EntityConverter;
 import pl.ziwg.backend.model.entity.Appointment;
 import pl.ziwg.backend.model.entity.Citizen;
 import pl.ziwg.backend.model.enumerates.CitizenState;
 import pl.ziwg.backend.service.CitizenService;
 
 import javax.validation.Valid;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/citizens")
@@ -33,18 +34,19 @@ public class CitizenController {
         return new ResponseEntity<>(citizenService.findAllFromPage(pageRequest), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Citizen> getOne(@PathVariable Long id) {
-        Citizen citizen = citizenService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id, "citizen"));
+    @GetMapping("/{pesel}")
+    public ResponseEntity<Citizen> getOne(@PathVariable String pesel) {
+        Citizen citizen = citizenService.findByPesel(pesel)
+                .orElseThrow(() -> new ResourceNotFoundException(pesel, "citizen"));
         return new ResponseEntity<>(citizen, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}/appointments")
-    public ResponseEntity<Set<Appointment>> getCitizenAppointments(@PathVariable Long id) {
-        Citizen citizen = citizenService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id, "citizen"));
-        return new ResponseEntity<>(citizen.getAppointments(), HttpStatus.OK);
+    @GetMapping("/{pesel}/appointments")
+    public ResponseEntity<List<Map<String, Object>>> getCitizenAppointments(@PathVariable String pesel) throws IllegalAccessException {
+        Citizen citizen = citizenService.findByPesel(pesel)
+                .orElseThrow(() -> new ResourceNotFoundException(pesel, "citizen"));
+        List<Map<String, Object>> response = EntityConverter.getListRepresentationWithoutChosenFields(citizen.getAppointments(), Arrays.asList("citizen"));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("")
