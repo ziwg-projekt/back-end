@@ -10,8 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
-import pl.ziwg.backend.model.EntityConverter;
-import pl.ziwg.backend.model.entity.Appointment;
+import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.entity.Citizen;
 import pl.ziwg.backend.model.enumerates.CitizenState;
 import pl.ziwg.backend.service.CitizenService;
@@ -45,7 +44,7 @@ public class CitizenController {
     public ResponseEntity<List<Map<String, Object>>> getCitizenAppointments(@PathVariable String pesel) throws IllegalAccessException {
         Citizen citizen = citizenService.findByPesel(pesel)
                 .orElseThrow(() -> new ResourceNotFoundException(pesel, "citizen"));
-        List<Map<String, Object>> response = EntityConverter.getListRepresentationWithoutChosenFields(citizen.getAppointments(), Arrays.asList("citizen"));
+        List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(citizen.getAppointments(), Arrays.asList("citizen"));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
