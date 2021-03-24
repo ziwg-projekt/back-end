@@ -7,8 +7,8 @@ import java.lang.reflect.Field;
 import org.apache.log4j.Logger;
 import java.util.*;
 
-public class EntityConverter {
-    protected static final Logger log = Logger.getLogger(EntityConverter.class);
+public class EntityToMapConverter {
+    protected static final Logger log = Logger.getLogger(EntityToMapConverter.class);
 
     public static Map<String, Object> getRepresentationWithoutChosenFields(Object object, List<String> excludedFields){
         Map<String, Object> representation = new HashMap<>();
