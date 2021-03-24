@@ -48,7 +48,7 @@ public class CompanyController {
         System.out.println("Original Image Byte Size - " + file.getBytes().length);
         Company company = companyService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
-        company.setLogoByte(ImageHandler.compressBytes(file.getBytes()));
+        company.setLogoByte(file.getBytes());
         companyService.save(company);
         return new ResponseEntity<>(company, HttpStatus.CREATED);
     }
@@ -57,11 +57,15 @@ public class CompanyController {
     public ResponseEntity<byte[]> getImage(@PathVariable Long id){
         Company company = companyService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
-        return new ResponseEntity<>(ImageHandler.decompressBytes(company.getLogoByte()), HttpStatus.OK);
+        byte[] logo = {};
+        if(company.getLogoByte()!=null){
+            logo = company.getLogoByte();
+        }
+        return new ResponseEntity<>(logo, HttpStatus.OK);
     }
 
     @GetMapping("/{id}/vaccines")
-    public ResponseEntity<List<Map<String, Object>>> getVaccines(@PathVariable Long id) throws IllegalAccessException {
+    public ResponseEntity<List<Map<String, Object>>> getVaccines(@PathVariable Long id){
         Company company = companyService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
         List<Map<String, Object>> response = EntityConverter.getListRepresentationWithoutChosenFields(company.getVaccines(), Arrays.asList("company", "appointment"));
