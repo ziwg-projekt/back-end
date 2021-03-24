@@ -31,7 +31,7 @@ public class AppointmentController {
 
     @GetMapping("")
     public ResponseEntity<Page<Appointment>> getAll(@PageableDefault(size = Integer.MAX_VALUE) Pageable pageRequest) {
-        return new ResponseEntity<>(appointmentService.findAll(pageRequest), HttpStatus.OK);
+        return new ResponseEntity<>(appointmentService.findAllFromPage(pageRequest), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -68,7 +68,7 @@ public class AppointmentController {
 
     @ExceptionHandler(IdentifierGenerationException.class)
     public ResponseEntity<ApiError> handleIdentifierGenerationException(IdentifierGenerationException exception) {
-        return new ResponseEntity<>(new ApiError("Probably wrong PK column name", exception.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ApiError("Probably wrong PK column name!", exception.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InvalidFormatException.class)

@@ -18,6 +18,11 @@ import javax.persistence.Table;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Entity
@@ -29,7 +34,7 @@ import javax.validation.constraints.NotNull;
 public class Address  {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private long Id;
+    private long id;
 
     @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "address")
@@ -52,5 +57,6 @@ public class Address  {
     @NotNull
     @Valid
     private float longitude;
+
 
 }
