@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.model.EntityConverter;
 import pl.ziwg.backend.model.entity.Appointment;
 import pl.ziwg.backend.model.entity.Doctor;
 import pl.ziwg.backend.model.entity.Vaccine;
@@ -18,6 +19,9 @@ import pl.ziwg.backend.model.enumerates.VaccineState;
 import pl.ziwg.backend.service.VaccineService;
 
 import javax.validation.Valid;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/vaccines")
@@ -42,10 +46,11 @@ public class VaccineController {
     }
 
     @GetMapping("/{code}/appointment")
-    public ResponseEntity<Appointment> getAppointment(@PathVariable String code) {
+    public ResponseEntity<Map<String, Object>> getAppointment(@PathVariable String code) throws IllegalAccessException {
         Vaccine vaccine = vaccineService.findByCode(code)
                 .orElseThrow(() -> new ResourceNotFoundException(code, "vaccine"));
-        return new ResponseEntity<>(vaccine.getAppointment(), HttpStatus.OK);
+        Map<String, Object> appointment = EntityConverter.getRepresentationWithoutChosenFields(vaccine.getAppointment(), Arrays.asList("vaccine"));
+        return new ResponseEntity<>(appointment, HttpStatus.OK);
     }
 
     @PostMapping("")
