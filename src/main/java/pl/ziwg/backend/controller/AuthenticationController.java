@@ -53,6 +53,7 @@ public class AuthenticationController {
                 Map<String, String> person = new HashMap<>();
                 person.put("name", "Mikołaj");
                 person.put("surname", "Kamiński");
+                verificationEntryList.remove(pesel);
                 return new ResponseEntity<>(person, HttpStatus.OK);
             }
             else{
