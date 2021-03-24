@@ -28,7 +28,7 @@ import java.util.Map;
 public class AuthenticationController {
     private Map<String, VerificationEntry> verificationEntryList = new HashMap<>();
 
-    @GetMapping("/registration-code/generate")
+    @PostMapping("/registration-code/generate")
     public ResponseEntity<Map<String, String>> generateRegistrationCodeForPesel(@RequestBody Map<String, Object> registrationDetails) {
         final String pesel = (String) registrationDetails.get("pesel");
         final NotificationType notificationType = NotificationType.values()[(int) registrationDetails.get("notification_type")];
@@ -41,12 +41,12 @@ public class AuthenticationController {
         return new ResponseEntity<>(endpointToVerify, HttpStatus.OK);
     }
 
-    @GetMapping("/registration-code/verify/{token}")
+    @PostMapping("/registration-code/verify/{token}")
     public ResponseEntity<Map<String, String>> verifyRegistrationCode(@RequestBody Map<String, Object> peselMap, @PathVariable String token) {
         final String pesel = (String) peselMap.get("pesel");
         final String registrationCode = (String) peselMap.get("registration_code");
         if(verificationEntryList.get(pesel)==null){
-            throw new NotExistingPeselException("Pesel doesn't exist, validate it");
+            throw new NotExistingPeselException("Pesel doesn't exist in cache, validate it");
         }
         if(verificationEntryList.get(pesel).getToken().equals(token)){
             if(verificationEntryList.get(pesel).getRegistrationCode().getCode().equals(registrationCode)){
