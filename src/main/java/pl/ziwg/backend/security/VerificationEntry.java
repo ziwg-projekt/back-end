@@ -7,10 +7,13 @@ import lombok.Setter;
 @Setter
 public class VerificationEntry {
     private RegistrationCode registrationCode;
-    private String token;
+    private String verificationToken;
+    private String registrationToken;
+    private boolean verified;
 
-    public VerificationEntry(RegistrationCode registrationCode, String token) {
+    public VerificationEntry(RegistrationCode registrationCode, String verificationToken) {
         this.registrationCode = registrationCode;
-        this.token = token;
+        this.verificationToken = verificationToken;
+        this.verified = false;
     }
 }

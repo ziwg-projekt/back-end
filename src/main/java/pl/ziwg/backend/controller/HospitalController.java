@@ -10,18 +10,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
-import pl.ziwg.backend.model.EntityConverter;
-import pl.ziwg.backend.model.entity.Citizen;
-import pl.ziwg.backend.model.entity.Doctor;
+import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.entity.Hospital;
-import pl.ziwg.backend.model.entity.Vaccine;
 import pl.ziwg.backend.service.HospitalService;
 
 import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/hospitals")
@@ -49,7 +45,7 @@ public class HospitalController {
     public ResponseEntity<List<Map<String, Object>>> getVaccines(@PathVariable Long id) throws IllegalAccessException {
         Hospital hospital = hospitalService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
-        List<Map<String, Object>> response = EntityConverter.getListRepresentationWithoutChosenFields(hospital.getVaccines(), Arrays.asList("hospital", "appointment"));
+        List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(hospital.getVaccines(), Arrays.asList("hospital", "appointment"));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -57,7 +53,7 @@ public class HospitalController {
     public ResponseEntity<List<Map<String, Object>>> getCitizens(@PathVariable Long id) throws IllegalAccessException {
         Hospital hospital = hospitalService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
-        List<Map<String, Object>> response = EntityConverter.getListRepresentationWithoutChosenFields(hospital.getCitizens(), Arrays.asList("hospital", "appointments"));
+        List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(hospital.getCitizens(), Arrays.asList("hospital", "appointments"));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -65,7 +61,7 @@ public class HospitalController {
     public ResponseEntity<List<Map<String, Object>>> getDoctors(@PathVariable Long id) throws IllegalAccessException {
         Hospital hospital = hospitalService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
-        List<Map<String, Object>> response = EntityConverter.getListRepresentationWithoutChosenFields(hospital.getDoctors(), Arrays.asList("hospital", "appointments"));
+        List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(hospital.getDoctors(), Arrays.asList("hospital", "appointments"));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
