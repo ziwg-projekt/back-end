@@ -3,6 +3,7 @@ package pl.ziwg.backend.service;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import pl.ziwg.backend.exception.*;
 import pl.ziwg.backend.notificator.NotificationType;
 import pl.ziwg.backend.security.RegistrationCode;
@@ -11,58 +12,117 @@ import pl.ziwg.backend.security.VerificationEntry;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+@Service
 public class AuthenticationService {
     protected static final Logger log = Logger.getLogger(AuthenticationService.class);
 
     private Map<String, VerificationEntry> verificationEntryList = new HashMap<>();
 
-    public String generateRegistrationCode(Map<String, Object> registrationDetails){
-        String pesel;
-        NotificationType notificationType;
+    public void checkIfCorrectGenerationCodeRequestBody(Map<String, Object> registrationDetails){
         if(!registrationDetails.containsKey("pesel") || !registrationDetails.containsKey("notification_type")){
             throw new InvalidRequestException("Request body should contain JSON with 'pesel' and 'notification_type' keys");
         }
+    }
 
+    public void checkIfCorrectRegistrationCodeRequestBody(Map<String, String> verificationDetails){
+        if(!verificationDetails.containsKey("registration_code")){
+            throw new InvalidRequestException("Request body should contain JSON with 'registration_code' key");
+        }
+    }
+
+    public Map<String, String> sendVerificationCodeToUser(Map<String, Object> registrationDetails){
+        Map.Entry<String, VerificationEntry> entry = getVerificationEntryBaseOnPesel(registrationDetails);
+        //TODO: notify person with pesel
+        validateIfRegistrationIsPossible(entry.getKey());
+        return getVerificationApiPath(entry.getValue());
+    }
+
+    public Map<String, String> verifyRegistrationCodeCorrectness(Map<String, String> verificationDetails, String verificationToken){
+        Map.Entry<String, VerificationEntry> entry = getMapEntryByVerificationToken(verificationToken);
+        validateIfVerificationSuccessful(entry, verificationDetails.get("registration_code"));
+        return allowRegistration(entry.getKey());
+    }
+
+    public void registerUser(String registrationToken, Map<String, Object> userData){
+        Map.Entry<String, VerificationEntry> entry = getMapEntryByRegistrationToken(registrationToken);
+        //TODO: make registration
+        verificationEntryList.remove(entry.getKey());
+    }
+
+    private Map<String, String> getVerificationApiPath(VerificationEntry verificationEntry){
+        return Map.of(
+                "verify_api_path", "/api/v1/auth/registration/code/verify/" + verificationEntry.getVerificationToken(),
+                "registration_code", verificationEntry.getRegistrationCode().getCode()  // to be deleted when notification system will be done
+        );
+    }
+
+    private void validateIfRegistrationIsPossible(String pesel){
+        checkIfPeselExists(pesel);
+        checkIfAlreadyRegistered(pesel);
+    }
+
+    private void validateIfVerificationSuccessful(Map.Entry<String, VerificationEntry> entry, String registrationCode){
+        checkIfRegistrationAlreadyVerified(entry);
+        checkIfRegistrationCodeIsCorrect(entry.getValue().getRegistrationCode(), registrationCode);
+        checkIfRegistrationCodeExpired(entry.getValue().getRegistrationCode());
+    }
+
+    private void checkIfRegistrationAlreadyVerified(Map.Entry<String, VerificationEntry> entry){
+        if(entry.getValue().isVerified()){
+            throw new VerificationAlreadySucceededException("That verification was done before and there is no possibility to generate registration code one more time");
+        }
+    }
+
+    private Map.Entry<String, VerificationEntry> getVerificationEntryBaseOnPesel(Map<String, Object> registrationDetails){
         try {
-            pesel = (String) registrationDetails.get("pesel");
-            notificationType = NotificationType.values()[(int) registrationDetails.get("notification_type")];
+            String pesel = (String) registrationDetails.get("pesel");
+            NotificationType notificationType = NotificationType.values()[(int) registrationDetails.get("notification_type")];
+            log.info("New registration request, PESEL: '" + pesel + "' and notification type: '" + notificationType.toString() + "'");
+            return generateVerificationEntry(pesel);
         } catch (ClassCastException | ArrayIndexOutOfBoundsException e){
             throw new InvalidRequestException("Field 'pesel' should be String and field 'notification_type' should be 0 (for SMS verification) or 1 (for e-mail verification)");
         }
+    }
 
-        log.info("New registration request, PESEL: '" + pesel + "' and notification type: '" + notificationType.toString() + "'");
+    private Map.Entry<String, VerificationEntry> generateVerificationEntry(String pesel){
         VerificationEntry verificationEntry = new VerificationEntry(createRegistrationCode(), RandomStringUtils.randomAlphanumeric(30));
         verificationEntryList.put(pesel, verificationEntry);
-        checkIfPeselExists(pesel);
-        //TODO: whole logic, add notification and token generation, check if pesel exists etc.
-        return verificationEntry.getToken();
+        return getMapEntryByVerificationToken(verificationEntry.getVerificationToken());
     }
 
-    public Map<String, String> verifyRegistrationCode(String pesel, String code, String token){
-        checkIfRegistrationCodeForPeselExists(pesel);
-        RegistrationCode registrationCode = verificationEntryList.get(pesel).getRegistrationCode();
-
-        if(verificationEntryList.get(pesel).getToken().equals(token)){
-            checkIfCodeIsCorrect(registrationCode, code);
-            verificationEntryList.remove(pesel);
-            log.info("Registration succeeded: PESEL: '" + pesel);
-            return Map.of(
-                    "name", "Mikołaj",
-                    "surname", "Kamiński"
-            );
+    private Map.Entry<String, VerificationEntry> getMapEntryByVerificationToken(String token){
+        for (Map.Entry<String,VerificationEntry> entry : verificationEntryList.entrySet()){
+            if(entry.getValue().getVerificationToken().equals(token)){
+                return entry;
+            }
         }
-        else{
-            log.error("PeselNotCorrespondingToTokenException: PESEL: '" + pesel + "', token: " + token + "'");
-            throw new PeselNotCorrespondingToTokenException("Token is not corresponding to pesel");
-        }
+        log.error("TokenDoesNotExistsException: verification token: " + token + "'");
+        throw new TokenDoesNotExistsException("There is no such a verification token");
     }
 
-    private void checkIfCodeIsCorrect(RegistrationCode registrationCode, String code){
-        if(registrationCode.getCode().equals(code)){
-            checkIfRegistrationCodeExpired(registrationCode);
+    private Map.Entry<String, VerificationEntry> getMapEntryByRegistrationToken(String token){
+        for (Map.Entry<String,VerificationEntry> entry : verificationEntryList.entrySet()){
+            if(entry.getValue().getRegistrationToken().equals(token)){
+                return entry;
+            }
         }
-        else{
+        log.error("TokenDoesNotExistsException: registration token: " + token + "'");
+        throw new TokenDoesNotExistsException("There is no such a registration token");
+    }
+
+    private Map<String, String> allowRegistration(String pesel){
+        verificationEntryList.get(pesel).setVerified(true);
+        verificationEntryList.get(pesel).setRegistrationToken(RandomStringUtils.randomAlphanumeric(30));
+        log.info("Registration succeeded: PESEL: '" + pesel);
+        return Map.of(
+                "register_api_path", "/api/v1/auth/registration/" + verificationEntryList.get(pesel).getRegistrationToken(),
+                "name", "Mikołaj",
+                "surname", "Kamiński"
+        );
+    }
+
+    private void checkIfRegistrationCodeIsCorrect(RegistrationCode registrationCode, String code){
+        if(!registrationCode.getCode().equals(code)){
             log.error("IncorrectRegistrationCodeException: registrationCode: '" + registrationCode + "', code: " + code + "'");
             throw new IncorrectRegistrationCodeException("Registration code is incorrect");
         }
@@ -71,13 +131,7 @@ public class AuthenticationService {
     private void checkIfRegistrationCodeExpired(RegistrationCode registrationCode){
         if(registrationCode.isExpire()){
             log.error("RegistrationCodeExpiredException: " + registrationCode.getHowManyCodeExistsInSeconds() + "s > " + registrationCode.getExpireIn() + "s");
-            throw new RegistrationCodeExpiredException("Token expired, " + registrationCode.getHowManyCodeExistsInSeconds() + "s > " + registrationCode.getExpireIn() + "s");
-        }
-    }
-    private void checkIfRegistrationCodeForPeselExists(String pesel){
-        if(verificationEntryList.get(pesel)==null){
-            log.error("NoCodeForGivenPeselException: PESEL: '" + pesel);
-            throw new NoCodeForGivenPeselException("Pesel doesn't exist in cache, validate it");
+            throw new RegistrationCodeExpiredException("Token expired, cause of " + registrationCode.getHowManyCodeExistsInSeconds() + "s > " + registrationCode.getExpireIn() + "s");
         }
     }
 
@@ -85,7 +139,17 @@ public class AuthenticationService {
         //TODO: check in remote API
         if(false){
             log.error("PeselDoesNotExistsException: PESEL: '" + pesel);
+            verificationEntryList.remove(pesel);
             throw new PeselDoesNotExistsException("Pesel does not exists!");
+        }
+    }
+
+    private void checkIfAlreadyRegistered(String pesel){
+        //TODO: user service check
+        if(false){
+            log.error("UserAlreadyRegisteredException: PESEL: '" + pesel);
+            verificationEntryList.remove(pesel);
+            throw new UserAlreadyRegisteredException("Person with that pesel is already registered");
         }
     }
 

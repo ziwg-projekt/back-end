@@ -22,26 +22,24 @@ public class AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
-    @PostMapping("/registration-code/generate")
+    @PostMapping("/registration/code/generate")
     public ResponseEntity<Map<String, String>> generateRegistrationCodeForPesel(@RequestBody Map<String, Object> registrationDetails) {
-        Map<String, String> apiPathToVerify = Map.of(
-                "verify_api_path", "/api/v1/auth/registration-code/verify/" + authenticationService.generateRegistrationCode(registrationDetails)
-        );
+        authenticationService.checkIfCorrectGenerationCodeRequestBody(registrationDetails);
+        Map<String, String> apiPathToVerify = authenticationService.sendVerificationCodeToUser(registrationDetails);
         return new ResponseEntity<>(apiPathToVerify, HttpStatus.OK);
     }
 
-    @PostMapping("/registration-code/verify/{token}")
-    public ResponseEntity<Map<String, String>> verifyRegistrationCode(@RequestBody Map<String, Object> peselMap, @PathVariable String token) {
-        final String pesel = (String) peselMap.get("pesel");
-        final String registrationCode = (String) peselMap.get("registration_code");
-        //TODO: verify parsing in 2 lines above
-        Map<String, String> response = authenticationService.verifyRegistrationCode(pesel, registrationCode, token);
+    @PostMapping("/registration/code/verify/{token}")
+    public ResponseEntity<Map<String, String>> verifyRegistrationCode(@RequestBody Map<String, String> verificationDetails, @PathVariable String token) {
+        authenticationService.checkIfCorrectRegistrationCodeRequestBody(verificationDetails);
+        Map<String, String> response = authenticationService.verifyRegistrationCodeCorrectness(verificationDetails, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @ExceptionHandler(PeselNotCorrespondingToTokenException.class)
-    public ResponseEntity<ApiError> handlePeselNotCorrespondingToTokenException(PeselNotCorrespondingToTokenException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.UNAUTHORIZED);
+    @PostMapping("/registration/{token}")
+    @ResponseStatus(HttpStatus.OK)
+    public void registerUser(@RequestBody Map<String, Object> userData, @PathVariable String token){
+        authenticationService.registerUser(token, userData);
     }
 
     @ExceptionHandler(IncorrectRegistrationCodeException.class)
@@ -49,14 +47,8 @@ public class AuthenticationController {
         return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
-
     @ExceptionHandler(RegistrationCodeExpiredException.class)
     public ResponseEntity<ApiError> handleRegistrationCodeExpiredException(RegistrationCodeExpiredException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(NoCodeForGivenPeselException.class)
-    public ResponseEntity<ApiError> handleNoCodeForGivenPeselException(NoCodeForGivenPeselException exception) {
         return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
@@ -69,6 +61,22 @@ public class AuthenticationController {
     public ResponseEntity<ApiError> handleInvalidRequestException(InvalidRequestException exception) {
         return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(TokenDoesNotExistsException.class)
+    public ResponseEntity<ApiError> handleTokenDoesNotExistsException(TokenDoesNotExistsException exception) {
+        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(UserAlreadyRegisteredException.class)
+    public ResponseEntity<ApiError> handleUserAlreadyRegisteredException(UserAlreadyRegisteredException exception) {
+        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(VerificationAlreadySucceededException.class)
+    public ResponseEntity<ApiError> handleVerificationAlreadySucceededException(VerificationAlreadySucceededException exception) {
+        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.UNAUTHORIZED);
+    }
+
 
 
 
