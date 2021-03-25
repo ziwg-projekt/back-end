@@ -12,8 +12,7 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
-import pl.ziwg.backend.model.EntityConverter;
-import pl.ziwg.backend.model.ImageHandler;
+import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.entity.*;
 import pl.ziwg.backend.service.CompanyService;
 
@@ -68,7 +67,7 @@ public class CompanyController {
     public ResponseEntity<List<Map<String, Object>>> getVaccines(@PathVariable Long id){
         Company company = companyService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
-        List<Map<String, Object>> response = EntityConverter.getListRepresentationWithoutChosenFields(company.getVaccines(), Arrays.asList("company", "appointment"));
+        List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(company.getVaccines(), Arrays.asList("company", "appointment"));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

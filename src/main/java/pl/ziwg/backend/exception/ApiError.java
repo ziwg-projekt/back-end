@@ -1,6 +1,7 @@
 package pl.ziwg.backend.exception;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -32,6 +33,8 @@ public class ApiError {
     }
 
     private String message;
+
+    @JsonProperty(value="debug_message")
     private String debugMessage;
 
     private ApiError() {
