@@ -1,6 +1,6 @@
 package pl.ziwg.backend.notificator;
 
-public enum NotificationType {
+public enum CommunicationChannelType {
     SMS,
     EMAIL
 }
