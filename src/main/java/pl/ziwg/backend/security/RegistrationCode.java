@@ -18,6 +18,7 @@ public class RegistrationCode {
 
     public RegistrationCode(String code, int expireIn) {
         this.code = code;
+        this.code = "123456";   // TODO: to be deleted when communications systems will be implemented
         this.expireIn = expireIn;
         this.startTime = LocalDateTime.now();
         this.expireTime = startTime.plusSeconds(expireIn);
