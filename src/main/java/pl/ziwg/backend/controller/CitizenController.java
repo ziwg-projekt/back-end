@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartException;
 import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.EntityToMapConverter;
@@ -57,7 +58,7 @@ public class CitizenController {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleNoSuchResourceException(ResourceNotFoundException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

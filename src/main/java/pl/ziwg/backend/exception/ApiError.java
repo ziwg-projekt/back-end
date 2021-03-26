@@ -16,9 +16,12 @@ public class ApiError {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private LocalDateTime timestamp;
 
-    public ApiError(String message) {
+    private String exception;
+
+    public ApiError(String message, String exception) {
         this();
         this.message = message;
+        this.exception = exception;
     }
 
     public ApiError(MethodArgumentNotValidException ex){
@@ -34,16 +37,8 @@ public class ApiError {
 
     private String message;
 
-    @JsonProperty(value="debug_message")
-    private String debugMessage;
-
     private ApiError() {
         timestamp = LocalDateTime.now();
     }
 
-    public ApiError(String message, String debugMessage) {
-        this();
-        this.message = message;
-        this.debugMessage = debugMessage;
-    }
 }

@@ -7,11 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.ApiError;
-import pl.ziwg.backend.exception.InvalidRequestException;
+import pl.ziwg.backend.exception.IncorrectPayloadSyntaxException;
 import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepository;
 import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepositoryImpl;
 import pl.ziwg.backend.externalapi.opencagedata.entity.GeocodeResponse;
@@ -87,18 +86,18 @@ public class AddressController {
             return new ResponseEntity<>(geocodeRepository.reverse(lat.get(), lon.get()), HttpStatus.OK);
         }
         else{
-            throw new InvalidRequestException("You must include title or latitude and longitude in request parameters!");
+            throw new IncorrectPayloadSyntaxException("You must include title or latitude and longitude in request parameters!");
         }
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleNoSuchResourceException(ResourceNotFoundException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(InvalidRequestException.class)
-    public ResponseEntity<ApiError> handleInvalidRequestException(InvalidRequestException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(IncorrectPayloadSyntaxException.class)
+    public ResponseEntity<ApiError> handleInvalidRequestException(IncorrectPayloadSyntaxException exception) {
+        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

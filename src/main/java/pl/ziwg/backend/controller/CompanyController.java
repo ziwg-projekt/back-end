@@ -85,7 +85,7 @@ public class CompanyController {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleNoSuchResourceException(ResourceNotFoundException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -95,7 +95,7 @@ public class CompanyController {
 
     @ExceptionHandler(MultipartException.class)
     public ResponseEntity<ApiError> handleMultipartException(MultipartException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.BAD_REQUEST);
     }
 
 }

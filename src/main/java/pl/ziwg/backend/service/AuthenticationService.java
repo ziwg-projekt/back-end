@@ -2,7 +2,6 @@ package pl.ziwg.backend.service;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import pl.ziwg.backend.exception.*;
 import pl.ziwg.backend.notificator.NotificationType;
@@ -19,14 +18,23 @@ public class AuthenticationService {
     private Map<String, VerificationEntry> verificationEntryList = new HashMap<>();
 
     public void checkIfCorrectGenerationCodeRequestBody(Map<String, Object> registrationDetails){
-        if(!registrationDetails.containsKey("pesel") || !registrationDetails.containsKey("notification_type")){
-            throw new InvalidRequestException("Request body should contain JSON with 'pesel' and 'notification_type' keys");
+        if(!registrationDetails.containsKey("pesel") || !registrationDetails.containsKey("verification_type")){
+            log.error("Request body should contain JSON with 'pesel' and 'verification_type' keys: " + registrationDetails.toString());
+            throw new IncorrectPayloadSyntaxException("Request body should contain JSON with 'pesel' and 'verification_type' keys");
         }
     }
 
     public void checkIfCorrectRegistrationCodeRequestBody(Map<String, String> verificationDetails){
         if(!verificationDetails.containsKey("registration_code")){
-            throw new InvalidRequestException("Request body should contain JSON with 'registration_code' key");
+            log.error("Request body should contain JSON with 'pesel' and 'verification_type' keys: " + verificationDetails.toString());
+            throw new IncorrectPayloadSyntaxException("Request body should contain JSON with 'registration_code' key");
+        }
+    }
+
+    public void checkIfCorrectRegistrationRequestBody(Map<String, String> userData){
+        if(!userData.containsKey("password")){
+            log.error("Request body should contain JSON with 'pesel' and 'verification_type' keys: " + userData.toString());
+            throw new IncorrectPayloadSyntaxException("Request body should contain JSON with 'password' key");
         }
     }
 
@@ -43,8 +51,9 @@ public class AuthenticationService {
         return allowRegistration(entry.getKey());
     }
 
-    public void registerUser(String registrationToken, Map<String, Object> userData){
+    public void registerUser(String registrationToken, Map<String, String> userData){
         Map.Entry<String, VerificationEntry> entry = getMapEntryByRegistrationToken(registrationToken);
+        String password = getPasswordFromUserData(userData);
         //TODO: make registration
         verificationEntryList.remove(entry.getKey());
     }
@@ -69,6 +78,7 @@ public class AuthenticationService {
 
     private void checkIfRegistrationAlreadyVerified(Map.Entry<String, VerificationEntry> entry){
         if(entry.getValue().isVerified()){
+            log.error("Verification is already done, PESEL: '" + entry.getKey() + "'");
             throw new VerificationAlreadySucceededException("That verification was done before and there is no possibility to generate registration code one more time");
         }
     }
@@ -76,11 +86,21 @@ public class AuthenticationService {
     private Map.Entry<String, VerificationEntry> getVerificationEntryBaseOnPesel(Map<String, Object> registrationDetails){
         try {
             String pesel = (String) registrationDetails.get("pesel");
-            NotificationType notificationType = NotificationType.values()[(int) registrationDetails.get("notification_type")];
-            log.info("New registration request, PESEL: '" + pesel + "' and notification type: '" + notificationType.toString() + "'");
+            NotificationType notificationType = NotificationType.values()[(int) registrationDetails.get("verification_type")];
+            log.info("New registration request, PESEL: '" + pesel + "' and verification type: '" + notificationType.toString() + "'");
             return generateVerificationEntry(pesel);
         } catch (ClassCastException | ArrayIndexOutOfBoundsException e){
-            throw new InvalidRequestException("Field 'pesel' should be String and field 'notification_type' should be 0 (for SMS verification) or 1 (for e-mail verification)");
+            log.error("InvalidDataTypeInPayloadException : " + e.getMessage());
+            throw new InvalidDataTypeInPayloadException("Field 'pesel' should be String and field 'verification_type' should be 0 (for SMS verification) or 1 (for e-mail verification)");
+        }
+    }
+
+    private String getPasswordFromUserData(Map<String, String> userData){
+        try {
+            return userData.get("password");
+        } catch (ClassCastException | ArrayIndexOutOfBoundsException e){
+            log.error("InvalidDataTypeInPayloadException : " + e.getMessage());
+            throw new InvalidDataTypeInPayloadException("Field 'password' should be String!");
         }
     }
 
