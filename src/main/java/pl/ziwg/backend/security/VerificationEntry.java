@@ -2,9 +2,11 @@ package pl.ziwg.backend.security;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class VerificationEntry {
     private RegistrationCode registrationCode;
     private String verificationToken;
