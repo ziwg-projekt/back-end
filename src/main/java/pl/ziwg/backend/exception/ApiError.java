@@ -33,6 +33,7 @@ public class ApiError {
             errors.put(fieldName, errorMessage);
         });
         this.message = errors.toString();
+        this.exception = ex.getClass().getSimpleName();
     }
 
     private String message;
