@@ -19,7 +19,7 @@ public class AuthenticationService {
     private Map<String, VerificationEntry> verificationEntryList = new HashMap<>();
 
     public void checkIfCorrectGenerationCodeRequestBody(Map<String, Object> registrationDetails){
-        if(!registrationDetails.containsKey("pesel") || !registrationDetails.containsKey("notification_type")){
+        if(!registrationDetails.containsKey("pesel") || !registrationDetails.containsKey("verification_type")){
             throw new InvalidRequestException("Request body should contain JSON with 'pesel' and 'notification_type' keys");
         }
     }
@@ -76,11 +76,11 @@ public class AuthenticationService {
     private Map.Entry<String, VerificationEntry> getVerificationEntryBaseOnPesel(Map<String, Object> registrationDetails){
         try {
             String pesel = (String) registrationDetails.get("pesel");
-            NotificationType notificationType = NotificationType.values()[(int) registrationDetails.get("notification_type")];
-            log.info("New registration request, PESEL: '" + pesel + "' and notification type: '" + notificationType.toString() + "'");
+            NotificationType notificationType = NotificationType.values()[(int) registrationDetails.get("verification_type")];
+            log.info("New registration request, PESEL: '" + pesel + "' and verification type: '" + notificationType.toString() + "'");
             return generateVerificationEntry(pesel);
         } catch (ClassCastException | ArrayIndexOutOfBoundsException e){
-            throw new InvalidRequestException("Field 'pesel' should be String and field 'notification_type' should be 0 (for SMS verification) or 1 (for e-mail verification)");
+            throw new InvalidRequestException("Field 'pesel' should be String and field 'verification_type' should be 0 (for SMS verification) or 1 (for e-mail verification)");
         }
     }
 
