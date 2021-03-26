@@ -6,10 +6,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.*;
+import pl.ziwg.backend.requestbody.RegistrationRequestBody;
 import pl.ziwg.backend.service.AuthenticationService;
 
+import javax.validation.Valid;
 import java.util.Map;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -24,16 +27,15 @@ public class AuthenticationController {
     }
 
     @PostMapping("/registration/code/generate")
-    public ResponseEntity<Map<String, String>> p(@RequestBody Map<String, Object> registrationDetails) {
-        authenticationService.checkIfCorrectGenerationCodeRequestBody(registrationDetails);
-        Map<String, String> apiPathToVerify = authenticationService.sendVerificationCodeToUser(registrationDetails);
+    public ResponseEntity<Map<String, String>> generateToken(@Valid @RequestBody RegistrationRequestBody registrationDetails) {
+        Map<String, String> apiPathToVerify = authenticationService.doVerificationProcess(registrationDetails);
         return new ResponseEntity<>(apiPathToVerify, HttpStatus.OK);
     }
 
     @PostMapping("/registration/code/verify/{token}")
-    public ResponseEntity<Map<String, String>> verifyRegistrationCode(@RequestBody Map<String, String> verificationDetails, @PathVariable String token) {
+    public ResponseEntity<Map<String, Object>> verifyRegistrationCode(@RequestBody Map<String, String> verificationDetails, @PathVariable String token) {
         authenticationService.checkIfCorrectRegistrationCodeRequestBody(verificationDetails);
-        Map<String, String> response = authenticationService.verifyRegistrationCodeCorrectness(verificationDetails, token);
+        Map<String, Object> response = authenticationService.verifyRegistrationCodeCorrectness(verificationDetails, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -74,6 +76,12 @@ public class AuthenticationController {
         return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(NotSupportedCommunicationChannelException.class)
+    public ResponseEntity<ApiError> handleNotSupportedCommunicationChannelException(NotSupportedCommunicationChannelException exception) {
+        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.NOT_FOUND);
+    }
+
+
     @ExceptionHandler(UserAlreadyRegisteredException.class)
     public ResponseEntity<ApiError> handleUserAlreadyRegisteredException(UserAlreadyRegisteredException exception) {
         return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.GONE);
@@ -91,6 +99,11 @@ public class AuthenticationController {
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ApiError> handleHttpMessageNotReadableException(HttpMediaTypeNotSupportedException exception) {
         return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException exception) {
+        return new ResponseEntity<>(new ApiError(exception), HttpStatus.BAD_REQUEST);
     }
 
 

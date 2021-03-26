@@ -21,7 +21,7 @@ public class RegistrationTest {
     private int port;
 
     private String pesel = "96050834215";
-
+    private String code = "123456";
     private String password = "admin12345";
 
     @Autowired
@@ -33,10 +33,10 @@ public class RegistrationTest {
 
     @Test
     public void goThroughEntireRegistrationProcess() {
-        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"verification_type", 1), Map.class);
+        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
+        System.out.println(responseEntity.toString());
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
-        String code = (String) responseEntity.getBody().get("registration_code");
 
         responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("registration_code", code), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -48,10 +48,9 @@ public class RegistrationTest {
 
     @Test
     public void invokeIncorrectRegistrationCodeExceptionByChangingCode() {
-        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"verification_type", 1), Map.class);
+        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
-        String code = (String) responseEntity.getBody().get("registration_code");
 
         responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("registration_code", changeString(code)), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -60,10 +59,9 @@ public class RegistrationTest {
 
     @Test
     public void invokeVerificationTokenDoesNotExistsExceptionByChangingToken() {
-        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"verification_type", 1), Map.class);
+        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
-        String code = (String) responseEntity.getBody().get("registration_code");
 
         responseEntity = restTemplate.postForEntity("http://localhost:" + port + changeString(path), Map.of("registration_code", code), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -73,10 +71,9 @@ public class RegistrationTest {
 
     @Test
     public void invokeRegistrationTokenDoesNotExistsExceptionByChangingToken() {
-        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"verification_type", 1), Map.class);
+        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
-        String code = (String) responseEntity.getBody().get("registration_code");
 
         responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("registration_code", code), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -89,10 +86,9 @@ public class RegistrationTest {
 
     @Test
     public void invokeRegistrationTokenDoesNotExistsExceptionByDoubleConfirm() {
-        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"verification_type", 1), Map.class);
+        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
-        String code = (String) responseEntity.getBody().get("registration_code");
 
         responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("registration_code", code), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -108,10 +104,9 @@ public class RegistrationTest {
 
     @Test
     public void invokeVerificationAlreadySucceededExceptionByDoubleConfirm() {
-        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"verification_type", 1), Map.class);
+        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
-        String code = (String) responseEntity.getBody().get("registration_code");
 
         responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("registration_code", code), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -123,18 +118,17 @@ public class RegistrationTest {
 
     @Test
     public void invokeIncorrectPayloadSyntaxExceptionByPuttingWrongKeyInRequestBody_v1() {
-        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of(changeString("pesel"), pesel,"verification_type", 1), Map.class);
+        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of(changeString("pesel"), pesel,"communication_channel_type", 1), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat((String) responseEntity.getBody().get("exception")).isEqualTo("IncorrectPayloadSyntaxException");
-    }
+        assertThat((String) responseEntity.getBody().get("exception")).isEqualTo("MethodArgumentNotValidException");
 
+    }
 
     @Test
     public void invokeIncorrectPayloadSyntaxExceptionByPuttingWrongKeyInRequestBody_v2() {
-        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"verification_type", 1), Map.class);
+        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
-        String code = (String) responseEntity.getBody().get("registration_code");
 
         responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of(changeString("registration_code"), code), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -143,10 +137,9 @@ public class RegistrationTest {
 
     @Test
     public void invokeIncorrectPayloadSyntaxExceptionByPuttingWrongKeyInRequestBody_v3() {
-        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"verification_type", 1), Map.class);
+        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
-        String code = (String) responseEntity.getBody().get("registration_code");
 
         responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("registration_code", code), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -158,14 +151,6 @@ public class RegistrationTest {
     }
 
     @Test
-    public void invokeInvalidDataTypeInPayloadExceptionByChangeDataTypeInValueInRequestBody() {
-        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"verification_type", String.valueOf(1)), Map.class);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
-        assertThat((String) responseEntity.getBody().get("exception")).isEqualTo("InvalidDataTypeInPayloadException");
-    }
-
-
-    @Test
     public void invokeHttpMessageNotReadableExceptionBySendingEmptyRequestBody() {
         ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", "", Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
@@ -175,10 +160,9 @@ public class RegistrationTest {
 
     @Test
     public void invokeHttpMessageNotReadableExceptionByWrappingCodeInExtraMap() {
-        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"verification_type", 1), Map.class);
+        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
-        String code = (String) responseEntity.getBody().get("registration_code");
 
         responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("registration_code",  Map.of("registration_code", code)), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -188,10 +172,9 @@ public class RegistrationTest {
     @Disabled
     @Test
     public void invokeRegistrationCodeExpiredExceptionBySleepFor61Seconds() throws InterruptedException {
-        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"verification_type", 1), Map.class);
+        ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
-        String code = (String) responseEntity.getBody().get("registration_code");
         Thread.sleep(61000);
         responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("registration_code",  code), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
