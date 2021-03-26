@@ -36,20 +36,19 @@ POST na `http://40.112.78.100:8080/api/v1/auth/registration/code/generate` z tak
 ```
 {
     "pesel": "123456789",
-    "verification_type": 1
+    "communication_channel_type": 1
 }
 ```
-Gdzie `verification_type` jest 0 dla SMSa i 1 dla maila. Serwer wysyła wygenerowany 6-cyfrowy kod za pośrednictwem wybranego kanału komunikacji i odsyła następujące body:
+Gdzie `verification_type` jest 0 dla SMSa i 1 dla maila. Serwer odsyła następujące body:
 ```
 {
-    "registration_code": "566483",
     "verify_api_path": "/api/v1/auth/registration/code/verify/GKBrBSSCjsAdH54S1ovJJIjPJD7sLw"
 }
 ```
-Tymczasowo `registration_code` jest wysyłany dopóki nie będą zaimplementowane wysyłanie SMSów oraz maili. Następnie wysyła się kolejny POST na adres z `verify_api_path` z takim body:
+Tymczasowo `registration_code` jest sztywno ustawiony na `123456` dopóki nie będą zaimplementowane wysyłanie SMSów oraz maili. Następnie wysyła się kolejny POST na adres z `verify_api_path` z takim body:
 ```
 {
-    "registration_code": "566483"
+    "registration_code": "123456"
 }
 ```
 Serwer weryfikuje czy kod się zgadza i odsyła następujące body:
