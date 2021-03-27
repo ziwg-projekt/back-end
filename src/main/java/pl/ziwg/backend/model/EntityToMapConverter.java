@@ -19,7 +19,7 @@ public class EntityToMapConverter {
                 try {
                     representation.put(field.getName(), field.get(object));
                 } catch (IllegalAccessException e) {
-                    log.error("Cannot access field " + field.toString() + " cause of " + e.getMessage());
+                    log.error("Cannot access field " + field.toString() + " cause of " + e.toString());
                 }
             }
         }
@@ -30,11 +30,11 @@ public class EntityToMapConverter {
         Map<String, Object> representation = new HashMap<>();
         for(String fieldName : includedFields){
             try {
-                Field field = object.getClass().getField(fieldName);
+                Field field = object.getClass().getDeclaredField(fieldName);
                 field.setAccessible(true);
                 representation.put(field.getName(), field.get(object));
             } catch (NoSuchFieldException | IllegalAccessException e){
-                log.error("Cannot access field " + fieldName + " cause of " + e.getMessage());
+                log.error("Cannot access field " + fieldName + " cause of " + e.toString());
             }
         }
         return representation;
