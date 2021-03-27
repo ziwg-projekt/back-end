@@ -4,11 +4,20 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pl.ziwg.backend.exception.*;
+import pl.ziwg.backend.exception.IncorrectPayloadSyntaxException;
+import pl.ziwg.backend.exception.IncorrectRegistrationCodeException;
+import pl.ziwg.backend.exception.InvalidDataTypeInPayloadException;
+import pl.ziwg.backend.exception.NotSupportedCommunicationChannelException;
+import pl.ziwg.backend.exception.PeselDoesNotExistsException;
+import pl.ziwg.backend.exception.RegistrationCodeExpiredException;
+import pl.ziwg.backend.exception.TokenDoesNotExistsException;
+import pl.ziwg.backend.exception.UserAlreadyRegisteredException;
+import pl.ziwg.backend.exception.VerificationAlreadySucceededException;
 import pl.ziwg.backend.externalapi.governmentapi.Person;
 import pl.ziwg.backend.externalapi.governmentapi.PersonRegister;
 import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.notificator.CommunicationChannelType;
+import pl.ziwg.backend.notificator.email.EmailSubject;
 import pl.ziwg.backend.requestbody.RegistrationRequestBody;
 import pl.ziwg.backend.security.RegistrationCode;
 import pl.ziwg.backend.security.VerificationEntry;
@@ -85,7 +94,7 @@ public class AuthenticationService {
             case EMAIL:
                 Optional<String> email = person.getEmail();
                 if(email.isPresent()) {
-                    emailService.sendVerificationCode(email.get(), code);
+                    emailService.sendVerificationCode(email.get(), code, EmailSubject.VERIFICATION_CODE);
                 }
                 else{
                     verificationEntryList.remove(person);
