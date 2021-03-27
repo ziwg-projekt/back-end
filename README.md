@@ -54,10 +54,14 @@ Tymczasowo `registration_code` jest sztywno ustawiony na `123456` dopóki nie b�
 Serwer weryfikuje czy kod się zgadza i odsyła następujące body:
 ```
 {
-    "name": "Jan",
-    "surname": "Kowalski",
-    ... może reszta danych
-    "register_api_path": "/api/v1/auth/registration/4Cojpo3Cq16DQ6EiLxjBQhLu3HJzBg"
+    "register_api_path": "/api/v1/auth/registration/ewMwdCUDZkcb05rJ51pHwGfN8ec3Er",
+    "person": {
+        "name": "Jan",
+        "surname": "Kowalski",
+        "pesel": "123456",
+        "email": "janek@gmail.com",
+        "phone_number": null
+    }
 }
 ```
 Front może teraz wyświetlić wszystkie dane (oczywiście bez możliwości edycji) pobrane z serwera (na podstawie PESEL) i udostępnić userowi wpisanie hasła, które następnie należy wysłać w takim body POSTem na `register_api_path`:
