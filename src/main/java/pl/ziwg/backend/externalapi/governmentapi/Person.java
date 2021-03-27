@@ -2,36 +2,37 @@ package pl.ziwg.backend.externalapi.governmentapi;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
-import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-@AllArgsConstructor
 public class Person {
-    @NotNull
+    @NotEmpty
     private String name;
 
-    @NotNull
+    @NotEmpty
     private String surname;
 
-    @NotNull
+    @NotEmpty
     private String pesel;
     private String phoneNumber;
     private String email;
 
     public Optional<String> getPhoneNumber(){
-        return Optional.of(phoneNumber);
+        return Optional.ofNullable(phoneNumber);
     }
 
     public Optional<String> getEmail(){
-        return Optional.of(email);
+        return Optional.ofNullable(email);
     }
 
     @Override

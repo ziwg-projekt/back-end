@@ -3,7 +3,6 @@ package pl.ziwg.backend.service;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.convert.EntityConverter;
 import org.springframework.stereotype.Service;
 import pl.ziwg.backend.exception.*;
 import pl.ziwg.backend.externalapi.governmentapi.Person;
@@ -154,6 +153,7 @@ public class AuthenticationService {
         entry.getValue().setRegistrationToken(RandomStringUtils.randomAlphanumeric(30));
         log.info("Registration succeeded: PESEL: '" + entry.getKey().getPesel());
         Map<String, Object> response = EntityToMapConverter.getRepresentationWithChosenFields(entry.getKey(), Arrays.asList("name", "surname", "pesel", "phoneNumber", "email"));
+        System.err.println("representation " + response.toString());
         response.put("register_api_path", "/api/v1/auth/registration/" + entry.getValue().getRegistrationToken());
         return response;
     }
