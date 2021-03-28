@@ -3,26 +3,33 @@ package pl.ziwg.backend.service;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.ziwg.backend.exception.*;
 import pl.ziwg.backend.externalapi.governmentapi.Person;
 import pl.ziwg.backend.externalapi.governmentapi.PersonRegister;
-import pl.ziwg.backend.model.EntityToMapConverter;
+import pl.ziwg.backend.jsonbody.response.AllowRegistrationResponse;
+import pl.ziwg.backend.jsonbody.response.JwtResponse;
 import pl.ziwg.backend.model.entity.Citizen;
-import pl.ziwg.backend.model.entity.Role;
 import pl.ziwg.backend.model.entity.RoleName;
 import pl.ziwg.backend.model.entity.User;
 import pl.ziwg.backend.model.repository.CitizenRepository;
 import pl.ziwg.backend.model.repository.RoleRepository;
 import pl.ziwg.backend.model.repository.UserRepository;
 import pl.ziwg.backend.notificator.CommunicationChannelType;
-import pl.ziwg.backend.requestbody.FinalRegistrationRequestBody;
-import pl.ziwg.backend.requestbody.RegistrationCodeRequestBody;
-import pl.ziwg.backend.requestbody.RegistrationRequestBody;
+import pl.ziwg.backend.jsonbody.request.FinalRegistrationRequestBody;
+import pl.ziwg.backend.jsonbody.request.RegistrationCodeRequestBody;
+import pl.ziwg.backend.jsonbody.request.RegistrationRequestBody;
 import pl.ziwg.backend.security.RegistrationCode;
 import pl.ziwg.backend.security.VerificationEntry;
+import pl.ziwg.backend.security.jwt.JwtProvider;
 
 import javax.transaction.Transactional;
 import java.util.*;
@@ -39,6 +46,8 @@ public class AuthenticationService {
     private CitizenRepository citizenRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder encoder;
+    private AuthenticationManager authenticationManager;
+    private JwtProvider jwtProvider;
 
     @Autowired
     public AuthenticationService(EmailService emailService,
@@ -47,7 +56,9 @@ public class AuthenticationService {
                                  UserRepository userRepository,
                                  CitizenRepository citizenRepository,
                                  RoleRepository roleRepository,
-                                 PasswordEncoder encoder){
+                                 PasswordEncoder encoder,
+                                 AuthenticationManager authenticationManager,
+                                 JwtProvider jwtProvider){
         this.emailService = emailService;
         this.personRegister = personRegister;
         this.smsService = smsService;
@@ -55,6 +66,8 @@ public class AuthenticationService {
         this.citizenRepository = citizenRepository;
         this.roleRepository = roleRepository;
         this.encoder = encoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtProvider = jwtProvider;
     }
 
     public Map<String, String> doVerificationProcess(RegistrationRequestBody registrationDetails){
@@ -66,7 +79,7 @@ public class AuthenticationService {
         return Map.of("verify_api_path", "/api/v1/auth/registration/code/verify/" + entry.getValue().getVerificationToken());
     }
 
-    public Map<String, Object> verifyRegistrationCodeCorrectness(RegistrationCodeRequestBody registrationCode, String verificationToken){
+    public AllowRegistrationResponse verifyRegistrationCodeCorrectness(RegistrationCodeRequestBody registrationCode, String verificationToken){
         Map.Entry<Person, VerificationEntry> entry = getMapEntryByVerificationToken(verificationToken);
         validateIfVerificationSuccessful(entry, registrationCode.getRegistrationCode());
         return allowRegistration(entry);
@@ -79,8 +92,21 @@ public class AuthenticationService {
         User user = new User(userData.getUsername(), encoder.encode(userData.getPassword()), new Citizen(person));
         user.setRoles(new HashSet<>(Collections.singletonList(roleRepository.findByName(RoleName.ROLE_CITIZEN).get())));
         this.userRepository.save(user);
+        log.info("Successful registration for user with pesel '" + person.getPesel() + "', username + '" + userData.getUsername() +"' and roles: " + user.getRoles());
         verificationEntryList.remove(person);
         log.info("Current verification list = " + verificationEntryList.toString());
+    }
+
+    public ResponseEntity<JwtResponse> loginUser(FinalRegistrationRequestBody userData){
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(userData.getUsername(), userData.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtProvider.generateJwtToken(authentication);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        log.info("Successful login for user with username '" + userData.getUsername() + "'");
+        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities());
+        log.info(jwtResponse.toString());
+        return new ResponseEntity<>(jwtResponse, HttpStatus.OK);
     }
 
     public void checkIfUsernameAvailable(String username){
@@ -183,13 +209,11 @@ public class AuthenticationService {
         throw new TokenDoesNotExistsException("There is no such a registration token");
     }
 
-    private Map<String, Object> allowRegistration(Map.Entry<Person, VerificationEntry> entry){
+    private AllowRegistrationResponse allowRegistration(Map.Entry<Person, VerificationEntry> entry){
         entry.getValue().setVerified(true);
         entry.getValue().setRegistrationToken(RandomStringUtils.randomAlphanumeric(30));
         log.info("Verification for registration succeeded: PESEL: '" + entry.getKey().getPesel() + "'");
-        Map<String, Object> response = new HashMap<>();
-        response.put("register_api_path", "/api/v1/auth/registration/" + entry.getValue().getRegistrationToken());
-        response.put("person", ResponseEntity.of(Optional.ofNullable(entry.getKey())).getBody());  // little trick to get valid JsonProperty
+        AllowRegistrationResponse response = new AllowRegistrationResponse(entry.getValue().getRegistrationToken(), entry.getKey());
         return response;
     }
 

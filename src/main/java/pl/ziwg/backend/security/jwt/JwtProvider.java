@@ -10,7 +10,7 @@ import pl.ziwg.backend.security.jwt.service.UserPrinciple;
 import java.util.Date;
 
 @Component
-class JwtProvider {
+public class JwtProvider {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
