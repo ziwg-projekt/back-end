@@ -38,7 +38,6 @@ public class AuthenticationController {
     @PostMapping("/registration/{token}")
     @ResponseStatus(HttpStatus.OK)
     public void registerUser(@Valid @RequestBody FinalRegistrationRequestBody userData, @PathVariable String token){
-        authenticationService.checkIfUsernameAvailable(userData.getUsername());
         authenticationService.registerUser(token, userData);
     }
 
