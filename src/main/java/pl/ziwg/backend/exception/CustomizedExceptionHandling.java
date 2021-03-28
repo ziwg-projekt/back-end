@@ -55,7 +55,7 @@ public class CustomizedExceptionHandling extends ResponseEntityExceptionHandler 
 
     @ExceptionHandler(UserAlreadyRegisteredException.class)
     public ResponseEntity<ApiError> handleUserAlreadyRegisteredException(UserAlreadyRegisteredException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.GONE);
+        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(VerificationAlreadySucceededException.class)
