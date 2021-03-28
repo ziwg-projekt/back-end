@@ -6,27 +6,36 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.ziwg.backend.exception.*;
+import pl.ziwg.backend.exception.IncorrectRegistrationCodeException;
+import pl.ziwg.backend.exception.NotSupportedCommunicationChannelException;
+import pl.ziwg.backend.exception.PeselDoesNotExistsException;
+import pl.ziwg.backend.exception.RegistrationCodeExpiredException;
+import pl.ziwg.backend.exception.TokenDoesNotExistsException;
+import pl.ziwg.backend.exception.UserAlreadyRegisteredException;
+import pl.ziwg.backend.exception.UsernameNotAvailableException;
+import pl.ziwg.backend.exception.VerificationAlreadySucceededException;
 import pl.ziwg.backend.externalapi.governmentapi.Person;
 import pl.ziwg.backend.externalapi.governmentapi.PersonRegister;
-import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.entity.Citizen;
-import pl.ziwg.backend.model.entity.Role;
 import pl.ziwg.backend.model.entity.RoleName;
 import pl.ziwg.backend.model.entity.User;
 import pl.ziwg.backend.model.repository.CitizenRepository;
 import pl.ziwg.backend.model.repository.RoleRepository;
 import pl.ziwg.backend.model.repository.UserRepository;
 import pl.ziwg.backend.notificator.CommunicationChannelType;
+import pl.ziwg.backend.notificator.email.EmailSubject;
 import pl.ziwg.backend.requestbody.FinalRegistrationRequestBody;
 import pl.ziwg.backend.requestbody.RegistrationCodeRequestBody;
-import pl.ziwg.backend.notificator.email.EmailSubject;
 import pl.ziwg.backend.requestbody.RegistrationRequestBody;
 import pl.ziwg.backend.security.RegistrationCode;
 import pl.ziwg.backend.security.VerificationEntry;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 
 @Transactional
 @Service
@@ -119,7 +128,8 @@ public class AuthenticationService {
             case EMAIL:
                 Optional<String> email = person.getEmail();
                 if(email.isPresent()) {
-                    emailService.sendVerificationCode(email.get(), code);
+                    emailService.sendVerificationCode(email.get(), code, EmailSubject.VERIFICATION_CODE,
+                            person.getName());
                 }
                 else{
                     verificationEntryList.remove(person);
