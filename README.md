@@ -67,7 +67,27 @@ Serwer weryfikuje czy kod się zgadza i odsyła następujące body:
 Front może teraz wyświetlić wszystkie dane (oczywiście bez możliwości edycji) pobrane z serwera (na podstawie PESEL) i udostępnić userowi wpisanie hasła, które następnie należy wysłać w takim body POSTem na `register_api_path`:
 ```
 {
-    "password":123456
+    "password":"123456"
+    "username":"testuser"
 }
 ```
-Serwer dokonuje rejestracji użytkownika i w sumie tyle. 
+Serwer dokonuje rejestracji użytkownika i w sumie tyle. I żeby zalogować się to POST na `http://40.112.78.100:8080/api/v1/auth/login`z następującym body:
+```
+{
+    "password":"123456"
+    "username":"testuser"
+}
+```
+Serwer odsyła JWT w odpowiedzi:
+```
+{
+    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbnRlc3QiLCJpYXQiOjE2MTY5NzEyMjgsImV4cCI6MTYxNzA1NzYyOH0.2Kg0fYvNy3ZRT6NRlSg0Y5yhg0oKaRCg70-tYQxeuWEH8ixCprpuAUXedrFHD7JIVVtZjW7dUa-APNq_6WKi_g",
+    "type": "Bearer",
+    "username": "testuser",
+    "authorities": [
+        {
+            "authority": "ROLE_CITIZEN"
+        }
+    ]
+}
+```
