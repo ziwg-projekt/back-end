@@ -77,6 +77,7 @@ public class RegistrationTest {
     @Test
     public void invokeRegistrationTokenDoesNotExistsExceptionByChangingToken() {
         ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
+        System.out.println(responseEntity.toString());
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
 
@@ -103,6 +104,7 @@ public class RegistrationTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("password", password, "username", username), Map.class);
+        System.out.println(responseEntity.toString());
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat((String) responseEntity.getBody().get("exception")).isEqualTo("TokenDoesNotExistsException");
     }
