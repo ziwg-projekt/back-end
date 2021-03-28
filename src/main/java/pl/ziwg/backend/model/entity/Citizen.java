@@ -4,17 +4,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import pl.ziwg.backend.externalapi.governmentapi.Person;
+import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.enumerates.CitizenState;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 
 @Entity
 @Table(name = "citizen")
 @Getter
-@ToString
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -44,7 +45,7 @@ public class Citizen {
     private Set<Appointment> appointments;
 
     @JsonIgnore
-    @OneToOne
+    @OneToOne()
     private User user;
 
     public Citizen(Person person){
@@ -56,6 +57,18 @@ public class Citizen {
         this.state = CitizenState.WAITING;
     }
 
-
-
+    @Override
+    public String toString() {
+        return "Citizen{" +
+                "pesel='" + pesel + '\'' +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", email='" + email + '\'' +
+                ", hospital=" + hospital +
+                ", state=" + state +
+                ", appointments=" + appointments +
+                ", user=" + EntityToMapConverter.getRepresentationWithoutChosenFields(user, Arrays.asList("citizen")) +
+                '}';
+    }
 }

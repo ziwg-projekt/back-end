@@ -4,6 +4,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.ziwg.backend.exception.*;
 import pl.ziwg.backend.externalapi.governmentapi.Person;
@@ -37,6 +38,7 @@ public class AuthenticationService {
     private UserRepository userRepository;
     private CitizenRepository citizenRepository;
     private RoleRepository roleRepository;
+    private PasswordEncoder encoder;
 
     @Autowired
     public AuthenticationService(EmailService emailService,
@@ -44,13 +46,15 @@ public class AuthenticationService {
                                  SMSService smsService,
                                  UserRepository userRepository,
                                  CitizenRepository citizenRepository,
-                                 RoleRepository roleRepository){
+                                 RoleRepository roleRepository,
+                                 PasswordEncoder encoder){
         this.emailService = emailService;
         this.personRegister = personRegister;
         this.smsService = smsService;
         this.userRepository = userRepository;
         this.citizenRepository = citizenRepository;
         this.roleRepository = roleRepository;
+        this.encoder = encoder;
     }
 
     public Map<String, String> doVerificationProcess(RegistrationRequestBody registrationDetails){
@@ -70,21 +74,12 @@ public class AuthenticationService {
 
     public void registerUser(String registrationToken, FinalRegistrationRequestBody userData){
         log.info("Current verification list = " + verificationEntryList.toString());
-        Map.Entry<Person, VerificationEntry> entry = getMapEntryByRegistrationToken(registrationToken);
+        Person person = getPersonByRegistrationToken(registrationToken);
         checkIfUsernameAvailable(userData.getUsername());
-        String password = userData.getPassword();
-        String username = userData.getUsername();
-        Person person = entry.getKey();
-        Citizen citizen = new Citizen(person);
-        User user = new User(username, password, citizen);
-//        citizen.setUser(user);
-        Set<Role> roles = new HashSet<>();
-        roles.add(roleRepository.findByName(RoleName.ROLE_CITIZEN).get());
-        user.setRoles(roles);
-        this.citizenRepository.save(citizen);
+        User user = new User(userData.getUsername(), encoder.encode(userData.getPassword()), new Citizen(person));
+        user.setRoles(new HashSet<>(Collections.singletonList(roleRepository.findByName(RoleName.ROLE_CITIZEN).get())));
         this.userRepository.save(user);
-        //TODO: make registration
-        verificationEntryList.remove(entry.getKey());
+        verificationEntryList.remove(person);
         log.info("Current verification list = " + verificationEntryList.toString());
     }
 
@@ -171,6 +166,17 @@ public class AuthenticationService {
         for (Map.Entry<Person, VerificationEntry> entry : verificationEntryList.entrySet()){
             if(entry.getValue().getRegistrationToken().equals(token)){
                 return entry;
+            }
+        }
+        log.error("TokenDoesNotExistsException: registration token: " + token + "'");
+        throw new TokenDoesNotExistsException("There is no such a registration token");
+    }
+
+
+    private Person getPersonByRegistrationToken(String token){
+        for (Map.Entry<Person, VerificationEntry> entry : verificationEntryList.entrySet()){
+            if(entry.getValue().getRegistrationToken().equals(token)){
+                return entry.getKey();
             }
         }
         log.error("TokenDoesNotExistsException: registration token: " + token + "'");
