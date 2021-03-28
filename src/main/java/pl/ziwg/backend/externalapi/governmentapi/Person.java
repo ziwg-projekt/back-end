@@ -1,13 +1,12 @@
 package pl.ziwg.backend.externalapi.governmentapi;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Entity;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -24,6 +23,8 @@ public class Person {
 
     @NotEmpty
     private String pesel;
+
+    @JsonProperty("phone_number")
     private String phoneNumber;
     private String email;
 

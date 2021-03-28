@@ -23,12 +23,16 @@ public class RegistrationTest {
     private String pesel = "96050834215";
     private String code = "123456";
     private String password = "admin12345";
+    private String username = "admintest";
 
     @Autowired
     private TestRestTemplate restTemplate;
 
     private String changeString(String stringToChange){
-        return stringToChange + "something";
+        int index = stringToChange.length() / 2;
+        String newString = stringToChange.substring(0, index) + 'x' + stringToChange.substring(index + 1);
+        System.err.println(newString);
+        return newString;
     }
 
     @Test
@@ -42,7 +46,7 @@ public class RegistrationTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         path = (String) responseEntity.getBody().get("register_api_path");
 
-        responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("password", password), Map.class);
+        responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("password", password, "username", username), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
@@ -63,7 +67,7 @@ public class RegistrationTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
 
-        responseEntity = restTemplate.postForEntity("http://localhost:" + port + changeString(path), Map.of("registration_code", code), Map.class);
+        responseEntity = restTemplate.postForEntity("http://localhost:" + port + path + "x", Map.of("registration_code", code), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat((String) responseEntity.getBody().get("exception")).isEqualTo("TokenDoesNotExistsException");
     }
@@ -79,7 +83,7 @@ public class RegistrationTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         path = (String) responseEntity.getBody().get("register_api_path");
 
-        responseEntity = restTemplate.postForEntity("http://localhost:" + port + changeString(path), Map.of("password", password), Map.class);
+        responseEntity = restTemplate.postForEntity("http://localhost:" + port + path + "x", Map.of("password", password, "username", username), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat((String) responseEntity.getBody().get("exception")).isEqualTo("TokenDoesNotExistsException");
     }
@@ -94,10 +98,10 @@ public class RegistrationTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         path = (String) responseEntity.getBody().get("register_api_path");
 
-        responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("password", password), Map.class);
+        responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("password", password, "username", username), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("password", password), Map.class);
+        responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of("password", password, "username", username), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat((String) responseEntity.getBody().get("exception")).isEqualTo("TokenDoesNotExistsException");
     }
@@ -117,7 +121,7 @@ public class RegistrationTest {
     }
 
     @Test
-    public void invokeIncorrectPayloadSyntaxExceptionByPuttingWrongKeyInRequestBody_v1() {
+    public void invokeMethodArgumentNotValidExceptionByPuttingWrongKeyInRequestBody_v1() {
         ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of(changeString("pesel"), pesel,"communication_channel_type", 1), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat((String) responseEntity.getBody().get("exception")).isEqualTo("MethodArgumentNotValidException");
@@ -125,18 +129,18 @@ public class RegistrationTest {
     }
 
     @Test
-    public void invokeIncorrectPayloadSyntaxExceptionByPuttingWrongKeyInRequestBody_v2() {
+    public void invokeMethodArgumentNotValidExceptionByPuttingWrongKeyInRequestBody_v2() {
         ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
 
         responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of(changeString("registration_code"), code), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat((String) responseEntity.getBody().get("exception")).isEqualTo("IncorrectPayloadSyntaxException");
+        assertThat((String) responseEntity.getBody().get("exception")).isEqualTo("MethodArgumentNotValidException");
     }
 
     @Test
-    public void invokeIncorrectPayloadSyntaxExceptionByPuttingWrongKeyInRequestBody_v3() {
+    public void invokeMethodArgumentNotValidExceptionByPuttingWrongKeyInRequestBody_v3() {
         ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String path = (String) responseEntity.getBody().get("verify_api_path");
@@ -145,9 +149,9 @@ public class RegistrationTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         path = (String) responseEntity.getBody().get("register_api_path");
 
-        responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of(changeString("password"), password), Map.class);
+        responseEntity = restTemplate.postForEntity("http://localhost:" + port + path, Map.of(changeString("password"), password, "username", username), Map.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat((String) responseEntity.getBody().get("exception")).isEqualTo("IncorrectPayloadSyntaxException");
+        assertThat((String) responseEntity.getBody().get("exception")).isEqualTo("MethodArgumentNotValidException");
     }
 
     @Test
