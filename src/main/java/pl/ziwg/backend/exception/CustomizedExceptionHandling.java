@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -104,7 +105,13 @@ public class CustomizedExceptionHandling extends ResponseEntityExceptionHandler 
     }
 
     @ExceptionHandler(UsernameNotAvailableException.class)
-        public ResponseEntity<ApiError> handleUsernameNotAvailableException(UsernameNotAvailableException exception) {
+    public ResponseEntity<ApiError> handleUsernameNotAvailableException(UsernameNotAvailableException exception) {
             return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiError> handleBadCredentialsException(BadCredentialsException exception) {
+        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.UNAUTHORIZED);
+    }
+
 }

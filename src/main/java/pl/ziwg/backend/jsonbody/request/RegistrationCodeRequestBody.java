@@ -1,4 +1,4 @@
-package pl.ziwg.backend.requestbody;
+package pl.ziwg.backend.jsonbody.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
