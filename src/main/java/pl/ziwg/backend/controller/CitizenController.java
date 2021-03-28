@@ -6,9 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import pl.ziwg.backend.exception.ApiError;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.entity.Citizen;
@@ -53,16 +51,6 @@ public class CitizenController {
         //TODO: validate if phone corresponds to PESEL in external database
         newCitizen.setState(CitizenState.WAITING);
         return new ResponseEntity<>(citizenService.save(newCitizen), HttpStatus.CREATED);
-    }
-
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiError> handleNoSuchResourceException(ResourceNotFoundException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException exception) {
-        return new ResponseEntity<>(new ApiError(exception), HttpStatus.BAD_REQUEST);
     }
 
 }

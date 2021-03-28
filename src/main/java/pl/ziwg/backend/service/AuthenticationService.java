@@ -3,20 +3,27 @@ package pl.ziwg.backend.service;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pl.ziwg.backend.exception.*;
 import pl.ziwg.backend.externalapi.governmentapi.Person;
 import pl.ziwg.backend.externalapi.governmentapi.PersonRegister;
 import pl.ziwg.backend.model.EntityToMapConverter;
+import pl.ziwg.backend.model.entity.Citizen;
+import pl.ziwg.backend.model.entity.Role;
+import pl.ziwg.backend.model.entity.RoleName;
+import pl.ziwg.backend.model.entity.User;
+import pl.ziwg.backend.model.repository.CitizenRepository;
+import pl.ziwg.backend.model.repository.RoleRepository;
+import pl.ziwg.backend.model.repository.UserRepository;
 import pl.ziwg.backend.notificator.CommunicationChannelType;
+import pl.ziwg.backend.requestbody.FinalRegistrationRequestBody;
+import pl.ziwg.backend.requestbody.RegistrationCodeRequestBody;
 import pl.ziwg.backend.requestbody.RegistrationRequestBody;
 import pl.ziwg.backend.security.RegistrationCode;
 import pl.ziwg.backend.security.VerificationEntry;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class AuthenticationService {
@@ -25,26 +32,23 @@ public class AuthenticationService {
     private EmailService emailService;
     private SMSService smsService;
     private PersonRegister personRegister;
+    private UserRepository userRepository;
+    private CitizenRepository citizenRepository;
+    private RoleRepository roleRepository;
 
     @Autowired
-    public AuthenticationService(EmailService emailService, PersonRegister personRegister, SMSService smsService){
+    public AuthenticationService(EmailService emailService,
+                                 PersonRegister personRegister,
+                                 SMSService smsService,
+                                 UserRepository userRepository,
+                                 CitizenRepository citizenRepository,
+                                 RoleRepository roleRepository){
         this.emailService = emailService;
         this.personRegister = personRegister;
         this.smsService = smsService;
-    }
-
-    public void checkIfCorrectRegistrationCodeRequestBody(Map<String, String> verificationDetails){
-        if(!verificationDetails.containsKey("registration_code")){
-            log.error("Request body should contain JSON with 'pesel' and 'communication_channel_type' keys: " + verificationDetails.toString());
-            throw new IncorrectPayloadSyntaxException("Request body should contain JSON with 'registration_code' key");
-        }
-    }
-
-    public void checkIfCorrectRegistrationRequestBody(Map<String, String> userData){
-        if(!userData.containsKey("password")){
-            log.error("Request body should contain JSON with 'pesel' and 'communication_channel_type' keys: " + userData.toString());
-            throw new IncorrectPayloadSyntaxException("Request body should contain JSON with 'password' key");
-        }
+        this.userRepository = userRepository;
+        this.citizenRepository = citizenRepository;
+        this.roleRepository = roleRepository;
     }
 
     public Map<String, String> doVerificationProcess(RegistrationRequestBody registrationDetails){
@@ -56,17 +60,34 @@ public class AuthenticationService {
         return Map.of("verify_api_path", "/api/v1/auth/registration/code/verify/" + entry.getValue().getVerificationToken());
     }
 
-    public Map<String, Object> verifyRegistrationCodeCorrectness(Map<String, String> verificationDetails, String verificationToken){
+    public Map<String, Object> verifyRegistrationCodeCorrectness(RegistrationCodeRequestBody registrationCode, String verificationToken){
         Map.Entry<Person, VerificationEntry> entry = getMapEntryByVerificationToken(verificationToken);
-        validateIfVerificationSuccessful(entry, verificationDetails.get("registration_code"));
+        validateIfVerificationSuccessful(entry, registrationCode.getRegistrationCode());
         return allowRegistration(entry);
     }
 
-    public void registerUser(String registrationToken, Map<String, String> userData){
+    public void registerUser(String registrationToken, FinalRegistrationRequestBody userData){
+        log.info("Current verification list = " + verificationEntryList.toString());
         Map.Entry<Person, VerificationEntry> entry = getMapEntryByRegistrationToken(registrationToken);
-        String password = getPasswordFromUserData(userData);
+        String password = userData.getPassword();
+        String username = userData.getUsername();
+        Person person = entry.getKey();
+        Citizen citizen = new Citizen(person);
+        User user = new User(username, password, citizen);
+        Set<Role> roles = new HashSet<>();
+        roles.add(roleRepository.findByName(RoleName.ROLE_CITIZEN).get());
+        user.setRoles(roles);
+        this.citizenRepository.save(citizen);
+        this.userRepository.save(user);
         //TODO: make registration
         verificationEntryList.remove(entry.getKey());
+        log.info("Current verification list = " + verificationEntryList.toString());
+    }
+
+    public void checkIfUsernameAvailable(String username){
+        if(userRepository.existsByUsername(username)){
+            throw new UsernameNotAvailableException("Username '" + username + "' is in use!");
+        }
     }
 
     private void validateIfRegistrationIsPossible(String pesel){
@@ -113,15 +134,6 @@ public class AuthenticationService {
         }
     }
 
-    private String getPasswordFromUserData(Map<String, String> userData){
-        try {
-            return userData.get("password");
-        } catch (ClassCastException | ArrayIndexOutOfBoundsException e){
-            log.error("InvalidDataTypeInPayloadException : " + e.getMessage());
-            throw new InvalidDataTypeInPayloadException("Field 'password' should be String!");
-        }
-    }
-
     private Map.Entry<Person, VerificationEntry> generateVerificationEntry(Person person){
         VerificationEntry verificationEntry = new VerificationEntry(createRegistrationCode(), RandomStringUtils.randomAlphanumeric(30));
         verificationEntryList.put(person, verificationEntry);
@@ -151,10 +163,10 @@ public class AuthenticationService {
     private Map<String, Object> allowRegistration(Map.Entry<Person, VerificationEntry> entry){
         entry.getValue().setVerified(true);
         entry.getValue().setRegistrationToken(RandomStringUtils.randomAlphanumeric(30));
-        log.info("Registration succeeded: PESEL: '" + entry.getKey().getPesel());
-        Map<String, Object> response = EntityToMapConverter.getRepresentationWithChosenFields(entry.getKey(), Arrays.asList("name", "surname", "pesel", "phoneNumber", "email"));
-        System.err.println("representation " + response.toString());
+        log.info("Verification for registration succeeded: PESEL: '" + entry.getKey().getPesel() + "'");
+        Map<String, Object> response = new HashMap<>();
         response.put("register_api_path", "/api/v1/auth/registration/" + entry.getValue().getRegistrationToken());
+        response.put("person", ResponseEntity.of(Optional.ofNullable(entry.getKey())).getBody());  // little trick to get valid JsonProperty
         return response;
     }
 
@@ -175,16 +187,13 @@ public class AuthenticationService {
     private void checkIfPeselExists(String pesel){
         if(!personRegister.checkIfPeselExists(pesel)){
             log.error("PeselDoesNotExistsException: PESEL: '" + pesel);
-            verificationEntryList.remove(pesel);
             throw new PeselDoesNotExistsException("Pesel does not exists!");
         }
     }
 
     private void checkIfAlreadyRegistered(String pesel){
-        //TODO: user service check
-        if(false){
+        if(citizenRepository.existsByPesel(pesel)){
             log.error("UserAlreadyRegisteredException: PESEL: '" + pesel);
-            verificationEntryList.remove(pesel);
             throw new UserAlreadyRegisteredException("Person with that pesel is already registered");
         }
     }
