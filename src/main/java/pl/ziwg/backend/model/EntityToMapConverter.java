@@ -13,6 +13,9 @@ public class EntityToMapConverter {
 
     public static Map<String, Object> getRepresentationWithoutChosenFields(Object object, List<String> excludedFields){
         Map<String, Object> representation = new HashMap<>();
+        if(object==null){
+            return representation;
+        }
         for(Field field : ArrayUtils.addAll(object.getClass().getDeclaredFields(), object.getClass().getFields())){
             if(!excludedFields.contains(field.getName())){
                 field.setAccessible(true);
@@ -28,6 +31,9 @@ public class EntityToMapConverter {
 
     public static Map<String, Object> getRepresentationWithChosenFields(Object object, List<String> includedFields){
         Map<String, Object> representation = new HashMap<>();
+        if(object==null){
+            return representation;
+        }
         for(String fieldName : includedFields){
             try {
                 Field field = object.getClass().getDeclaredField(fieldName);

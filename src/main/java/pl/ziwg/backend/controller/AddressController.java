@@ -7,10 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import pl.ziwg.backend.exception.ApiError;
-import pl.ziwg.backend.exception.IncorrectPayloadSyntaxException;
+import pl.ziwg.backend.exception.IncorrectRequestParametersException;
 import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepository;
 import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepositoryImpl;
 import pl.ziwg.backend.externalapi.opencagedata.entity.GeocodeResponse;
@@ -86,24 +84,7 @@ public class AddressController {
             return new ResponseEntity<>(geocodeRepository.reverse(lat.get(), lon.get()), HttpStatus.OK);
         }
         else{
-            throw new IncorrectPayloadSyntaxException("You must include title or latitude and longitude in request parameters!");
+            throw new IncorrectRequestParametersException("You must include title or latitude and longitude in request parameters!");
         }
     }
-
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiError> handleNoSuchResourceException(ResourceNotFoundException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(IncorrectPayloadSyntaxException.class)
-    public ResponseEntity<ApiError> handleInvalidRequestException(IncorrectPayloadSyntaxException exception) {
-        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException exception) {
-        return new ResponseEntity<>(new ApiError(exception), HttpStatus.BAD_REQUEST);
-    }
-
-
 }
