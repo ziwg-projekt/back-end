@@ -1,6 +1,7 @@
 package pl.ziwg.backend.model.entity;
 
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,12 +11,12 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import pl.ziwg.backend.model.EntityToMapConverter;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Entity
 @Table(name = "user")
 public class User {
@@ -35,15 +36,24 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Citizen citizen;
 
     public User(String username, String password, Citizen citizen){
         this.username = username;
         this.password = password;
         this.citizen = citizen;
+        this.citizen.setUser(this);
     }
 
-
-
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", roles=" + roles +
+                ", citizen=" + EntityToMapConverter.getRepresentationWithoutChosenFields(citizen, Arrays.asList("user")) +
+                '}';
+    }
 }
