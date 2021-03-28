@@ -13,4 +13,5 @@ public interface CitizenRepository extends JpaRepository<Citizen, Long> {
     Page<Citizen> findAll(Pageable pageable);
     Optional<Citizen> findByPesel(String pesel);
     Boolean existsByPesel(String pesel);
+    void deleteByPesel(String pesel);
 }
