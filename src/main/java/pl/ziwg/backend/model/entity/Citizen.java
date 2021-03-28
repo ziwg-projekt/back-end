@@ -3,12 +3,17 @@ package pl.ziwg.backend.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import pl.ziwg.backend.model.enumerates.CitizenState;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
 
@@ -17,7 +22,6 @@ import java.util.Set;
 @Getter
 @ToString
 @Setter
-@NoArgsConstructor
 public class Citizen {
     @Id
     private String pesel;
@@ -29,9 +33,11 @@ public class Citizen {
     private String surname;
 
     @NotNull
-    @JsonProperty(value="phone_number")
+    @JsonProperty(value = "phone_number")
     private String phoneNumber;
 
+    @Email
+    @NotNull
     private String email;
 
     @ManyToOne()
@@ -41,11 +47,7 @@ public class Citizen {
     private CitizenState state;
 
     @JsonIgnore
-    @OneToMany(mappedBy="citizen")
+    @OneToMany(mappedBy = "citizen")
     private Set<Appointment> appointments;
-
-
-
-
 
 }

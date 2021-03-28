@@ -25,7 +25,7 @@ public class EmailSender {
     public void sendMail(@Email @NotNull final String destinationEmail,
                          @NotNull final String message,
                          final EmailSubject subject) throws MailException {
-        SimpleMailMessage msg = new SimpleMailMessage();
+        final SimpleMailMessage msg = new SimpleMailMessage();
         msg.setFrom(email);
         msg.setTo(destinationEmail);
         msg.setSubject(subject.getSubject());
