@@ -1,5 +1,6 @@
 package pl.ziwg.backend.externalapi.governmentapi;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,8 @@ public class Person {
 
     @NotEmpty
     private String pesel;
+
+    @JsonProperty("phone_number")
     private String phoneNumber;
     private String email;
     private boolean enabled;

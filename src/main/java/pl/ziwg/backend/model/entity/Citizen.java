@@ -2,6 +2,9 @@ package pl.ziwg.backend.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
+import pl.ziwg.backend.externalapi.governmentapi.Person;
+import pl.ziwg.backend.model.EntityToMapConverter;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -15,13 +18,16 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 
 @Entity
 @Table(name = "citizen")
 @Getter
-@ToString
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Citizen {
     @Id
     private String pesel;
@@ -47,7 +53,34 @@ public class Citizen {
     private CitizenState state;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "citizen")
+    @OneToMany(mappedBy="citizen", fetch = FetchType.EAGER)
     private Set<Appointment> appointments;
 
+    @JsonIgnore
+    @OneToOne()
+    private User user;
+
+    public Citizen(Person person){
+        this.name = person.getName();
+        this.surname = person.getSurname();
+        this.pesel = person.getPesel();
+        person.getPhoneNumber().ifPresent(s -> this.phoneNumber = s);
+        person.getEmail().ifPresent(s -> this.email = s);
+        this.state = CitizenState.WAITING;
+    }
+
+    @Override
+    public String toString() {
+        return "Citizen{" +
+                "pesel='" + pesel + '\'' +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", email='" + email + '\'' +
+                ", hospital=" + hospital +
+                ", state=" + state +
+                ", appointments=" + appointments +
+                ", user=" + EntityToMapConverter.getRepresentationWithoutChosenFields(user, Arrays.asList("citizen")) +
+                '}';
+    }
 }
