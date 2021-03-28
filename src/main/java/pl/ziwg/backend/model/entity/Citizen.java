@@ -40,7 +40,7 @@ public class Citizen {
     private CitizenState state;
 
     @JsonIgnore
-    @OneToMany(mappedBy="citizen")
+    @OneToMany(mappedBy="citizen", fetch = FetchType.EAGER)
     private Set<Appointment> appointments;
 
     @JsonIgnore

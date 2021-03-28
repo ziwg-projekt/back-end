@@ -23,8 +23,10 @@ import pl.ziwg.backend.requestbody.RegistrationRequestBody;
 import pl.ziwg.backend.security.RegistrationCode;
 import pl.ziwg.backend.security.VerificationEntry;
 
+import javax.transaction.Transactional;
 import java.util.*;
 
+@Transactional
 @Service
 public class AuthenticationService {
     protected static final Logger log = Logger.getLogger(AuthenticationService.class);
@@ -69,11 +71,13 @@ public class AuthenticationService {
     public void registerUser(String registrationToken, FinalRegistrationRequestBody userData){
         log.info("Current verification list = " + verificationEntryList.toString());
         Map.Entry<Person, VerificationEntry> entry = getMapEntryByRegistrationToken(registrationToken);
+        checkIfUsernameAvailable(userData.getUsername());
         String password = userData.getPassword();
         String username = userData.getUsername();
         Person person = entry.getKey();
         Citizen citizen = new Citizen(person);
         User user = new User(username, password, citizen);
+//        citizen.setUser(user);
         Set<Role> roles = new HashSet<>();
         roles.add(roleRepository.findByName(RoleName.ROLE_CITIZEN).get());
         user.setRoles(roles);
@@ -88,6 +92,19 @@ public class AuthenticationService {
         if(userRepository.existsByUsername(username)){
             throw new UsernameNotAvailableException("Username '" + username + "' is in use!");
         }
+    }
+
+    public void showCurrentState(){
+        log.info("Current users list : " + userRepository.findAll().toString());
+        log.info("Current citizen list : " + citizenRepository.findAll().toString());
+    }
+
+    public void deleteUser(String username){
+        userRepository.deleteByUsername(username);
+    }
+
+    public void deleteCitizen(String pesel){
+        citizenRepository.deleteByPesel(pesel);
     }
 
     private void validateIfRegistrationIsPossible(String pesel){
