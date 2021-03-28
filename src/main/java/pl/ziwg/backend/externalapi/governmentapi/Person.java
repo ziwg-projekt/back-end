@@ -2,17 +2,13 @@ package pl.ziwg.backend.externalapi.governmentapi;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Entity;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.Objects;
 import java.util.Optional;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 public class Person {
@@ -26,12 +22,19 @@ public class Person {
     private String pesel;
     private String phoneNumber;
     private String email;
+    private boolean enabled;
 
-    public Optional<String> getPhoneNumber(){
+    public Person() {
+        super();
+        //the idea is after click on verification code person account is enabled
+        this.enabled = false;
+    }
+
+    public Optional<String> getPhoneNumber() {
         return Optional.ofNullable(phoneNumber);
     }
 
-    public Optional<String> getEmail(){
+    public Optional<String> getEmail() {
         return Optional.ofNullable(email);
     }
 
