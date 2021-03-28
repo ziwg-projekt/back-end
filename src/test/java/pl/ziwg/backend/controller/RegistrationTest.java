@@ -35,6 +35,7 @@ public class RegistrationTest {
         return newString;
     }
 
+    @Disabled
     @Test
     public void goThroughEntireRegistrationProcess() {
         ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/registration/code/generate", Map.of("pesel", pesel,"communication_channel_type", 1), Map.class);
