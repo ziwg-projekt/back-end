@@ -165,7 +165,7 @@ Serwer odsyła JWT w odpowiedzi z informacją o wszystkich uprawnieniach:
 ```
 
 ## Rejestracja szpitala
-Post na `/api/v1/auth/registration/hospital/register`
+Rejestrację szpitala można wykonać tylko z poziomu admina, więc uprzednio trzeba się na niego zalogowa i wykorzystać otrzymany JWT , wywołując metodę POST na `/api/v1/auth/registration/hospital/register`
 ```
 {
     "password": "password",
@@ -174,6 +174,22 @@ Post na `/api/v1/auth/registration/hospital/register`
     "city": "Wroclaw",
     "street": "Grunwaldzka",
     "street_number": "12c"
+}
+``` 
+Serwer powinien zwrócić status 200 bez żadnego body, bądź wyjątek o nazwie użytkownika, jeśli zarequestowana jest już w użyciu.
+
+## Logowanie szpitala
+Odbywa się tak samo jak logowanie admina i obywatela, lecz zwracany jest JWT z innymi uprawnieniami:
+```
+{
+    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzenBpdGFsaWNobyIsImlhdCI6MTYxNzAyNTI2OCwiZXhwIjoxNjE3MTExNjY4fQ.TAfc5_6POXz6zKP4Qn84EUMO1XweAUccoxTMKa3oqSy8qq6a51vjAB2wRXfGU3cvG0KupCCPLkyAaJ8P6KpOGA",
+    "type": "Bearer",
+    "username": "szpitalicho",
+    "authorities": [
+        {
+            "authority": "ROLE_HOSPITAL"
+        }
+    ]
 }
 ```
 
