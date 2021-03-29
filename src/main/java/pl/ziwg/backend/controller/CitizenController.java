@@ -27,7 +27,7 @@ public class CitizenController {
         this.citizenService = citizenService;
     }
 
-    @PreAuthorize("hasRole('CITIZEN')")
+
     @GetMapping("")
     public ResponseEntity<Page<Citizen>> getAll(@PageableDefault(size = Integer.MAX_VALUE) Pageable pageRequest) {
         return new ResponseEntity<>(citizenService.findAllFromPage(pageRequest), HttpStatus.OK);
@@ -41,18 +41,10 @@ public class CitizenController {
     }
 
     @GetMapping("/{pesel}/appointments")
-    public ResponseEntity<List<Map<String, Object>>> getCitizenAppointments(@PathVariable String pesel) throws IllegalAccessException {
+    public ResponseEntity<List<Map<String, Object>>> getCitizenAppointments(@PathVariable String pesel){
         Citizen citizen = citizenService.findByPesel(pesel)
                 .orElseThrow(() -> new ResourceNotFoundException(pesel, "citizen"));
         List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(citizen.getAppointments(), Arrays.asList("citizen"));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
-    @PostMapping("")
-    public ResponseEntity<Citizen> newCitizen(@Valid @RequestBody Citizen newCitizen) {
-        //TODO: validate if phone corresponds to PESEL in external database
-        newCitizen.setState(CitizenState.WAITING);
-        return new ResponseEntity<>(citizenService.save(newCitizen), HttpStatus.CREATED);
-    }
-
 }

@@ -35,38 +35,11 @@ public class AddressController {
             return new ResponseEntity<>(addressService.findAllFromPage(pageRequest), HttpStatus.OK);
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<Address> getOne(@PathVariable Long id) {
         Address address = addressService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "address"));
         return new ResponseEntity<>(address, HttpStatus.OK);
-    }
-
-    @PostMapping("")
-    public ResponseEntity<Address> newAddress(@Valid @RequestBody Address newAddress) {
-        return new ResponseEntity<>(addressService.save(newAddress), HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Address> replaceAddress(@Valid @RequestBody Address newAddress, @PathVariable Long id) {
-        AtomicBoolean newlyCreated = new AtomicBoolean(false);
-        Address updatedAddress = addressService.findById(id)
-                .map(address -> {
-                    address.setLatitude(newAddress.getLatitude());
-                    address.setLongitude(newAddress.getLongitude());
-                    address.setCity(newAddress.getCity());
-                    address.setHouseNumber(newAddress.getHouseNumber());
-                    address.setStreet(newAddress.getStreet());
-                    return addressService.save(address);
-                })
-                .orElseGet(() -> {
-                    newlyCreated.set(true);
-                    newAddress.setId(id);
-                    return addressService.save(newAddress);
-                });
-        HttpStatus status = newlyCreated.get() ? HttpStatus.CREATED : HttpStatus.OK;
-        return new ResponseEntity<>(updatedAddress, status);
     }
 
     @GetMapping("/generate")
