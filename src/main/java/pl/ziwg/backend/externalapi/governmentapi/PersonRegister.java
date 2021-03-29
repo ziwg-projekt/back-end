@@ -13,6 +13,6 @@ public class PersonRegister {
 
     public Person getPersonByPesel(String pesel){
         //TODO: request to government api
-        return new Person("Jan", "Kowalski", pesel, null, "janek@gmail.com", false);
+        return new Person("Jan", "Kowalski", pesel, null, "janek@gmail.com");
     }
 }

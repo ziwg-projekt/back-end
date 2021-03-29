@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum EmailSubject {
-    VERIFICATION_CODE("Kod weryfikacyjny");
+    VERIFICATION_CODE("Kod weryfikacyjny"),
+    PASSWORD_REMINDER("Przypomnienie hasła");
 
     private final String subject;
 

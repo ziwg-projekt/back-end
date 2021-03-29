@@ -25,13 +25,6 @@ public class Person {
     @JsonProperty("phone_number")
     private String phoneNumber;
     private String email;
-    private boolean enabled;
-
-    public Person() {
-        super();
-        //the idea is after click on verification code person account is enabled
-        this.enabled = false;
-    }
 
     public Optional<String> getPhoneNumber() {
         return Optional.ofNullable(phoneNumber);
