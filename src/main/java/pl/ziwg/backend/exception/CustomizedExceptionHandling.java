@@ -71,7 +71,7 @@ public class CustomizedExceptionHandling extends ResponseEntityExceptionHandler 
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        return new ResponseEntity<>(new ApiError("Give JSON with appropriate values in request body!", ex.getClass().getSimpleName()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ApiError("Give JSON with appropriate values in request body - " + ex.getMessage(), ex.getClass().getSimpleName()), HttpStatus.BAD_REQUEST);
     }
 
     @Override
