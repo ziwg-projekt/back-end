@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FinalRegistrationRequestBody {
+public class CitizenRegistrationRequestBody {
     @NotNull
     private String password;
 

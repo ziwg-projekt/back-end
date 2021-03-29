@@ -13,7 +13,7 @@ public class AllowRegistrationResponse {
     private Person person;
 
     public AllowRegistrationResponse(String token, Person person){
-        this.registerApiPath = "/api/v1/auth/registration/" + token;
+        this.registerApiPath = "/api/v1/auth/registration/citizen/register?token=" + token;
         this.person = person;
 
     }

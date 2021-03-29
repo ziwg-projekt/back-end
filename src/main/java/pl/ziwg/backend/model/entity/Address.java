@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepository;
+import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepositoryImpl;
+import pl.ziwg.backend.externalapi.opencagedata.entity.GeocodeResponse;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -28,7 +31,6 @@ import java.util.Map;
 @Entity
 @Table(name = "address")
 @Getter
-@ToString
 @Setter
 @NoArgsConstructor
 public class Address  {
@@ -46,9 +48,9 @@ public class Address  {
     @NotEmpty
     private String street;
 
-    @JsonProperty(value="house_number")
+    @JsonProperty(value="street_number")
     @NotEmpty
-    private String houseNumber;
+    private String streetNumber;
 
     @NotNull
     @Valid
@@ -58,5 +60,26 @@ public class Address  {
     @Valid
     private float longitude;
 
+    public Address(String city, String street, String streetNumber){
+        this.city = city;
+        this.street = street;
+        this.streetNumber = streetNumber;
+        GeocodeRepository geocodeRepository = new GeocodeRepositoryImpl(System.getenv("OPENCAGEDATA_API_KEY"));
+        GeocodeResponse response = geocodeRepository.query(city + " " + street + " " + streetNumber);
+        this.longitude = response.getResults().get(0).getGeometry().getLongitude();
+        this.latitude = response.getResults().get(0).getGeometry().getLatitude();
+    }
 
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "id=" + id +
+                ", city='" + city + '\'' +
+                ", street='" + street + '\'' +
+                ", streetNumber='" + streetNumber + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                '}';
+    }
 }
