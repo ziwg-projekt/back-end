@@ -31,21 +31,18 @@ Login: root
 Hasło: admin12345@@
 ```
 
-# Autentykacja
-
-## Rejestracja obywatela
-
-POST na `http://40.112.78.100:8080/api/v1/auth/registration/citizen/notify` z takim body:
+# Rejestracja
+POST na `http://40.112.78.100:8080/api/v1/auth/registration/code/generate` z takim body:
 ```
 {
     "pesel": "123456789",
     "communication_channel_type": 1
 }
 ```
-Gdzie `communication_channel_type` jest 0 dla SMSa i 1 dla maila. Serwer odsyła następujące body:
+Gdzie `verification_type` jest 0 dla SMSa i 1 dla maila. Serwer odsyła następujące body:
 ```
 {
-    "verify_api_path": "/api/v1/auth/registration/citizen/verify?token=GKBrBSSCjsAdH54S1ovJJIjPJD7sLw"
+    "verify_api_path": "/api/v1/auth/registration/code/verify/GKBrBSSCjsAdH54S1ovJJIjPJD7sLw"
 }
 ```
 Tymczasowo `registration_code` jest sztywno ustawiony na `123456` dopóki nie będą zaimplementowane wysyłanie SMSów oraz maili. Następnie wysyła się kolejny POST na adres z `verify_api_path` z takim body:
@@ -57,7 +54,7 @@ Tymczasowo `registration_code` jest sztywno ustawiony na `123456` dopóki nie b�
 Serwer weryfikuje czy kod się zgadza i odsyła następujące body:
 ```
 {
-    "register_api_path": "/api/v1/auth/registration?token=ewMwdCUDZkcb05rJ51pHwGfN8ec3Er",
+    "register_api_path": "/api/v1/auth/registration/ewMwdCUDZkcb05rJ51pHwGfN8ec3Er",
     "person": {
         "name": "Jan",
         "surname": "Kowalski",
@@ -74,11 +71,7 @@ Front może teraz wyświetlić wszystkie dane (oczywiście bez możliwości edyc
     "username":"testuser"
 }
 ```
-Serwer dokonuje rejestracji użytkownika i w sumie tyle. 
-
-## Logowanie obywatela
-
-Żeby zalogować się to POST na `http://40.112.78.100:8080/api/v1/auth/login` z następującym body:
+Serwer dokonuje rejestracji użytkownika i w sumie tyle. I żeby zalogować się to POST na `http://40.112.78.100:8080/api/v1/auth/login`z następującym body:
 ```
 {
     "password":"123456"
@@ -99,30 +92,16 @@ Serwer odsyła JWT w odpowiedzi:
 }
 ```
 
-## Logowanie admina
-Żeby zalogować się to POST na `http://40.112.78.100:8080/api/v1/auth/login` z następującym body:
+# API z użytkownikami
+
+logowanie do django admin (`127.0.0.1:8000/admin/`) jako superuser:
 ```
-{
-    "password": "adminpassword",
-    "username": "admin"
-}
+   login: gov-user
+   password: gov-user-dev
 ```
 
-## Rejestracja szpitala
-Rejestracja szpitala może zostać tylko wykonana z poziomu admina, więc uprzednio trzeba się na niego zalogować. Strzelamy POST z JWT w headerze na `http://40.112.78.100:8080/api/v1/auth/registration/hospital/register`:
-```
-{
-    "password": "password",
-    "username": "szpitalicho",
-    "hospital": {
-                "name": "szpitalisko we wroclawiu",
-                "address": {
-                    "city": "Wroclaw",
-                    "street": "Grunwaldzka",
-                    "house_number": "12c",
-                    "latitude": 40.13,
-                    "longitude": 23.1
-                }
-    }
-}
-```
+Aby uzyskać token do API wysyłamy POST na `http://127.0.0.1:8000/api-token-auth/` i przekazujemy parametry: `username="gov-user"`, `passoword="gov-user-dev"`
+
+W odpowiedzi otrzymujemy token
+
+`GET http://127.0.0.1:8000/person/<pesel>/ "Authorization: Token XXXXX...."`
