@@ -2,15 +2,26 @@ package pl.ziwg.backend.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import pl.ziwg.backend.externalapi.governmentapi.Person;
 import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.enumerates.CitizenState;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.Set;
 
 @Entity
@@ -29,13 +40,16 @@ public class Citizen {
     @NotNull
     private String surname;
 
-    @JsonProperty(value="phone_number")
+    @NotNull
+    @JsonProperty(value = "phone_number")
     private String phoneNumber;
 
+    @Email
+    @NotNull
     private String email;
 
-    @OneToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name = "address", referencedColumnName="Id")
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address", referencedColumnName = "Id")
     @NotNull
     private Address address;
 
