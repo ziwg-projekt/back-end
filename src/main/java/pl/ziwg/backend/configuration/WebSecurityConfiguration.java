@@ -70,7 +70,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter imple
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
-    
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**").allowedMethods("*");
