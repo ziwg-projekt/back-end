@@ -49,19 +49,27 @@ Gdzie `communication_channel_type` jest 0 dla SMSa i 1 dla maila. Jeśli okaże 
     "message": "Person with that pesel is already registered"
 }
 ```
-Jeśli jednak nie jest to serwer zwraca następujące body:
+Jeśli okaże się, że osoba z takim peselem istnieje, ale nie obsługuje wybranego sposobu komunikacji to serwer odsyła następujące body:
+```
+{
+    "timestamp": "29-03-2021 07:52:34",
+    "exception": "NotSupportedCommunicationChannelException",
+    "message": "Person with pesel '123456789' has no phone number assigned!"
+}
+```
+Jeżeli jest wszystko git to serwer zwraca następujące body:
 ```
 {
     "verify_api_path": "/api/v1/auth/registration/citizen/verify?token=UXkMwFQgKDRsdrk8vBp95VjmceabGO"
 }
 ```
-Tymczasowo `registration_code` jest sztywno ustawiony na `123456` dopóki nie będą zaimplementowane wysyłanie SMSów oraz maili. Następnie wysyła się kolejny POST na adres z `verify_api_path` z takim body:
+Następnie wysyła się kolejny POST na adres z `verify_api_path` z takim body:
 ```
 {
     "registration_code": "123456"
 }
 ```
-Serwer weryfikuje czy kod się zgadza i odsyła następujące body (`person` na podstawie danych z rządowego API):
+Tymczasowo `registration_code` jest sztywno ustawiony na `123456` dopóki nie będą zaimplementowane wysyłanie SMSów oraz maili. Serwer weryfikuje czy kod się zgadza i odsyła następujące body (`person` na podstawie danych z rządowego API):
 ```
 {
     "person": {
@@ -115,7 +123,7 @@ Zaś jeśli nazwa użytkownika będzie zajęta to dostaniemy takie info:
 ```
 
 ## Logowanie obywatela
-Żeby zalogować się to POST na `api/v1/auth/login`z następującym body:
+Żeby zalogować się to POST na `api/v1/auth/login` z następującym body:
 ```
 {
     "password": "123456",
@@ -125,7 +133,7 @@ Zaś jeśli nazwa użytkownika będzie zajęta to dostaniemy takie info:
 Serwer odsyła JWT w odpowiedzi z informacją o uprawnieniach:
 ```
 {
-    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbnRlc3QiLCJpYXQiOjE2MTY5NzEyMjgsImV4cCI6MTYxNzA1NzYyOH0.2Kg0fYvNy3ZRT6NRlSg0Y5yhg0oKaRCg70-tYQxeuWEH8ixCprpuAUXedrFHD7JIVVtZjW7dUa-APNq_6WKi_g",
+    "access_token": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbnRlc3QiLCJpYXQiOjE2MTY5NzEyMjgsImV4cCI6MTYxNzA1NzYyOH0.2Kg0fYvNy3ZRT6NRlSg0Y5yhg0oKaRCg70-tYQxeuWEH8ixCprpuAUXedrFHD7JIVVtZjW7dUa-APNq_6WKi_g",
     "type": "Bearer",
     "username": "testuser",
     "authorities": [
@@ -137,7 +145,7 @@ Serwer odsyła JWT w odpowiedzi z informacją o uprawnieniach:
 ```
 
 ## Logowanie admina
-Żeby zalogować się to również POST na `/api/v1/auth/login`z następującym body:
+Żeby zalogować się to również POST na `/api/v1/auth/login` z następującym body:
 ```
 {
     "password": "adminpassword",
@@ -147,7 +155,7 @@ Serwer odsyła JWT w odpowiedzi z informacją o uprawnieniach:
 Serwer odsyła JWT w odpowiedzi z informacją o wszystkich uprawnieniach:
 ```
 {
-    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTYxNzAyMzY0OCwiZXhwIjoxNjE3MTEwMDQ4fQ.un27rc4DziLY9Dd-X-xYrJUiJIKXszxA6kMXGennKt96PwcyuNioYXLn46KGkqu9HIIXoa1NIT1DFAKxBKqkeA",
+    "access_token": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTYxNzAyMzY0OCwiZXhwIjoxNjE3MTEwMDQ4fQ.un27rc4DziLY9Dd-X-xYrJUiJIKXszxA6kMXGennKt96PwcyuNioYXLn46KGkqu9HIIXoa1NIT1DFAKxBKqkeA",
     "type": "Bearer",
     "username": "admin",
     "authorities": [
@@ -165,7 +173,7 @@ Serwer odsyła JWT w odpowiedzi z informacją o wszystkich uprawnieniach:
 ```
 
 ## Rejestracja szpitala
-Rejestrację szpitala można wykonać tylko z poziomu admina, więc uprzednio trzeba się na niego zalogowa i wykorzystać otrzymany JWT , wywołując metodę POST na `/api/v1/auth/registration/hospital/register`
+Rejestrację szpitala można wykonać tylko z poziomu admina, więc uprzednio trzeba się na niego zalogować i wykorzystać otrzymany JWT , wywołując metodę POST na `/api/v1/auth/registration/hospital/register` z następującym body:
 ```
 {
     "password": "password",
@@ -182,7 +190,7 @@ Serwer powinien zwrócić status 200 bez żadnego body, bądź wyjątek o nazwie
 Odbywa się tak samo jak logowanie admina i obywatela, lecz zwracany jest JWT z innymi uprawnieniami:
 ```
 {
-    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzenBpdGFsaWNobyIsImlhdCI6MTYxNzAyNTI2OCwiZXhwIjoxNjE3MTExNjY4fQ.TAfc5_6POXz6zKP4Qn84EUMO1XweAUccoxTMKa3oqSy8qq6a51vjAB2wRXfGU3cvG0KupCCPLkyAaJ8P6KpOGA",
+    "access_token": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzenBpdGFsaWNobyIsImlhdCI6MTYxNzAyNTI2OCwiZXhwIjoxNjE3MTExNjY4fQ.TAfc5_6POXz6zKP4Qn84EUMO1XweAUccoxTMKa3oqSy8qq6a51vjAB2wRXfGU3cvG0KupCCPLkyAaJ8P6KpOGA",
     "type": "Bearer",
     "username": "szpitalicho",
     "authorities": [
