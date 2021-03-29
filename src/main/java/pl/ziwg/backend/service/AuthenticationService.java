@@ -22,6 +22,10 @@ import pl.ziwg.backend.exception.UsernameNotAvailableException;
 import pl.ziwg.backend.exception.VerificationAlreadySucceededException;
 import pl.ziwg.backend.externalapi.governmentapi.Person;
 import pl.ziwg.backend.externalapi.governmentapi.PersonRegister;
+import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepository;
+import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepositoryImpl;
+import pl.ziwg.backend.externalapi.opencagedata.entity.GeocodeResponse;
+import pl.ziwg.backend.jsonbody.request.*;
 import pl.ziwg.backend.jsonbody.request.CitizenRegistrationRequestBody;
 import pl.ziwg.backend.jsonbody.request.HospitalRegistrationRequestBody;
 import pl.ziwg.backend.jsonbody.request.RegistrationCodeRequestBody;
@@ -62,7 +66,6 @@ public class AuthenticationService {
     private PersonRegister personRegister;
     private UserRepository userRepository;
     private CitizenRepository citizenRepository;
-    private AddressRepository addressRepository;
     private HospitalRepository hospitalRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder encoder;
@@ -75,7 +78,6 @@ public class AuthenticationService {
                                  SMSService smsService,
                                  UserRepository userRepository,
                                  CitizenRepository citizenRepository,
-                                 AddressRepository addressRepository,
                                  HospitalRepository hospitalRepository,
                                  RoleRepository roleRepository,
                                  PasswordEncoder encoder,
@@ -86,7 +88,6 @@ public class AuthenticationService {
         this.smsService = smsService;
         this.userRepository = userRepository;
         this.citizenRepository = citizenRepository;
-        this.addressRepository = addressRepository;
         this.hospitalRepository = hospitalRepository;
         this.roleRepository = roleRepository;
         this.encoder = encoder;
@@ -113,7 +114,8 @@ public class AuthenticationService {
         log.info("Current verification list = " + verificationEntryList.toString());
         Person person = getPersonByRegistrationToken(registrationToken);
         checkIfUsernameAvailable(userData.getUsername());
-        User user = new User(userData.getUsername(), encoder.encode(userData.getPassword()), new Citizen(person));
+        Address address = new Address(userData.getCity(), userData.getStreet(), userData.getStreetNumber());
+        User user = new User(userData.getUsername(), encoder.encode(userData.getPassword()), new Citizen(person, address));
         user.setRoles(new HashSet<>(Collections.singletonList(roleRepository.findByName(RoleName.ROLE_CITIZEN).get())));
         this.userRepository.save(user);
         log.info("Successful registration for user citizen with pesel '" + person.getPesel() + "', username + '" + userData.getUsername() +"' and roles: " + user.getRoles());
@@ -133,7 +135,7 @@ public class AuthenticationService {
 
     }
 
-    public ResponseEntity<JwtResponse> loginUser(CitizenRegistrationRequestBody userData){
+    public ResponseEntity<JwtResponse> loginUser(LoginRequestBody userData){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userData.getUsername(), userData.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -231,17 +233,6 @@ public class AuthenticationService {
         throw new TokenDoesNotExistsException("There is no such a verification token");
     }
 
-    private Map.Entry<Person, VerificationEntry> getMapEntryByRegistrationToken(String token){
-        for (Map.Entry<Person, VerificationEntry> entry : verificationEntryList.entrySet()){
-            if(entry.getValue().getRegistrationToken().equals(token)){
-                return entry;
-            }
-        }
-        log.error("TokenDoesNotExistsException: registration token: " + token + "'");
-        throw new TokenDoesNotExistsException("There is no such a registration token");
-    }
-
-
     private Person getPersonByRegistrationToken(String token){
         for (Map.Entry<Person, VerificationEntry> entry : verificationEntryList.entrySet()){
             if(entry.getValue().getRegistrationToken().equals(token)){
@@ -256,8 +247,7 @@ public class AuthenticationService {
         entry.getValue().setVerified(true);
         entry.getValue().setRegistrationToken(RandomStringUtils.randomAlphanumeric(30));
         log.info("Verification for registration succeeded: PESEL: '" + entry.getKey().getPesel() + "'");
-        AllowRegistrationResponse response = new AllowRegistrationResponse(entry.getValue().getRegistrationToken(), entry.getKey());
-        return response;
+        return new AllowRegistrationResponse(entry.getValue().getRegistrationToken(), entry.getKey());
     }
 
     private void checkIfRegistrationCodeIsCorrect(RegistrationCode registrationCode, String code){

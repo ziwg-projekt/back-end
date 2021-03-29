@@ -42,6 +42,11 @@ public class Address  {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "address")
     private Hospital hospital;
 
+    @JsonIgnore
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "address")
+    private Citizen citizen;
+
+
     @NotEmpty
     private String city;
 
