@@ -12,6 +12,7 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import pl.ziwg.backend.model.EntityToMapConverter;
+import pl.ziwg.backend.model.enumerates.UserType;
 
 @Getter
 @Setter
@@ -39,11 +40,32 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Citizen citizen;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Hospital hospital;
+
+    private UserType userType;
+
     public User(String username, String password, Citizen citizen){
         this.username = username;
         this.password = password;
         this.citizen = citizen;
         this.citizen.setUser(this);
+        this.userType = UserType.CITIZEN;
+    }
+
+    public User(String username, String password, Hospital hospital){
+        this.username = username;
+        this.password = password;
+        this.hospital = hospital;
+        this.hospital.setUser(this);
+        this.userType = UserType.HOSPITAL;
+    }
+
+
+    public User(String username, String password, UserType userType){
+        this.username = username;
+        this.password = password;
+        this.userType = userType;
     }
 
     @Override
@@ -52,8 +74,10 @@ public class User {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
+                ", type='" + userType + '\'' +
                 ", roles=" + roles +
                 ", citizen=" + EntityToMapConverter.getRepresentationWithoutChosenFields(citizen, Arrays.asList("user")) +
+                ", hospital=" + EntityToMapConverter.getRepresentationWithoutChosenFields(hospital, Arrays.asList("user")) +
                 '}';
     }
 }

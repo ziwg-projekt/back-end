@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 import pl.ziwg.backend.model.entity.Citizen;
 import pl.ziwg.backend.model.repository.CitizenRepository;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+@Transactional
 @Service
 public class CitizenService {
     private CitizenRepository citizenRepository;
@@ -33,6 +35,10 @@ public class CitizenService {
 
     public Citizen save(Citizen citizen) {
         return citizenRepository.save(citizen);
+    }
+
+    public void deleteCitizen(String pesel){
+        citizenRepository.deleteByPesel(pesel);
     }
 
 }

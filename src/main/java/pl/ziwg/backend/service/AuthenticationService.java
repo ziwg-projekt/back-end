@@ -15,18 +15,18 @@ import org.springframework.stereotype.Service;
 import pl.ziwg.backend.exception.*;
 import pl.ziwg.backend.externalapi.governmentapi.Person;
 import pl.ziwg.backend.externalapi.governmentapi.PersonRegister;
+import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepository;
+import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepositoryImpl;
+import pl.ziwg.backend.externalapi.opencagedata.entity.GeocodeResponse;
+import pl.ziwg.backend.jsonbody.request.HospitalRegistrationRequestBody;
 import pl.ziwg.backend.jsonbody.response.AllowRegistrationResponse;
 import pl.ziwg.backend.jsonbody.response.JwtResponse;
-import pl.ziwg.backend.model.entity.Citizen;
-import pl.ziwg.backend.model.entity.RoleName;
-import pl.ziwg.backend.model.entity.User;
-import pl.ziwg.backend.model.repository.CitizenRepository;
-import pl.ziwg.backend.model.repository.RoleRepository;
-import pl.ziwg.backend.model.repository.UserRepository;
+import pl.ziwg.backend.model.entity.*;
+import pl.ziwg.backend.model.repository.*;
 import pl.ziwg.backend.notificator.CommunicationChannelType;
-import pl.ziwg.backend.jsonbody.request.FinalRegistrationRequestBody;
+import pl.ziwg.backend.jsonbody.request.CitizenRegistrationRequestBody;
+import pl.ziwg.backend.jsonbody.request.VerifyCodeRequestBody;
 import pl.ziwg.backend.jsonbody.request.RegistrationCodeRequestBody;
-import pl.ziwg.backend.jsonbody.request.RegistrationRequestBody;
 import pl.ziwg.backend.security.RegistrationCode;
 import pl.ziwg.backend.security.VerificationEntry;
 import pl.ziwg.backend.security.jwt.JwtProvider;
@@ -44,6 +44,8 @@ public class AuthenticationService {
     private PersonRegister personRegister;
     private UserRepository userRepository;
     private CitizenRepository citizenRepository;
+    private AddressRepository addressRepository;
+    private HospitalRepository hospitalRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder encoder;
     private AuthenticationManager authenticationManager;
@@ -55,6 +57,8 @@ public class AuthenticationService {
                                  SMSService smsService,
                                  UserRepository userRepository,
                                  CitizenRepository citizenRepository,
+                                 AddressRepository addressRepository,
+                                 HospitalRepository hospitalRepository,
                                  RoleRepository roleRepository,
                                  PasswordEncoder encoder,
                                  AuthenticationManager authenticationManager,
@@ -64,40 +68,54 @@ public class AuthenticationService {
         this.smsService = smsService;
         this.userRepository = userRepository;
         this.citizenRepository = citizenRepository;
+        this.addressRepository = addressRepository;
+        this.hospitalRepository = hospitalRepository;
         this.roleRepository = roleRepository;
         this.encoder = encoder;
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
     }
 
-    public Map<String, String> doVerificationProcess(RegistrationRequestBody registrationDetails){
+    public Map<String, String> doVerificationProcess(RegistrationCodeRequestBody registrationDetails){
         String pesel = registrationDetails.getPesel();
         validateIfRegistrationIsPossible(pesel);
         Person person = personRegister.getPersonByPesel(pesel);
         Map.Entry<Person, VerificationEntry> entry =  generateVerificationEntry(person);
         sendCodeThroughChosenCommunicationChannel(person, registrationDetails.getCommunicationChannelType(), entry.getValue().getRegistrationCode().getCode());
-        return Map.of("verify_api_path", "/api/v1/auth/registration/code/verify/" + entry.getValue().getVerificationToken());
+        return Map.of("verify_api_path", "/api/v1/auth/registration/citizen/verify?token=" + entry.getValue().getVerificationToken());
     }
 
-    public AllowRegistrationResponse verifyRegistrationCodeCorrectness(RegistrationCodeRequestBody registrationCode, String verificationToken){
+    public AllowRegistrationResponse verifyRegistrationCodeCorrectness(VerifyCodeRequestBody registrationCode, String verificationToken){
         Map.Entry<Person, VerificationEntry> entry = getMapEntryByVerificationToken(verificationToken);
         validateIfVerificationSuccessful(entry, registrationCode.getRegistrationCode());
         return allowRegistration(entry);
     }
 
-    public void registerUser(String registrationToken, FinalRegistrationRequestBody userData){
+    public void registerUser(String registrationToken, CitizenRegistrationRequestBody userData){
         log.info("Current verification list = " + verificationEntryList.toString());
         Person person = getPersonByRegistrationToken(registrationToken);
         checkIfUsernameAvailable(userData.getUsername());
         User user = new User(userData.getUsername(), encoder.encode(userData.getPassword()), new Citizen(person));
         user.setRoles(new HashSet<>(Collections.singletonList(roleRepository.findByName(RoleName.ROLE_CITIZEN).get())));
         this.userRepository.save(user);
-        log.info("Successful registration for user with pesel '" + person.getPesel() + "', username + '" + userData.getUsername() +"' and roles: " + user.getRoles());
+        log.info("Successful registration for user citizen with pesel '" + person.getPesel() + "', username + '" + userData.getUsername() +"' and roles: " + user.getRoles());
         verificationEntryList.remove(person);
         log.info("Current verification list = " + verificationEntryList.toString());
     }
 
-    public ResponseEntity<JwtResponse> loginUser(FinalRegistrationRequestBody userData){
+    public void registerHospital(HospitalRegistrationRequestBody hospitalData){
+        checkIfUsernameAvailable(hospitalData.getUsername());
+        Address address = new Address(hospitalData.getCity(), hospitalData.getStreet(), hospitalData.getStreetNumber());
+        Hospital hospital = new Hospital(hospitalData.getHospitalName(), address);
+        User user = new User(hospitalData.getUsername(), encoder.encode(hospitalData.getPassword()), hospital);
+        log.info(user.toString());
+        user.setRoles(new HashSet<>(Collections.singletonList(roleRepository.findByName(RoleName.ROLE_HOSPITAL).get())));
+        this.userRepository.save(user);
+        log.info("Successful registration for user hospital with username + '" + hospitalData.getUsername() +"' and roles: " + user.getRoles());
+
+    }
+
+    public ResponseEntity<JwtResponse> loginUser(CitizenRegistrationRequestBody userData){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userData.getUsername(), userData.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -105,7 +123,6 @@ public class AuthenticationService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         log.info("Successful login for user with username '" + userData.getUsername() + "'");
         JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities());
-        log.info(jwtResponse.toString());
         return new ResponseEntity<>(jwtResponse, HttpStatus.OK);
     }
 
@@ -118,14 +135,21 @@ public class AuthenticationService {
     public void showCurrentState(){
         log.info("Current users list : " + userRepository.findAll().toString());
         log.info("Current citizen list : " + citizenRepository.findAll().toString());
+        log.info("Current hospital list : " + hospitalRepository.findAll().toString());
     }
 
-    public void deleteUser(String username){
-        userRepository.deleteByUsername(username);
-    }
-
-    public void deleteCitizen(String pesel){
-        citizenRepository.deleteByPesel(pesel);
+    public boolean checkIfAllRolesPresent(){
+        for (RoleName roleName : RoleName.values()) {
+            Optional<Role> role = roleRepository.findByName(roleName);
+            if(role.isEmpty()){
+                log.error("Role " + roleName.toString() +" not found!");
+                return false;
+            }
+            else{
+                log.info("Role " + roleName.toString() + " was found");
+            }
+        }
+        return true;
     }
 
     private void validateIfRegistrationIsPossible(String pesel){

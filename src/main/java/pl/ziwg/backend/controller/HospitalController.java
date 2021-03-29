@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.EntityToMapConverter;
+import pl.ziwg.backend.model.entity.Company;
 import pl.ziwg.backend.model.entity.Hospital;
 import pl.ziwg.backend.service.HospitalService;
 
@@ -16,6 +17,7 @@ import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/hospitals")
@@ -67,6 +69,5 @@ public class HospitalController {
     public ResponseEntity<Hospital> newHospital(@Valid @RequestBody Hospital newHospital) {
         return new ResponseEntity<>(hospitalService.save(newHospital), HttpStatus.CREATED);
     }
-
 
 }
