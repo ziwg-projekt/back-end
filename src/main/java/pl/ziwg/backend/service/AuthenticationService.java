@@ -12,24 +12,49 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.ziwg.backend.exception.*;
+import pl.ziwg.backend.exception.IncorrectRegistrationCodeException;
+import pl.ziwg.backend.exception.NotSupportedCommunicationChannelException;
+import pl.ziwg.backend.exception.PeselDoesNotExistsException;
+import pl.ziwg.backend.exception.RegistrationCodeExpiredException;
+import pl.ziwg.backend.exception.TokenDoesNotExistsException;
+import pl.ziwg.backend.exception.UserAlreadyRegisteredException;
+import pl.ziwg.backend.exception.UsernameNotAvailableException;
+import pl.ziwg.backend.exception.VerificationAlreadySucceededException;
 import pl.ziwg.backend.externalapi.governmentapi.Person;
 import pl.ziwg.backend.externalapi.governmentapi.PersonRegister;
 import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepository;
 import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepositoryImpl;
 import pl.ziwg.backend.externalapi.opencagedata.entity.GeocodeResponse;
 import pl.ziwg.backend.jsonbody.request.*;
+import pl.ziwg.backend.jsonbody.request.CitizenRegistrationRequestBody;
+import pl.ziwg.backend.jsonbody.request.HospitalRegistrationRequestBody;
+import pl.ziwg.backend.jsonbody.request.RegistrationCodeRequestBody;
+import pl.ziwg.backend.jsonbody.request.VerifyCodeRequestBody;
 import pl.ziwg.backend.jsonbody.response.AllowRegistrationResponse;
 import pl.ziwg.backend.jsonbody.response.JwtResponse;
-import pl.ziwg.backend.model.entity.*;
-import pl.ziwg.backend.model.repository.*;
+import pl.ziwg.backend.model.entity.Address;
+import pl.ziwg.backend.model.entity.Citizen;
+import pl.ziwg.backend.model.entity.Hospital;
+import pl.ziwg.backend.model.entity.Role;
+import pl.ziwg.backend.model.entity.RoleName;
+import pl.ziwg.backend.model.entity.User;
+import pl.ziwg.backend.model.repository.AddressRepository;
+import pl.ziwg.backend.model.repository.CitizenRepository;
+import pl.ziwg.backend.model.repository.HospitalRepository;
+import pl.ziwg.backend.model.repository.RoleRepository;
+import pl.ziwg.backend.model.repository.UserRepository;
 import pl.ziwg.backend.notificator.CommunicationChannelType;
+import pl.ziwg.backend.notificator.email.EmailSubject;
 import pl.ziwg.backend.security.RegistrationCode;
 import pl.ziwg.backend.security.VerificationEntry;
 import pl.ziwg.backend.security.jwt.JwtProvider;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 
 @Transactional
 @Service
@@ -163,7 +188,8 @@ public class AuthenticationService {
             case EMAIL:
                 Optional<String> email = person.getEmail();
                 if(email.isPresent()) {
-                    emailService.sendVerificationCode(email.get(), code);
+                    emailService.sendVerificationCode(email.get(), code, EmailSubject.VERIFICATION_CODE,
+                            person.getName());
                 }
                 else{
                     verificationEntryList.remove(person);

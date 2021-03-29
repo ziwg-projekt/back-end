@@ -3,7 +3,6 @@ package pl.ziwg.backend.externalapi.governmentapi;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
@@ -11,7 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 public class Person {
@@ -28,11 +26,11 @@ public class Person {
     private String phoneNumber;
     private String email;
 
-    public Optional<String> getPhoneNumber(){
+    public Optional<String> getPhoneNumber() {
         return Optional.ofNullable(phoneNumber);
     }
 
-    public Optional<String> getEmail(){
+    public Optional<String> getEmail() {
         return Optional.ofNullable(email);
     }
 

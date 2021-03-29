@@ -1,0 +1,9 @@
+Witaj [name],
+
+Dziękujemy za rozpoczęcie korzystania z naszej aplikacji.
+
+Aby ukończyć proces rejestracji należy potwierdzić adres e-mail.
+
+Kliknij poniżej aby zatwierdzić adres e-mail:
+
+[link]
