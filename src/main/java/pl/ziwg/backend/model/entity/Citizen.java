@@ -10,6 +10,7 @@ import pl.ziwg.backend.externalapi.governmentapi.Person;
 import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.enumerates.CitizenState;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -47,8 +48,8 @@ public class Citizen {
     @NotNull
     private String email;
 
-    @OneToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name = "address", referencedColumnName="Id")
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address", referencedColumnName = "Id")
     @NotNull
     private Address address;
 
