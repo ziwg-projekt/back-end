@@ -21,7 +21,7 @@ public class Hospital {
     @NotNull
     private String name;
 
-    @OneToOne(cascade = CascadeType.MERGE)
+    @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name = "address", referencedColumnName="Id")
     @NotNull
     private Address address;
@@ -37,5 +37,14 @@ public class Hospital {
     @JsonIgnore
     @OneToMany(mappedBy="hospital")
     private Set<Doctor> doctors;
+
+    @JsonIgnore
+    @OneToOne()
+    private User user;
+
+    public Hospital(String name, Address address){
+        this.name = name;
+        this.address = address;
+    }
 
 }

@@ -1,4 +1,4 @@
-package pl.ziwg.backend.requestbody;
+package pl.ziwg.backend.jsonbody.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @ToString
-public class RegistrationRequestBody {
+public class RegistrationCodeRequestBody {
     @NotNull
     private String pesel;
 
@@ -19,7 +19,7 @@ public class RegistrationRequestBody {
     @NotNull
     private CommunicationChannelType communicationChannelType;
 
-    public RegistrationRequestBody(String pesel, int communicationChannelType){
+    public RegistrationCodeRequestBody(String pesel, int communicationChannelType){
         this.pesel = pesel;
         this.communicationChannelType = CommunicationChannelType.values()[communicationChannelType];
     }

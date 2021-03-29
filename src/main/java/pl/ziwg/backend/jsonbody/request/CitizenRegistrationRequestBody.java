@@ -1,4 +1,4 @@
-package pl.ziwg.backend.requestbody;
+package pl.ziwg.backend.jsonbody.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FinalRegistrationRequestBody {
+public class CitizenRegistrationRequestBody {
     @NotNull
     private String password;
 
