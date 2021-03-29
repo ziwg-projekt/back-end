@@ -47,6 +47,12 @@ public class Citizen {
     @NotNull
     private String email;
 
+    @OneToOne(cascade=CascadeType.ALL)
+    @JoinColumn(name = "address", referencedColumnName="Id")
+    @NotNull
+    private Address address;
+
+
     @ManyToOne()
     @JoinColumn(name = "hospital", referencedColumnName = "id")
     private Hospital hospital;
@@ -61,13 +67,14 @@ public class Citizen {
     @OneToOne()
     private User user;
 
-    public Citizen(Person person){
+    public Citizen(Person person, Address address){
         this.name = person.getName();
         this.surname = person.getSurname();
         this.pesel = person.getPesel();
         person.getPhoneNumber().ifPresent(s -> this.phoneNumber = s);
         person.getEmail().ifPresent(s -> this.email = s);
         this.state = CitizenState.WAITING;
+        this.address = address;
     }
 
     @Override
