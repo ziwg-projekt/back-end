@@ -45,6 +45,7 @@ public class AuthenticationTest {
     private String password = "admin12345";
     private String username = "admintest";
     private String hospitalUsername = "szpitalicho";
+    private String hospitalPassword = "hospitalpass";
     private final String adminPassword = "adminpassword";
     private final String adminUsername = "admin";
     private ResponseEntity<JsonNode> response;
@@ -60,6 +61,7 @@ public class AuthenticationTest {
     public void procedureAfter(){
         try{
             userService.deleteUser(username);
+            userService.deleteUser(hospitalUsername);
         } catch(Exception ex){
             log.info(ex.getMessage());
         }
@@ -100,14 +102,14 @@ public class AuthenticationTest {
         response = login(adminUsername, adminPassword);
 
         headers.set("Authorization", "Bearer " + getParameterFromEntity(response, "access_token"));
-        Map<String, Object> requestBody = getHospitalInformation(hospitalUsername);
+        Map<String, Object> requestBody = getHospitalInformation(hospitalUsername, hospitalPassword);
         body = new HttpEntity<>(requestBody, headers);
         response = makePostRequest("/api/v1/auth/registration/hospital/register", body);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        userService.deleteUser(hospitalUsername);
     }
 
-    @Test void invokeForbiddenOnRegisterHospitalByCitizen(){
+    @Test
+    public void invokeForbiddenOnRegisterHospitalByCitizen(){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -119,17 +121,77 @@ public class AuthenticationTest {
         response = login(username, password);
 
         headers.set("Authorization", "Bearer " + getParameterFromEntity(response, "access_token"));
-        Map<String, Object> requestBody = getHospitalInformation(hospitalUsername);
+        Map<String, Object> requestBody = getHospitalInformation(hospitalUsername, hospitalPassword);
         body = new HttpEntity<>(requestBody, headers);
         response = makePostRequest("/api/v1/auth/registration/hospital/register", body);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
-    @Test void invokeUnauthorizedOnRegisterHospitalAnonymously(){
-        Map<String, Object> requestBody = getHospitalInformation(hospitalUsername);
+    @Test
+    public void invokeUnauthorizedOnRegisterHospitalAnonymously(){
+        Map<String, Object> requestBody = getHospitalInformation(hospitalUsername, hospitalPassword);
         body = new HttpEntity<>(requestBody);
         response = makePostRequest("/api/v1/auth/registration/hospital/register", body);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    public void checkIfAddressIsAccessibleFromContext(){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        response = basicCodeGeneration(pesel, 1);
+        response = basicVerification(getVerifyApiPath(response), code);
+        response = basicRegistration(getRegisterApiPath(response), password, username);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        response = login(username, password);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        headers.set("Authorization", "Bearer " + getParameterFromEntity(response, "access_token"));
+        body = new HttpEntity<>(headers);
+        response = makeGetRequest("/api/v1/users/self/address", body);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void checkIfVaccinesAreAccessibleFromHospitalContext(){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        response = login(adminUsername, adminPassword);
+
+        headers.set("Authorization", "Bearer " + getParameterFromEntity(response, "access_token"));
+        Map<String, Object> requestBody = getHospitalInformation(hospitalUsername, hospitalPassword);
+        body = new HttpEntity<>(requestBody, headers);
+        response = makePostRequest("/api/v1/auth/registration/hospital/register", body);
+
+        response = login(hospitalUsername, hospitalPassword);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        headers.set("Authorization", "Bearer " + getParameterFromEntity(response, "access_token"));
+        body = new HttpEntity<>(headers);
+        response = makeGetRequest("/api/v1/users/self/vaccines", body);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void checkIfVaccinesAreAccessibleFromCitizenContext(){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        response = basicCodeGeneration(pesel, 1);
+        response = basicVerification(getVerifyApiPath(response), code);
+        response = basicRegistration(getRegisterApiPath(response), password, username);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        response = login(username, password);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        headers.set("Authorization", "Bearer " + getParameterFromEntity(response, "access_token"));
+        body = new HttpEntity<>(headers);
+        response = makeGetRequest("/api/v1/users/self/vaccines", body);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -271,6 +333,12 @@ public class AuthenticationTest {
         return response;
     }
 
+    private <T> ResponseEntity<JsonNode> makeGetRequest(String path, HttpEntity<T> entity){
+        ResponseEntity<JsonNode> response = restTemplate.exchange("http://localhost:" + port + path, HttpMethod.GET, entity, JsonNode.class);
+        log.info(getHumanReadableResponse(response));
+        return response;
+    }
+
     private ResponseEntity<JsonNode> basicCodeGeneration(String pesel, int type){
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(Map.of("pesel", pesel,"communication_channel_type", type));
         return makePostRequest("/api/v1/auth/registration/citizen/notify", entity);
@@ -282,7 +350,11 @@ public class AuthenticationTest {
     }
 
     private ResponseEntity<JsonNode> basicRegistration(String path, String password, String username){
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(Map.of("password", password, "username", username));
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(Map.of("password", password,
+                                                                        "username", username,
+                                                                        "street_number", "47",
+                                                                        "city", "Wroclaw",
+                                                                        "street", "Zielinskiego"));
         return makePostRequest(path, entity);
     }
 
@@ -299,8 +371,8 @@ public class AuthenticationTest {
         return makePostRequest("/api/v1/auth/login", body);
     }
 
-    private Map<String, Object> getHospitalInformation(String username){
-        return Map.of("password", "password",
+    private Map<String, Object> getHospitalInformation(String username, String password){
+        return Map.of("password", password,
                 "username", username,
                 "hospital_name", "szpitalisko we wroclawiu",
                 "city", "Wroclaw",

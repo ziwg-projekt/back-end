@@ -5,10 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import pl.ziwg.backend.jsonbody.request.CitizenRegistrationRequestBody;
-import pl.ziwg.backend.jsonbody.request.HospitalRegistrationRequestBody;
-import pl.ziwg.backend.jsonbody.request.VerifyCodeRequestBody;
-import pl.ziwg.backend.jsonbody.request.RegistrationCodeRequestBody;
+import pl.ziwg.backend.jsonbody.request.*;
 import pl.ziwg.backend.jsonbody.response.AllowRegistrationResponse;
 import pl.ziwg.backend.jsonbody.response.JwtResponse;
 import pl.ziwg.backend.service.AuthenticationService;
@@ -54,7 +51,7 @@ public class AuthenticationController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> loginUser(@Valid @RequestBody CitizenRegistrationRequestBody userData){
+    public ResponseEntity<JwtResponse> loginUser(@Valid @RequestBody LoginRequestBody userData){
         return authenticationService.loginUser(userData);
     }
 

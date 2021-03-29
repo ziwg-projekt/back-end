@@ -42,7 +42,7 @@ public class HospitalController {
     }
 
     @GetMapping("/{id}/vaccines")
-    public ResponseEntity<List<Map<String, Object>>> getVaccines(@PathVariable Long id) throws IllegalAccessException {
+    public ResponseEntity<List<Map<String, Object>>> getVaccines(@PathVariable Long id){
         Hospital hospital = hospitalService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
         List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(hospital.getVaccines(), Arrays.asList("hospital", "appointment"));
@@ -50,7 +50,7 @@ public class HospitalController {
     }
 
     @GetMapping("/{id}/citizens")
-    public ResponseEntity<List<Map<String, Object>>> getCitizens(@PathVariable Long id) throws IllegalAccessException {
+    public ResponseEntity<List<Map<String, Object>>> getCitizens(@PathVariable Long id){
         Hospital hospital = hospitalService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
         List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(hospital.getCitizens(), Arrays.asList("hospital", "appointments"));
@@ -58,7 +58,7 @@ public class HospitalController {
     }
 
     @GetMapping("/{id}/doctors")
-    public ResponseEntity<List<Map<String, Object>>> getDoctors(@PathVariable Long id) throws IllegalAccessException {
+    public ResponseEntity<List<Map<String, Object>>> getDoctors(@PathVariable Long id){
         Hospital hospital = hospitalService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
         List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(hospital.getDoctors(), Arrays.asList("hospital", "appointments"));
