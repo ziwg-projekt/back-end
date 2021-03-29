@@ -24,8 +24,10 @@ public class EmailService {
         emailSender.sendMail(mail, message, subject);
     }
 
-    public void sendPasswordReminder(String mail, String message) {
-        //TODO: whole logic
+    public void sendPasswordReminder(@Email @NotNull final String mail, @NotNull final String passwordReminder,
+                                     final EmailSubject subject, @NotNull final String name) {
+        final String message = ReadFileUtils.getPasswordReminderMessage(name, passwordReminder);
+        emailSender.sendMail(mail, message, subject);
     }
 
 }
