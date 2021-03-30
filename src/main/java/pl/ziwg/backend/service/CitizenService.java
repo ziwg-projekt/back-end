@@ -41,4 +41,8 @@ public class CitizenService {
         citizenRepository.deleteByPesel(pesel);
     }
 
+    public boolean checkIfExistsByPesel(String pesel){
+        return citizenRepository.existsByPesel(pesel);
+    }
+
 }

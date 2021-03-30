@@ -12,7 +12,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 public class Hospital {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,15 +26,15 @@ public class Hospital {
     private Address address;
 
     @JsonIgnore
-    @OneToMany(mappedBy="hospital")
+    @OneToMany(mappedBy="hospital", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Vaccine> vaccines;
 
     @JsonIgnore
-    @OneToMany(mappedBy="hospital")
+    @OneToMany(mappedBy="hospital", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Citizen> citizens;
 
     @JsonIgnore
-    @OneToMany(mappedBy="hospital")
+    @OneToMany(mappedBy="hospital", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Doctor> doctors;
 
     @JsonIgnore
@@ -47,4 +46,13 @@ public class Hospital {
         this.address = address;
     }
 
+    @Override
+    public String toString() {
+        return "Hospital{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", address=" + address +
+                ", user=" + user +
+                '}';
+    }
 }

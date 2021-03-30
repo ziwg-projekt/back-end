@@ -50,13 +50,11 @@ public class Person {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Person person = (Person) o;
-        return name.equals(person.name) &&
-                surname.equals(person.surname) &&
-                pesel.equals(person.pesel);
+        return pesel.equals(person.pesel);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, surname, pesel);
+        return Objects.hash(pesel);
     }
 }

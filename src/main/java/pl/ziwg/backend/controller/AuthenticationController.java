@@ -41,7 +41,7 @@ public class AuthenticationController {
     @PostMapping("/registration/citizen/register")
     @ResponseStatus(HttpStatus.OK)
     public void registerCitizen(@Valid @RequestBody CitizenRegistrationRequestBody userData, @RequestParam String token){
-        authenticationService.registerUser(token, userData);
+        authenticationService.registerCitizen(token, userData);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
