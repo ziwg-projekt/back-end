@@ -73,7 +73,7 @@ public class CompanyController {
     @GetMapping("/logo/{fileName:.+}")
     public ResponseEntity<Resource> getImage(@PathVariable String fileName, HttpServletRequest request){
         Resource resource = fileStorageService.loadFileAsResource(fileName);
-        
+
         String contentType = null;
         try {
             contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());

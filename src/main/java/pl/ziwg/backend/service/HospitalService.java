@@ -49,6 +49,7 @@ public class HospitalService {
         for(Company company : companies){
             Map<String, Object> statsPerCompany = new HashMap<>();
             statsPerCompany.put("company", company.getName());
+            statsPerCompany.put("logo_path", company.getLogoPath());
             int available = 0;
             int assigned = 0;
             int given = 0;
