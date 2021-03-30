@@ -65,19 +65,26 @@ public class AfterStartupConfiguration {
     private void createVaccines(){
         List<String> codes = new ArrayList<>(Arrays.asList("2342", "2455", "2445", "4676", "24421", "35424", "13", "2445"));
         List<Company> companies = companyService.findAll();
-
-        Hospital hospital = userService.findByUsername(hospitalUsername).get().getHospital();
-        if(hospital.getVaccines().isEmpty()){
-            for(String code : codes){
-                Company company = companies.get(random.nextInt(companies.size()));
-                Vaccine vaccine = new Vaccine(code, company, hospital);
-                vaccine.setState(randomEnum(VaccineState.class));
-                vaccineService.save(vaccine);
-                log.info("Add vaccine with code '" + code + "' for hospital!");
+        Optional<User> user = userService.findByUsername(hospitalUsername);
+        if(user.isPresent()) {
+            Hospital hospital = user.get().getHospital();
+            if (hospital == null) {
+                log.warn("Hospital doesn't exists in system!");
             }
-        }
-        else{
-            log.info("No vaccines where added, hospital has got some vaccines!");
+            else if(hospital.getVaccines().isEmpty()){
+                for(String code : codes){
+                    Company company = companies.get(random.nextInt(companies.size()));
+                    Vaccine vaccine = new Vaccine(code, company, hospital);
+                    vaccine.setState(randomEnum(VaccineState.class));
+                    vaccineService.save(vaccine);
+                    log.info("Add vaccine with code '" + code + "' for hospital!");
+                }
+            }
+            else{
+                log.info("No vaccines where added, hospital has got some vaccines!");
+            }
+        } else{
+            log.warn("User hospital doesn't exists in system!");
         }
     }
 
@@ -116,13 +123,21 @@ public class AfterStartupConfiguration {
     }
 
     private void createDoctors(){
-        Hospital hospital = userService.findByUsername(hospitalUsername).get().getHospital();
-        if(hospital.getDoctors().isEmpty()){
-            doctorService.save(new Doctor(hospital));
-            log.info("Add doctor for hospital!");
+        Optional<User> user = userService.findByUsername(hospitalUsername);
+        if(user.isPresent()) {
+            Hospital hospital = userService.findByUsername(hospitalUsername).get().getHospital();
+            if(hospital==null){
+                log.warn("Hospital doesn't exists in system!");
+            }
+            else if (hospital.getDoctors().isEmpty()) {
+                doctorService.save(new Doctor(hospital));
+                log.info("Add doctor for hospital!");
+            } else {
+                log.info("No doctor was added, hospital has got some doctors!");
+            }
         }
         else{
-            log.info("No doctor was added, hospital has got some doctors!");
+            log.warn("User hospital doesn't exists in system!");
         }
     }
 
