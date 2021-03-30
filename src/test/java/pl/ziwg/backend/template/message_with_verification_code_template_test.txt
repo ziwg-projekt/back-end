@@ -2,8 +2,6 @@ Witaj Jan,
 
 Dziękujemy za rozpoczęcie korzystania z naszej aplikacji.
 
-Aby ukończyć proces rejestracji należy potwierdzić adres e-mail.
-
-Kliknij poniżej aby zatwierdzić adres e-mail:
+Twój kod weryfikacyjny:
 
 74974752-682e-47c6-98f5-d21d2b0dccad

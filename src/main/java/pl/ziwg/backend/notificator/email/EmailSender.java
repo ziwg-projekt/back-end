@@ -1,7 +1,5 @@
 package pl.ziwg.backend.notificator.email;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
@@ -15,7 +13,7 @@ import javax.validation.constraints.NotNull;
 
 @Service
 public class EmailSender {
-    private static final Logger logger = LoggerFactory.getLogger(EmailSender.class);
+    protected static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(EmailSender.class);
 
     @Value("{spring.mail.username}")
     private String email;
@@ -37,9 +35,9 @@ public class EmailSender {
         msg.setText(message);
         try {
             javaMailSender.send(msg);
-            logger.info("Mail sent successfully!");
+            log.info("Mail sent successfully!");
         } catch (MailException e) {
-            logger.error(String.format("Unable to send email trace %s", e));
+            log.error(String.format("Unable to send email trace %s", e));
         }
     }
 }
