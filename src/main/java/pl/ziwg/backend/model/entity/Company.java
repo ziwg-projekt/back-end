@@ -1,6 +1,7 @@
 package pl.ziwg.backend.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +14,6 @@ import java.util.Set;
 @Entity
 @Table(name = "company")
 @Getter
-@ToString
 @Setter
 @NoArgsConstructor
 public class Company {
@@ -24,9 +24,8 @@ public class Company {
     @NotEmpty
     private String name;
 
-    @JsonIgnore
-    @Column(length = 1000)
-    private byte[] logoByte;
+    @JsonProperty("logo_path")
+    private String logoPath;
 
     @JsonIgnore
     @OneToMany(mappedBy="company")
@@ -36,4 +35,12 @@ public class Company {
         this.name = name;
     }
 
+    @Override
+    public String toString() {
+        return "Company{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", logoPath='" + logoPath + '\'' +
+                '}';
+    }
 }
