@@ -33,6 +33,7 @@ public class Company {
 
     public Company(String name){
         this.name = name;
+        this.logoPath = "";
     }
 
     @Override
