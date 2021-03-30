@@ -1,6 +1,7 @@
 package pl.ziwg.backend.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.hibernate.id.IdentifierGenerationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -113,5 +114,11 @@ public class CustomizedExceptionHandling extends ResponseEntityExceptionHandler 
     public ResponseEntity<ApiError> handleBadCredentialsException(BadCredentialsException exception) {
         return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ApiError> handleExpiredJwtException(ExpiredJwtException exception) {
+        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.UNAUTHORIZED);
+    }
+
 
 }
