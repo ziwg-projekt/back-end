@@ -77,7 +77,7 @@ public class User {
                 ", type='" + userType + '\'' +
                 ", roles=" + roles +
                 ", citizen=" + EntityToMapConverter.getRepresentationWithoutChosenFields(citizen, Arrays.asList("user")) +
-                ", hospital=" + EntityToMapConverter.getRepresentationWithoutChosenFields(hospital, Arrays.asList("user")) +
+                ", hospital=" + EntityToMapConverter.getRepresentationWithoutChosenFields(hospital, Arrays.asList("user", "doctors", "citizens", "vaccines")) +
                 '}';
     }
 }
