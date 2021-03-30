@@ -20,6 +20,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.Set;
@@ -34,22 +35,20 @@ public class Citizen {
     @Id
     private String pesel;
 
-    @NotNull
+    @NotEmpty
     private String name;
 
-    @NotNull
+    @NotEmpty
     private String surname;
 
-    @NotNull
     @JsonProperty(value = "phone_number")
     private String phoneNumber;
 
     @Email
-    @NotNull
     private String email;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "address", referencedColumnName = "Id")
+    @JoinColumn(name = "address", referencedColumnName = "id")
     @NotNull
     private Address address;
 

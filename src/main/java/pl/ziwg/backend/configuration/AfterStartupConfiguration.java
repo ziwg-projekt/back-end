@@ -34,6 +34,7 @@ public class AfterStartupConfiguration {
 
     @EventListener(ApplicationReadyEvent.class)
     public void createAdminIfNotExists() {
+        createRolesIfNotExist();
         List<Role> adminRoles = Arrays.asList(roleRepository.findByName(RoleName.ROLE_ADMIN).get(), roleRepository.findByName(RoleName.ROLE_CITIZEN).get(), roleRepository.findByName(RoleName.ROLE_HOSPITAL).get());
         log.info("Looking for admin in User table");
         Optional<User> optionalAdmin = userRepository.findByRolesIn(new HashSet<>(Collections.singletonList(roleRepository.findByName(RoleName.ROLE_ADMIN).get())));
@@ -48,8 +49,7 @@ public class AfterStartupConfiguration {
         }
     }
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void createRolesIfNotExist(){
+    private void createRolesIfNotExist(){
         log.info("Looking for roles in Role table");
         for (RoleName roleName : RoleName.values()) {
             Optional<Role> role = roleRepository.findByName(roleName);

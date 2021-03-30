@@ -18,7 +18,7 @@ public class ReadFileUtils {
         String content = readFromFile(MESSAGE_WITH_VERIFICATION_CODE_TEMPLATE_PATH);
         String message = "";
         if (Objects.nonNull(content)) {
-            message = content.replace("[name]", name).replace("[link]", verificationCode);
+            message = content.replace("[name]", name).replace("[code]", verificationCode);
         }
         return message;
     }

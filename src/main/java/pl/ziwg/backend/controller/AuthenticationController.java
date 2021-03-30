@@ -3,6 +3,7 @@ package pl.ziwg.backend.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.jsonbody.request.*;
@@ -27,6 +28,7 @@ public class AuthenticationController {
     @PostMapping("/registration/citizen/notify")
     public ResponseEntity<Map<String, String>> sendCodeToCitizen(@Valid @RequestBody RegistrationCodeRequestBody registrationDetails) {
         Map<String, String> apiPathToVerify = authenticationService.doVerificationProcess(registrationDetails);
+
         return new ResponseEntity<>(apiPathToVerify, HttpStatus.OK);
     }
 

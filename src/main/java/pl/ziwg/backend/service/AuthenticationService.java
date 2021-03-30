@@ -3,8 +3,10 @@ package pl.ziwg.backend.service;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,9 +24,6 @@ import pl.ziwg.backend.exception.UsernameNotAvailableException;
 import pl.ziwg.backend.exception.VerificationAlreadySucceededException;
 import pl.ziwg.backend.externalapi.governmentapi.Person;
 import pl.ziwg.backend.externalapi.governmentapi.PersonRegister;
-import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepository;
-import pl.ziwg.backend.externalapi.opencagedata.GeocodeRepositoryImpl;
-import pl.ziwg.backend.externalapi.opencagedata.entity.GeocodeResponse;
 import pl.ziwg.backend.jsonbody.request.*;
 import pl.ziwg.backend.jsonbody.request.CitizenRegistrationRequestBody;
 import pl.ziwg.backend.jsonbody.request.HospitalRegistrationRequestBody;
@@ -38,7 +37,6 @@ import pl.ziwg.backend.model.entity.Hospital;
 import pl.ziwg.backend.model.entity.Role;
 import pl.ziwg.backend.model.entity.RoleName;
 import pl.ziwg.backend.model.entity.User;
-import pl.ziwg.backend.model.repository.AddressRepository;
 import pl.ziwg.backend.model.repository.CitizenRepository;
 import pl.ziwg.backend.model.repository.HospitalRepository;
 import pl.ziwg.backend.model.repository.RoleRepository;
@@ -183,11 +181,13 @@ public class AuthenticationService {
         checkIfRegistrationCodeExpired(entry.getValue().getRegistrationCode());
     }
 
-    private void sendCodeThroughChosenCommunicationChannel(Person person, CommunicationChannelType communicationChannelType, String code){
+    public void sendCodeThroughChosenCommunicationChannel(Person person, CommunicationChannelType communicationChannelType, String code){
+        log.info("Sending registration code '" + code + "' to citizen with pesel '"  + person.getPesel() + "' via " + communicationChannelType.toString());
         switch(communicationChannelType) {
             case EMAIL:
                 Optional<String> email = person.getEmail();
                 if(email.isPresent()) {
+                    log.info("Email for '" + person.getPesel() +"'was found - '" + email.get() + "'");
                     emailService.sendVerificationCode(email.get(), code, EmailSubject.VERIFICATION_CODE,
                             person.getName());
                 }
