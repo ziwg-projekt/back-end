@@ -101,8 +101,11 @@ Bądź jeśli został przekroczony czas na wpisanie kodu (60 sekund) to odsyła 
 Front może teraz wyświetlić wszystkie dane (oczywiście bez możliwości edycji) i udostępnić obywatelowi wpisanie hasła i nazwy użytkownika, które następnie należy wysłać w takim body POSTem na `register_api_path`:
 ```
 {
-    "password":"123456",
-    "username":"testuser"
+    "password": "123456",
+    "username": "testuser",
+    "city": "Kraków",
+    "street": "Wrocławska",
+    "street_number": "19"
 }
 ```
 Serwer dokonuje rejestracji użytkownika i wysyła status 200 bez body i w sumie tyle. Jeśli którykolwiek z tokenów będzie niepoprawny to dostaniemy takie info:
