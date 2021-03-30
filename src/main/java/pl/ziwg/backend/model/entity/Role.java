@@ -10,7 +10,6 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@ToString
 @Table(name = "role")
 public class Role {
     @Id
@@ -24,5 +23,13 @@ public class Role {
 
     public Role(RoleName roleName){
         this.name = roleName;
+    }
+
+    @Override
+    public String toString() {
+        return "Role{" +
+                "id=" + id +
+                ", name=" + name +
+                '}';
     }
 }

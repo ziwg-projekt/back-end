@@ -38,9 +38,9 @@ public class AssignmentAlgorithm implements Runnable, DisposableBean {
         while(active){
             Thread.sleep(2000);
             for(Hospital hospital : hospitalService.findAll()){
-                log.info("Looking for available vaccines in hospital - " + hospital.getName());
+//                log.info("Looking for available vaccines in hospital - " + hospital.getName());
                 List<Vaccine> vaccines = vaccineService.findAllAvailableFromHospital(hospital);
-                log.info(vaccines.size() + " available vaccines.");
+//                log.info(vaccines.size() + " available vaccines.");
             }
             //TODO: add checking how many citizen wait for vaccine
 

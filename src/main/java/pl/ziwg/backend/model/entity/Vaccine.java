@@ -38,5 +38,12 @@ public class Vaccine implements Serializable {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "vaccine")
     private Appointment appointment;
 
+    public Vaccine(String code, Company company, Hospital hospital){
+        this.code = code;
+        this.company = company;
+        this.hospital = hospital;
+        this.state = VaccineState.AVAILABLE;
+    }
+
 
 }

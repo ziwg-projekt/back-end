@@ -30,6 +30,10 @@ public class Doctor {
     @OneToMany(mappedBy="doctor")
     private Set<Appointment> appointments;
 
+    public Doctor(Hospital hospital){
+        this.hospital = hospital;
+    }
+
 
 
 }
