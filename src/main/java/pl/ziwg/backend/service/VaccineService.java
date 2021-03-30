@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import pl.ziwg.backend.model.entity.Company;
 import pl.ziwg.backend.model.entity.Doctor;
 import pl.ziwg.backend.model.entity.Hospital;
 import pl.ziwg.backend.model.entity.Vaccine;
@@ -32,6 +33,10 @@ public class VaccineService {
 
     public List<Vaccine> findAllAvailableFromHospital(Hospital hospital){
         return vaccineRepository.findByHospitalAndState(hospital, VaccineState.AVAILABLE);
+    }
+
+    public List<Vaccine> findAllFromGivenCompanyFromHospital(Hospital hospital, Company company){
+        return vaccineRepository.findAllByHospitalAndCompany(hospital, company);
     }
 
     public Optional<Vaccine> findByCode(String code) {

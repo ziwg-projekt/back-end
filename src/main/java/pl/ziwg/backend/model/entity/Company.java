@@ -32,4 +32,8 @@ public class Company {
     @OneToMany(mappedBy="company")
     private Set<Vaccine> vaccines;
 
+    public Company(String name){
+        this.name = name;
+    }
+
 }

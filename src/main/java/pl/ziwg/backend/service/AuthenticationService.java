@@ -62,11 +62,10 @@ public class AuthenticationService {
     private EmailService emailService;
     private SMSService smsService;
     private PersonRegister personRegister;
-    private UserRepository userRepository;
-    private CitizenRepository citizenRepository;
-    private HospitalRepository hospitalRepository;
-    private RoleRepository roleRepository;
-    private PasswordEncoder encoder;
+    private UserService userService;
+    private CitizenService citizenService;
+    private HospitalService hospitalService;
+    private RoleService roleService;
     private AuthenticationManager authenticationManager;
     private JwtProvider jwtProvider;
 
@@ -74,21 +73,19 @@ public class AuthenticationService {
     public AuthenticationService(EmailService emailService,
                                  PersonRegister personRegister,
                                  SMSService smsService,
-                                 UserRepository userRepository,
-                                 CitizenRepository citizenRepository,
-                                 HospitalRepository hospitalRepository,
-                                 RoleRepository roleRepository,
-                                 PasswordEncoder encoder,
+                                 UserService userService,
+                                 CitizenService citizenService,
+                                 HospitalService hospitalService,
+                                 RoleService roleService,
                                  AuthenticationManager authenticationManager,
                                  JwtProvider jwtProvider){
         this.emailService = emailService;
         this.personRegister = personRegister;
         this.smsService = smsService;
-        this.userRepository = userRepository;
-        this.citizenRepository = citizenRepository;
-        this.hospitalRepository = hospitalRepository;
-        this.roleRepository = roleRepository;
-        this.encoder = encoder;
+        this.userService = userService;
+        this.citizenService = citizenService;
+        this.hospitalService = hospitalService;
+        this.roleService = roleService;
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
     }
@@ -96,7 +93,7 @@ public class AuthenticationService {
     public Map<String, String> doVerificationProcess(RegistrationCodeRequestBody registrationDetails){
         String pesel = registrationDetails.getPesel();
         validateIfRegistrationIsPossible(pesel);
-        Person person = personRegister.getPersonByPesel(pesel);
+        Person person = personRegister.getPersonByPeselMock(pesel);
         Map.Entry<Person, VerificationEntry> entry =  generateVerificationEntry(person);
         sendCodeThroughChosenCommunicationChannel(person, registrationDetails.getCommunicationChannelType(), entry.getValue().getRegistrationCode().getCode());
         return Map.of("verify_api_path", "/api/v1/auth/registration/citizen/verify?token=" + entry.getValue().getVerificationToken());
@@ -108,15 +105,13 @@ public class AuthenticationService {
         return allowRegistration(entry);
     }
 
-    public void registerUser(String registrationToken, CitizenRegistrationRequestBody userData){
+    public void registerCitizen(String registrationToken, CitizenRegistrationRequestBody userData){
         log.info("Current verification list = " + verificationEntryList.toString());
         Person person = getPersonByRegistrationToken(registrationToken);
         checkIfUsernameAvailable(userData.getUsername());
         Address address = new Address(userData.getCity(), userData.getStreet(), userData.getStreetNumber());
-        User user = new User(userData.getUsername(), encoder.encode(userData.getPassword()), new Citizen(person, address));
-        user.setRoles(new HashSet<>(Collections.singletonList(roleRepository.findByName(RoleName.ROLE_CITIZEN).get())));
-        this.userRepository.save(user);
-        log.info("Successful registration for user citizen with pesel '" + person.getPesel() + "', username + '" + userData.getUsername() +"' and roles: " + user.getRoles());
+        userService.saveCitizen(userData.getUsername(), userData.getPassword(), new Citizen(person, address));
+        log.info("Successful registration for user citizen with pesel '" + person.getPesel() + "', username + '" + userData.getUsername());
         verificationEntryList.remove(person);
         log.info("Current verification list = " + verificationEntryList.toString());
     }
@@ -124,12 +119,8 @@ public class AuthenticationService {
     public void registerHospital(HospitalRegistrationRequestBody hospitalData){
         checkIfUsernameAvailable(hospitalData.getUsername());
         Address address = new Address(hospitalData.getCity(), hospitalData.getStreet(), hospitalData.getStreetNumber());
-        Hospital hospital = new Hospital(hospitalData.getHospitalName(), address);
-        User user = new User(hospitalData.getUsername(), encoder.encode(hospitalData.getPassword()), hospital);
-        log.info(user.toString());
-        user.setRoles(new HashSet<>(Collections.singletonList(roleRepository.findByName(RoleName.ROLE_HOSPITAL).get())));
-        this.userRepository.save(user);
-        log.info("Successful registration for user hospital with username + '" + hospitalData.getUsername() +"' and roles: " + user.getRoles());
+        userService.saveHospital(hospitalData.getUsername(), hospitalData.getPassword(), new Hospital(hospitalData.getHospitalName(), address));
+        log.info("Successful registration for user hospital with username + '" + hospitalData.getUsername());
 
     }
 
@@ -145,20 +136,20 @@ public class AuthenticationService {
     }
 
     public void checkIfUsernameAvailable(String username){
-        if(userRepository.existsByUsername(username)){
+        if(userService.checkIfUserExists(username)){
             throw new UsernameNotAvailableException("Username '" + username + "' is in use!");
         }
     }
 
     public void showCurrentState(){
-        log.info("Current users list : " + userRepository.findAll().toString());
-        log.info("Current citizen list : " + citizenRepository.findAll().toString());
-        log.info("Current hospital list : " + hospitalRepository.findAll().toString());
+        log.info("Current users list : " + userService.findAll().toString());
+        log.info("Current citizen list : " + citizenService.findAll().toString());
+        log.info("Current hospital list : " + hospitalService.findAll().toString());
     }
 
     public boolean checkIfAllRolesPresent(){
         for (RoleName roleName : RoleName.values()) {
-            Optional<Role> role = roleRepository.findByName(roleName);
+            Optional<Role> role = roleService.findByName(roleName);
             if(role.isEmpty()){
                 log.error("Role " + roleName.toString() +" not found!");
                 return false;
@@ -235,6 +226,7 @@ public class AuthenticationService {
 
     private Person getPersonByRegistrationToken(String token){
         for (Map.Entry<Person, VerificationEntry> entry : verificationEntryList.entrySet()){
+            System.out.println(entry);
             if(entry.getValue().getRegistrationToken().equals(token)){
                 return entry.getKey();
             }
@@ -272,7 +264,7 @@ public class AuthenticationService {
     }
 
     private void checkIfAlreadyRegistered(String pesel){
-        if(citizenRepository.existsByPesel(pesel)){
+        if(citizenService.checkIfExistsByPesel(pesel)){
             log.error("UserAlreadyRegisteredException: PESEL: '" + pesel);
             throw new UserAlreadyRegisteredException("Person with that pesel is already registered");
         }

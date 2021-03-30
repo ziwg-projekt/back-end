@@ -49,6 +49,15 @@ public class HospitalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/{id}/vaccines/stats")
+    public ResponseEntity<List<Map<String, Object>>> getAvailableVaccines(@PathVariable Long id){
+        Hospital hospital = hospitalService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
+        List<Map<String, Object>> response = hospitalService.getVaccinesStatistics(hospital);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
     @GetMapping("/{id}/citizens")
     public ResponseEntity<List<Map<String, Object>>> getCitizens(@PathVariable Long id){
         Hospital hospital = hospitalService.findById(id)
