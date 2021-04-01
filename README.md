@@ -203,17 +203,3 @@ Odbywa się tak samo jak logowanie admina i obywatela, lecz zwracany jest JWT z 
     ]
 }
 ```
-
-# API z użytkownikami
-
-logowanie do django admin (`127.0.0.1:8000/admin/`) jako superuser:
-```
-   login: gov-user
-   password: gov-user-dev
-```
-
-Aby uzyskać token do API wysyłamy POST na `http://127.0.0.1:8000/api-token-auth/` i przekazujemy parametry: `username="gov-user"`, `passoword="gov-user-dev"`
-
-W odpowiedzi otrzymujemy token
-
-`GET http://127.0.0.1:8000/person/<pesel>/ "Authorization: Token XXXXX...."`
