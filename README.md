@@ -31,6 +31,13 @@ Login: root
 Hasło: admin12345@@
 ```
 
+# Testowi użytkownicy
+Można tworzyć ich samemu, ale obecnie w systemie jest też po jednym przykładowym użytkowniku każdego typu
+- admin - username - `admin`, hasło - `adminpassword`,
+- szpital - username - `first_hospital`, hasło - `password`,
+- obywatel - username - `first_user`, hasło - `password`.
+
+
 # Autentykacja
 
 ## Rejestracja obywatela
