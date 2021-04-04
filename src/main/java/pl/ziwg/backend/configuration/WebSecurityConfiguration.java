@@ -88,8 +88,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter imple
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/api/v1/auth/**",
-            "/api/v1/hospitals**",
-            "/api/v1/companies**"
+            "/api/v1/hospitals/**",
+            "/api/v1/companies/**"
             // other public endpoints of your API may be appended to this array
     };
 
