@@ -16,11 +16,15 @@ public class JwtResponse {
     private String accessToken;
     private String type = "Bearer";
     private String username;
+
+    @JsonProperty("user_id")
+    private long userId;
     private Collection<? extends GrantedAuthority> authorities;
 
-    public JwtResponse(String accessToken, String username, Collection<? extends GrantedAuthority> authorities) {
+    public JwtResponse(String accessToken, String username, Collection<? extends GrantedAuthority> authorities, long userId) {
         this.accessToken = accessToken;
         this.username = username;
         this.authorities = authorities;
+        this.userId = userId;
     }
 }
