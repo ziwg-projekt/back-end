@@ -131,7 +131,8 @@ public class AuthenticationService {
         String jwt = jwtProvider.generateJwtToken(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         log.info("Successful login for user with username '" + userData.getUsername() + "'");
-        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities());
+
+        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities(), userService.findByUsername(userDetails.getUsername()).getId());
         return new ResponseEntity<>(jwtResponse, HttpStatus.OK);
     }
 
