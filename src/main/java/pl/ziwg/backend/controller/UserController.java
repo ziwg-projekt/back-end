@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.entity.Address;
+import pl.ziwg.backend.model.entity.Citizen;
 import pl.ziwg.backend.model.entity.Company;
 import pl.ziwg.backend.model.entity.User;
 import pl.ziwg.backend.model.enumerates.UserType;
@@ -36,6 +37,13 @@ public class UserController {
     public ResponseEntity<Company> deleteByUsername(@PathVariable String username) {
         userService.deleteUser(username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id){
+        User user = userService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "user"));
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('CITIZEN') || hasRole('HOSPITAL')")
