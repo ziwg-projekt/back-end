@@ -132,7 +132,7 @@ public class AuthenticationService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         log.info("Successful login for user with username '" + userData.getUsername() + "'");
 
-        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities(), userService.findByUsername(userDetails.getUsername()).getId());
+        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities(), userService.findByUsername(userDetails.getUsername()).get().getId());
         return new ResponseEntity<>(jwtResponse, HttpStatus.OK);
     }
 
