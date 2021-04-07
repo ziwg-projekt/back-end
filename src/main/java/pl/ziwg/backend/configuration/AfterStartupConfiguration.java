@@ -6,6 +6,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +21,7 @@ import pl.ziwg.backend.service.*;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -63,7 +64,7 @@ public class AfterStartupConfiguration {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void initializeData() throws URISyntaxException {
+    public void initializeData() throws URISyntaxException, IOException {
         createRolesIfNotExist();
         createAdminIfNotExists();
         createCompaniesWithLogos();
@@ -164,22 +165,14 @@ public class AfterStartupConfiguration {
         }
     }
 
-    private void createCompaniesWithLogos() throws URISyntaxException {
+    private void createCompaniesWithLogos() throws URISyntaxException, IOException {
         List<String> companies = new ArrayList<>(Arrays.asList("Pfizer", "AstraZeneca", "Johnson&Johnson"));
         for(String companyName : companies){
             Company company = companyService.addIfNotExists(companyName);
-
-            Path path = Paths.get(ClassLoader.getSystemResource(companyName.toLowerCase() + ".png").toURI());
-            String name = companyName.toLowerCase() + ".png";
-            String contentType = "text/plain";
-            byte[] content = null;
-            try {
-                content = Files.readAllBytes(path);
-            } catch (final IOException i) {
-                log.info("Logo for company '" + companyName + "' not found in resources folder");
-            }
-            MultipartFile result = new MockMultipartFile(name, name, contentType, content);
-            String pathToFile = fileStorageService.storeFile(result);
+            File file = ResourceUtils.getFile("classpath:" + companyName.toLowerCase() + ".png");
+            InputStream in = new FileInputStream(file);
+            MultipartFile multipartFile = new MockMultipartFile(companyName.toLowerCase() + ".png", companyName.toLowerCase() + ".png", "text/plain", in);
+            String pathToFile = fileStorageService.storeFile(multipartFile);
             HttpServletRequest mockRequest = new MockHttpServletRequest();
             ServletRequestAttributes servletRequestAttributes = new ServletRequestAttributes(mockRequest);
             RequestContextHolder.setRequestAttributes(servletRequestAttributes);

@@ -52,7 +52,7 @@ public class FileStorageService {
 
             return fileName;
         } catch (IOException ex) {
-            throw new FileStorageException("Could not store file " + fileName + ". Please try again!");
+            throw new FileStorageException("Could not store file " + fileName + ". Please try again!\n" + ex.getMessage());
         }
     }
 
