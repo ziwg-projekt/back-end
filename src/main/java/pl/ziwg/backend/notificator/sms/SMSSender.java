@@ -3,6 +3,7 @@ package pl.ziwg.backend.notificator.sms;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,8 @@ import java.util.Objects;
 
 @Service
 public class SMSSender {
+    protected static final Logger log = Logger.getLogger(SMSSender.class);
+
     @Value("${sms.account.sid}")
     private String accountSid;
 
@@ -30,5 +33,6 @@ public class SMSSender {
         }
 
         Message.creator(new PhoneNumber(phoneNumber), new PhoneNumber(myPhoneNumber), message).create();
+        log.info("sms sent successfully");
     }
 }
