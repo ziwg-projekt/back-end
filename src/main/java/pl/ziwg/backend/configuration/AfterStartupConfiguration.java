@@ -101,13 +101,13 @@ public class AfterStartupConfiguration {
     private void createCitizen(){
         String username = "first_user";
         String password = "password";
-        String pesel = "2888924742";
+        String pesel = "99110323923";
         if(userService.checkIfUserExists(username)){
             log.info("User (type citizen) '" + username + "' was found in system");
         }
         else {
             Address address = new Address("Krakow", "Kazimierza Wielkiego", "32");
-            userService.saveCitizen(username, password, new Citizen(personRegister.getPersonByPeselMock(pesel), address));
+            userService.saveCitizen(username, password, new Citizen(personRegister.getPersonByPesel(pesel), address));
         }
     }
 

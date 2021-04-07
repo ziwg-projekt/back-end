@@ -20,7 +20,6 @@ import java.time.ZoneOffset;
 public class GeocodeRepositoryImpl implements GeocodeRepository
 {
     private static final String API_KEY = "key";
-
     private static final String QUERY = "q";
 
     @Getter
