@@ -92,8 +92,8 @@ public class AuthenticationService {
 
     public Map<String, String> doVerificationProcess(RegistrationCodeRequestBody registrationDetails){
         String pesel = registrationDetails.getPesel();
-        validateIfRegistrationIsPossible(pesel);
-        Person person = personRegister.getPersonByPeselMock(pesel);
+        checkIfAlreadyRegistered(pesel);
+        Person person = personRegister.getPersonByPesel(pesel);
         Map.Entry<Person, VerificationEntry> entry =  generateVerificationEntry(person);
         sendCodeThroughChosenCommunicationChannel(person, registrationDetails.getCommunicationChannelType(), entry.getValue().getRegistrationCode().getCode());
         return Map.of("verify_api_path", "/api/v1/auth/registration/citizen/verify?token=" + entry.getValue().getVerificationToken());
@@ -163,7 +163,6 @@ public class AuthenticationService {
     }
 
     private void validateIfRegistrationIsPossible(String pesel){
-        checkIfPeselExists(pesel);
         checkIfAlreadyRegistered(pesel);
     }
 
@@ -254,13 +253,6 @@ public class AuthenticationService {
         if(registrationCode.isExpire()){
             log.error("RegistrationCodeExpiredException: " + registrationCode.getHowManyCodeExistsInSeconds() + "s > " + registrationCode.getExpireIn() + "s");
             throw new RegistrationCodeExpiredException("Token expired, cause of " + registrationCode.getHowManyCodeExistsInSeconds() + "s > " + registrationCode.getExpireIn() + "s");
-        }
-    }
-
-    private void checkIfPeselExists(String pesel){
-        if(!personRegister.checkIfPeselExists(pesel)){
-            log.error("PeselDoesNotExistsException: PESEL: '" + pesel);
-            throw new PeselDoesNotExistsException("Pesel does not exists!");
         }
     }
 
