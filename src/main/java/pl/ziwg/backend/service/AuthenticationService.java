@@ -91,9 +91,9 @@ public class AuthenticationService {
     }
 
     public Map<String, String> doVerificationProcess(RegistrationCodeRequestBody registrationDetails){
-        String pesel = registrationDetails.getPesel();
-        validateIfRegistrationIsPossible(pesel);
-        Person person = personRegister.getPersonByPeselMock(pesel);
+        String pesel = getPeselIfValid(registrationDetails);
+        checkIfAlreadyRegistered(pesel);
+        Person person = personRegister.getPersonByPesel(pesel);
         Map.Entry<Person, VerificationEntry> entry =  generateVerificationEntry(person);
         sendCodeThroughChosenCommunicationChannel(person, registrationDetails.getCommunicationChannelType(), entry.getValue().getRegistrationCode().getCode());
         return Map.of("verify_api_path", "/api/v1/auth/registration/citizen/verify?token=" + entry.getValue().getVerificationToken());
@@ -162,9 +162,13 @@ public class AuthenticationService {
         return true;
     }
 
-    private void validateIfRegistrationIsPossible(String pesel){
-        checkIfPeselExists(pesel);
-        checkIfAlreadyRegistered(pesel);
+    private String getPeselIfValid(RegistrationCodeRequestBody registrationCodeRequestBody){
+        if(registrationCodeRequestBody.getPesel().length() == 11){
+            return registrationCodeRequestBody.getPesel();
+        }
+        else{
+            throw new PeselDoesNotExistsException("Pesel should have 11 digits, was given: " + registrationCodeRequestBody.getPesel().length());
+        }
     }
 
     private void validateIfVerificationSuccessful(Map.Entry<Person, VerificationEntry> entry, String registrationCode){
@@ -182,6 +186,7 @@ public class AuthenticationService {
                     log.info("Email for '" + person.getPesel() +"'was found - '" + email.get() + "'");
                     emailService.sendVerificationCode(email.get(), code, EmailSubject.VERIFICATION_CODE,
                             person.getName());
+                    log.info("Email to '" + person.getPesel() + "' successfully send!");
                 }
                 else{
                     verificationEntryList.remove(person);
@@ -254,13 +259,6 @@ public class AuthenticationService {
         if(registrationCode.isExpire()){
             log.error("RegistrationCodeExpiredException: " + registrationCode.getHowManyCodeExistsInSeconds() + "s > " + registrationCode.getExpireIn() + "s");
             throw new RegistrationCodeExpiredException("Token expired, cause of " + registrationCode.getHowManyCodeExistsInSeconds() + "s > " + registrationCode.getExpireIn() + "s");
-        }
-    }
-
-    private void checkIfPeselExists(String pesel){
-        if(!personRegister.checkIfPeselExists(pesel)){
-            log.error("PeselDoesNotExistsException: PESEL: '" + pesel);
-            throw new PeselDoesNotExistsException("Pesel does not exists!");
         }
     }
 

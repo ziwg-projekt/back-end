@@ -6,8 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "jwt")
-public class JwtProperties {
-    private String secret;
-    private long expiration;
+@ConfigurationProperties(prefix = "government")
+public class GovernmentApiProperties {
+    private String username;
+    private String password;
 }
