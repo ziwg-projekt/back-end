@@ -38,12 +38,14 @@ public class AuthenticationTest {
         this.userService = userService;
         this.restTemplate = restTemplate;
     }
+
     protected static final Logger log = Logger.getLogger(AuthenticationService.class);
 
-    private String pesel = "96050834215";
+    private String pesel = "94040743567";
+    private String pesel_2 = "81071149213";
     private String code = "123456";
-    private String password = "admin12345";
-    private String username = "admintest";
+    private String citizenPassword = "password12345";
+    private String citizenUsername = "user_test";
     private String hospitalUsername = "szpitalicho";
     private String hospitalPassword = "hospitalpass";
     private final String adminPassword = "adminpassword";
@@ -60,7 +62,7 @@ public class AuthenticationTest {
     @AfterEach
     public void procedureAfter(){
         try{
-            userService.deleteUser(username);
+            userService.deleteUser(citizenUsername);
             userService.deleteUser(hospitalUsername);
         } catch(Exception ex){
             log.info(ex.getMessage());
@@ -71,7 +73,7 @@ public class AuthenticationTest {
 
     @Test
     public void failLogin(){
-        response = login(username, password);
+        response = login(citizenUsername, citizenPassword);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(getParameterFromEntity(response, "exception")).isEqualTo("BadCredentialsException");
     }
@@ -80,10 +82,10 @@ public class AuthenticationTest {
     public void passLogin(){
         response = basicCodeGeneration(pesel, 1);
         response = basicVerification(getVerifyApiPath(response), code);
-        response = basicRegistration(getRegisterApiPath(response), password, username);
+        response = basicRegistration(getRegisterApiPath(response), citizenPassword, citizenUsername);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        response = login(username, password);
+        response = login(citizenUsername, citizenPassword);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
@@ -116,9 +118,9 @@ public class AuthenticationTest {
 
         response = basicCodeGeneration(pesel, 1);
         response = basicVerification(getVerifyApiPath(response), code);
-        response = basicRegistration(getRegisterApiPath(response), password, username);
+        response = basicRegistration(getRegisterApiPath(response), citizenPassword, citizenUsername);
 
-        response = login(username, password);
+        response = login(citizenUsername, citizenPassword);
 
         headers.set("Authorization", "Bearer " + getParameterFromEntity(response, "access_token"));
         Map<String, Object> requestBody = getHospitalInformation(hospitalUsername, hospitalPassword);
@@ -143,10 +145,10 @@ public class AuthenticationTest {
 
         response = basicCodeGeneration(pesel, 1);
         response = basicVerification(getVerifyApiPath(response), code);
-        response = basicRegistration(getRegisterApiPath(response), password, username);
+        response = basicRegistration(getRegisterApiPath(response), citizenPassword, citizenUsername);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        response = login(username, password);
+        response = login(citizenUsername, citizenPassword);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         headers.set("Authorization", "Bearer " + getParameterFromEntity(response, "access_token"));
         body = new HttpEntity<>(headers);
@@ -183,10 +185,10 @@ public class AuthenticationTest {
 
         response = basicCodeGeneration(pesel, 1);
         response = basicVerification(getVerifyApiPath(response), code);
-        response = basicRegistration(getRegisterApiPath(response), password, username);
+        response = basicRegistration(getRegisterApiPath(response), citizenPassword, citizenUsername);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        response = login(username, password);
+        response = login(citizenUsername, citizenPassword);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         headers.set("Authorization", "Bearer " + getParameterFromEntity(response, "access_token"));
         body = new HttpEntity<>(headers);
@@ -203,7 +205,7 @@ public class AuthenticationTest {
     public void goThroughEntireRegistrationProcess() {
         response = basicCodeGeneration(pesel, 1);
         response = basicVerification(getVerifyApiPath(response), code);
-        response = basicRegistration(getRegisterApiPath(response), password, username);
+        response = basicRegistration(getRegisterApiPath(response), citizenPassword, citizenUsername);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
@@ -219,7 +221,7 @@ public class AuthenticationTest {
     public void invokeUserAlreadyRegisteredException(){
         response = basicCodeGeneration(pesel, 1);
         response = basicVerification(getVerifyApiPath(response), code);
-        response = basicRegistration(getRegisterApiPath(response), password, username);
+        response = basicRegistration(getRegisterApiPath(response), citizenPassword, citizenUsername);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         response = basicCodeGeneration(pesel, 1);
@@ -231,12 +233,12 @@ public class AuthenticationTest {
     public void invokeUsernameNotAvailableException(){
         response = basicCodeGeneration(pesel, 1);
         response = basicVerification(getVerifyApiPath(response), code);
-        response = basicRegistration(getRegisterApiPath(response), password, username);
+        response = basicRegistration(getRegisterApiPath(response), citizenPassword, citizenUsername);
 
-        response = basicCodeGeneration(changeString(pesel), 1);
+        response = basicCodeGeneration(pesel_2, 1);
         response = basicVerification(getVerifyApiPath(response), code);
 
-        response = basicRegistration(getRegisterApiPath(response), password, username);
+        response = basicRegistration(getRegisterApiPath(response), citizenPassword, citizenUsername);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(getParameterFromEntity(response, "exception")).isEqualTo("UsernameNotAvailableException");
     }
@@ -254,7 +256,7 @@ public class AuthenticationTest {
     public void invokeRegistrationTokenDoesNotExistsExceptionByChangingToken() {
         response = basicCodeGeneration(pesel, 1);
         response = basicVerification(getVerifyApiPath(response), code);
-        response = basicRegistration(getRegisterApiPath(response) + 'x', password, username);
+        response = basicRegistration(getRegisterApiPath(response) + 'x', citizenPassword, citizenUsername);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(getParameterFromEntity(response, "exception")).isEqualTo("TokenDoesNotExistsException");
     }
@@ -264,8 +266,8 @@ public class AuthenticationTest {
         response = basicCodeGeneration(pesel, 1);
         response = basicVerification(getVerifyApiPath(response), code);
         String registerApiPath = getRegisterApiPath(response);
-        response = basicRegistration(registerApiPath, password, username);
-        response = basicRegistration(registerApiPath, password, username);
+        response = basicRegistration(registerApiPath, citizenPassword, citizenUsername);
+        response = basicRegistration(registerApiPath, citizenPassword, citizenUsername);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(getParameterFromEntity(response, "exception")).isEqualTo("TokenDoesNotExistsException");
     }
