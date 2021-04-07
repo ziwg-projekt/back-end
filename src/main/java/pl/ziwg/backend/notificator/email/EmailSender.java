@@ -1,6 +1,7 @@
 package pl.ziwg.backend.notificator.email;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import java.util.Properties;
 
 @Service
 public class EmailSender {
-    protected static final Logger log = Logger.getLogger(EmailSender.class);
+    protected static final Logger log = LoggerFactory.getLogger(EmailSender.class);
     @Value("${spring.mail.username}")
     private String email;
 
