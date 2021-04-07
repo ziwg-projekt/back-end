@@ -4,17 +4,27 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pl.ziwg.backend.BackendApplication;
-import pl.ziwg.backend.externalapi.governmentapi.Person;
 import pl.ziwg.backend.externalapi.governmentapi.PersonRegister;
 import pl.ziwg.backend.model.entity.*;
-import pl.ziwg.backend.model.enumerates.UserType;
 import pl.ziwg.backend.model.enumerates.VaccineState;
-import pl.ziwg.backend.model.repository.*;
+import org.springframework.mock.web.MockMultipartFile;
 import pl.ziwg.backend.service.*;
 
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -31,7 +41,7 @@ public class AfterStartupConfiguration {
     private DoctorService doctorService;
     private VaccineService vaccineService;
     private AppointmentService appointmentService;
-
+    private FileStorageService fileStorageService;
 
     @Autowired
     public AfterStartupConfiguration(UserService userService,
@@ -40,7 +50,8 @@ public class AfterStartupConfiguration {
                                      PersonRegister personRegister,
                                      DoctorService doctorService,
                                      VaccineService vaccineService,
-                                     AppointmentService appointmentService){
+                                     AppointmentService appointmentService,
+                                     FileStorageService fileStorageService){
         this.userService = userService;
         this.roleService = roleService;
         this.companyService = companyService;
@@ -48,13 +59,14 @@ public class AfterStartupConfiguration {
         this.doctorService = doctorService;
         this.vaccineService = vaccineService;
         this.appointmentService = appointmentService;
+        this.fileStorageService = fileStorageService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void initializeData(){
+    public void initializeData() throws URISyntaxException {
         createRolesIfNotExist();
         createAdminIfNotExists();
-        createCompanies();
+        createCompaniesWithLogos();
         createCitizen();
         createHospital();
         createDoctors();
@@ -63,7 +75,7 @@ public class AfterStartupConfiguration {
     }
 
     private void createVaccines(){
-        List<String> codes = new ArrayList<>(Arrays.asList("2342", "2455", "2445", "4676", "24421", "35424", "13", "2445"));
+        List<String> codes = new ArrayList<>(Arrays.asList("2342", "2455", "2445", "4676", "24421", "35424", "13", "2446"));
         List<Company> companies = companyService.findAll();
         Optional<User> user = userService.findByUsername(hospitalUsername);
         if(user.isPresent()) {
@@ -152,11 +164,36 @@ public class AfterStartupConfiguration {
         }
     }
 
-    private void createCompanies(){
+    private void createCompaniesWithLogos() throws URISyntaxException {
         List<String> companies = new ArrayList<>(Arrays.asList("Pfizer", "AstraZeneca", "Johnson&Johnson"));
-        for(String company : companies){
-            companyService.addIfNotExists(company);
+        for(String companyName : companies){
+            Company company = companyService.addIfNotExists(companyName);
+
+            Path path = Paths.get(ClassLoader.getSystemResource(companyName.toLowerCase() + ".png").toURI());
+            String name = companyName.toLowerCase() + ".png";
+            String contentType = "text/plain";
+            byte[] content = null;
+            try {
+                content = Files.readAllBytes(path);
+            } catch (final IOException i) {
+                log.info("Logo for company '" + companyName + "' not found in resources folder");
+            }
+            MultipartFile result = new MockMultipartFile(name, name, contentType, content);
+            String pathToFile = fileStorageService.storeFile(result);
+            HttpServletRequest mockRequest = new MockHttpServletRequest();
+            ServletRequestAttributes servletRequestAttributes = new ServletRequestAttributes(mockRequest);
+            RequestContextHolder.setRequestAttributes(servletRequestAttributes);
+            String contextPath = ServletUriComponentsBuilder.fromRequest(mockRequest).toUriString();
+            String fileDownloadUri = ServletUriComponentsBuilder.fromPath(contextPath)
+                    .path(":8080")
+                    .path("/api/v1/companies/logo/")
+                    .path(pathToFile)
+                    .toUriString();
+            log.info("Logo for '" + companyName + "' saved in '" + fileDownloadUri + "'");
+            company.setLogoPath(fileDownloadUri);
+            companyService.save(company);
         }
+
     }
 
 

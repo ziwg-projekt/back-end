@@ -19,8 +19,8 @@ public class CompanyService {
     private CompanyRepository companyRepository;
 
     @Autowired
-    public CompanyService(CompanyRepository vaccineRepository) {
-        this.companyRepository = vaccineRepository;
+    public CompanyService(CompanyRepository companyRepository) {
+        this.companyRepository = companyRepository;
     }
 
     public Page<Company> findAllFromPage(Pageable pageable){
@@ -35,21 +35,23 @@ public class CompanyService {
         return companyRepository.findById(id);
     }
 
-    public Company save(Company vaccine) {
-        return companyRepository.save(vaccine);
+    public Company save(Company company) {
+        return companyRepository.save(company);
     }
 
-    public void delete(Company vaccine) {
-        companyRepository.delete(vaccine);
+    public void delete(Company company) {
+        companyRepository.delete(company);
     }
 
-    public void addIfNotExists(String company){
-        if(companyRepository.existsByName(company)){
-            log.info("Company '" + company + "' was found in system");
+    public Company addIfNotExists(String companyName){
+        Optional<Company> company = companyRepository.findByName(companyName);
+        if(company.isPresent()){
+            log.info("Company '" + companyName + "' was found in system");
+            return company.get();
         }
         else {
-            companyRepository.save(new Company(company));
-            log.warn("Company '" + company + "' not found in system but has just been added!");
+            log.warn("Company '" + companyName + "' not found in system but has just been added!");
+            return save(new Company(companyName));
         }
     }
 

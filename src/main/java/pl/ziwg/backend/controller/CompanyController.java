@@ -53,7 +53,7 @@ public class CompanyController {
     }
 
     @PostMapping("/{id}/logo")
-    public ResponseEntity<UploadFileResponse> uploadLogo(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<UploadFileResponse> uploadLogo(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         Company company = companyService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "company"));
 
