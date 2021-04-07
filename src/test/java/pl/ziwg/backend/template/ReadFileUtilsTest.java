@@ -28,4 +28,16 @@ public class ReadFileUtilsTest {
         //then
         assertThat(message).isEqualTo(ReadFileUtils.readFromFile(path));
     }
+
+    @Test
+    public void shouldCorrectlyReplaceNameAndVaccinationDate() {
+        //given
+        String date = "11.12.2021";
+        String name = "Jan";
+        String path = "src/test/java/pl/ziwg/backend/template/email/message_with_vaccination_date_template_test.html";
+        //when
+        String message = ReadFileUtils.getVaccinationDateMessage(name, date);
+        //then
+        assertThat(message).isEqualTo(ReadFileUtils.readFromFile(path));
+    }
 }
