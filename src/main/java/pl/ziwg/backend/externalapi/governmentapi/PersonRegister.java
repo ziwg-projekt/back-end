@@ -6,13 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.*;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import pl.ziwg.backend.exception.PeselDoesNotExistsException;
 import pl.ziwg.backend.exception.UnexpectedResponseFormatException;
 import pl.ziwg.backend.property.GovernmentApiProperties;
@@ -33,7 +31,6 @@ public class PersonRegister {
     private ResponseEntity<JsonNode> response;
     private HttpEntity<Map<String, Object>> body;
     private GovernmentApiProperties properties;
-    private ObjectMapper jsonObjectMapper = new ObjectMapper();
 
     @Autowired
     public PersonRegister(GovernmentApiProperties properties){
@@ -42,17 +39,10 @@ public class PersonRegister {
     }
 
     public Person getPersonByPesel(String pesel){
-        body = new HttpEntity<>(null, getHeadersWithApiToken());
-        response = makeRequest("gov-api/person/" + pesel, body, HttpMethod.GET);
-        if(response.getStatusCode().equals(HttpStatus.OK)) {
-            try {
-                return jsonObjectMapper.treeToValue(response.getBody(), Person.class);
-            } catch (JsonProcessingException e) {
-                log.error("Unexpected response body, should be convertible to Person, but is - " + response.getBody().toString() + " error is " + e.getMessage());
-                throw new PeselDoesNotExistsException("Pesel does not exists!");
-            }
-        }
-        else{
+        try {
+            ResponseEntity<Person> response = template.exchange(urlBase + "gov-api/person/" + pesel, HttpMethod.GET, new HttpEntity<>(getHeadersWithApiToken()), Person.class);
+            return response.getBody();
+        } catch (HttpClientErrorException e){
             throw new PeselDoesNotExistsException("Pesel does not exists!");
         }
     }
@@ -64,14 +54,8 @@ public class PersonRegister {
     private void saveApiToken(){
         template =  new RestTemplate();
         body = new HttpEntity<>(Map.of("username", properties.getUsername(), "password", properties.getPassword()));
-        response = makeRequest("api-token-auth/", body, HttpMethod.POST);
+        response = template.postForEntity(urlBase + "api-token-auth/", body, JsonNode.class);
         this.apiToken = getParameterFromEntity(response, "token");
-    }
-
-
-    private <T> ResponseEntity<JsonNode> makeRequest(String path, HttpEntity<T> entity, HttpMethod method){
-        log.info("Request to " + path + ", method - " + method.toString());
-        return template.exchange(urlBase + path, method, entity, JsonNode.class);
     }
 
 

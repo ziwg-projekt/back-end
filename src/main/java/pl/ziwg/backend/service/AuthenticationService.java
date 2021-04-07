@@ -91,7 +91,7 @@ public class AuthenticationService {
     }
 
     public Map<String, String> doVerificationProcess(RegistrationCodeRequestBody registrationDetails){
-        String pesel = registrationDetails.getPesel();
+        String pesel = getPeselIfValid(registrationDetails);
         checkIfAlreadyRegistered(pesel);
         Person person = personRegister.getPersonByPesel(pesel);
         Map.Entry<Person, VerificationEntry> entry =  generateVerificationEntry(person);
@@ -162,8 +162,13 @@ public class AuthenticationService {
         return true;
     }
 
-    private void validateIfRegistrationIsPossible(String pesel){
-        checkIfAlreadyRegistered(pesel);
+    private String getPeselIfValid(RegistrationCodeRequestBody registrationCodeRequestBody){
+        if(registrationCodeRequestBody.getPesel().length() == 11){
+            return registrationCodeRequestBody.getPesel();
+        }
+        else{
+            throw new PeselDoesNotExistsException("Pesel should have 11 digits, was given: " + registrationCodeRequestBody.getPesel().length());
+        }
     }
 
     private void validateIfVerificationSuccessful(Map.Entry<Person, VerificationEntry> entry, String registrationCode){
@@ -181,6 +186,7 @@ public class AuthenticationService {
                     log.info("Email for '" + person.getPesel() +"'was found - '" + email.get() + "'");
                     emailService.sendVerificationCode(email.get(), code, EmailSubject.VERIFICATION_CODE,
                             person.getName());
+                    log.info("Email to '" + person.getPesel() + "' successfully send!");
                 }
                 else{
                     verificationEntryList.remove(person);
