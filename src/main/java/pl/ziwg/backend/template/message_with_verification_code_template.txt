@@ -1,7 +1,0 @@
-Witaj [name],
-
-Dziękujemy za rozpoczęcie korzystania z naszej aplikacji.
-
-Twój kod weryfikacyjny potrzebny do rejestracji:
-
-[code]
