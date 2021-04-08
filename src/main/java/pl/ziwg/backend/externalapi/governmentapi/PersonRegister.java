@@ -26,7 +26,7 @@ public class PersonRegister {
     Faker faker = new Faker();
 
     private String apiToken;
-    private String urlBase = "http://40.112.78.100:8000/";
+    private String urlBase = "http://23.102.47.94:8000/";
     private RestOperations template;
     private ResponseEntity<JsonNode> response;
     private HttpEntity<Map<String, Object>> body;
