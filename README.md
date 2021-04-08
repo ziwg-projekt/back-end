@@ -17,7 +17,7 @@ docker exec -it mysql_container mysql -u root -p -e "use ziwg_db; $(cat /var/lib
 ```
 Publiczne IP maszyny:
 ```
-40.112.78.100
+23.102.47.94
 ```
 Logowanie:
 ```
