@@ -3,7 +3,7 @@
 | ------------- | 
 | ![alt text](http://23.102.47.94:7070/buildStatus/icon?job=backend-pipeline)  |
 
-[Endpointy w Swagger UI](http://40.112.78.100:8080/swagger-ui/)
+[Endpointy w Swagger UI](http://23.102.47.94:8080/swagger-ui/)
 
 # Dev Info
 
