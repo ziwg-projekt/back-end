@@ -9,10 +9,13 @@ import java.util.Objects;
 
 public class ReadFileUtils {
     private static final String MESSAGE_WITH_VERIFICATION_CODE_TEMPLATE_PATH =
-            "src/main/java/pl/ziwg/backend/template/message_with_verification_code_template.txt";
+            "src/main/java/pl/ziwg/backend/template/email/message_with_verification_code_template.html";
 
     private static final String MESSAGE_WITH_PASSWORD_REMINDER_TEMPLATE_PATH =
-            "src/main/java/pl/ziwg/backend/template/message_with_password_reminder_template.txt";
+            "src/main/java/pl/ziwg/backend/template/email/message_with_password_reminder_template.html";
+
+    private static final String MESSAGE_WITH_VACCINATION_DATE_TEMPLATE_PATH =
+            "src/main/java/pl/ziwg/backend/template/email/message_with_vaccination_date_template.html";
 
     public static String getVerificationCodeMessage(final String name, final String verificationCode) {
         String content = readFromFile(MESSAGE_WITH_VERIFICATION_CODE_TEMPLATE_PATH);
@@ -28,6 +31,15 @@ public class ReadFileUtils {
         String message = "";
         if (Objects.nonNull(content)) {
             message = content.replace("[name]", name).replace("[link]", passwordReminder);
+        }
+        return message;
+    }
+
+    public static String getVaccinationDateMessage(final String name, final String vaccinationDate) {
+        String content = readFromFile(MESSAGE_WITH_VACCINATION_DATE_TEMPLATE_PATH);
+        String message = "";
+        if (Objects.nonNull(content)) {
+            message = content.replace("[name]", name).replace("[date]", vaccinationDate);
         }
         return message;
     }

@@ -1,8 +1,10 @@
 package pl.ziwg.backend.externalapi.governmentapi;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
@@ -12,7 +14,12 @@ import java.util.Optional;
 @AllArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
 public class Person {
+
+    @JsonIgnore
+    private long id;
+
     @NotEmpty
     private String name;
 
@@ -33,6 +40,7 @@ public class Person {
     public Optional<String> getEmail() {
         return Optional.ofNullable(email);
     }
+
 
     @Override
     public String toString() {
