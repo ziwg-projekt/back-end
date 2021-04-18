@@ -1,5 +1,6 @@
 package pl.ziwg.backend.service;
 
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.pl.PESEL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @Transactional
 @Service
+@NoArgsConstructor
 public class CitizenService {
     private CitizenRepository citizenRepository;
 
@@ -50,9 +52,11 @@ public class CitizenService {
         return citizenRepository.existsByPesel(pesel);
     }
 
-    public CitizenUpdateResponseDto updateCitizenData(final CitizenUpdateDto citizenUpdateDto, @PESEL final String pesel) {
+    public CitizenUpdateResponseDto updateCitizenData(final CitizenUpdateDto citizenUpdateDto,
+                                                      @PESEL final String pesel) {
         final Citizen citizen = citizenRepository.findByPesel(pesel)
                 .orElseThrow(() -> new ResourceNotFoundException(pesel, "citizen"));
+
         if (Objects.nonNull(citizenUpdateDto.getName())) {
             citizen.setName(citizenUpdateDto.getName());
         }
@@ -78,7 +82,7 @@ public class CitizenService {
         return mapFrom(citizen);
     }
 
-    private CitizenUpdateResponseDto mapFrom(final Citizen citizen) {
+    public CitizenUpdateResponseDto mapFrom(final Citizen citizen) {
         final CitizenUpdateResponseDto citizenUpdateResponseDto = new CitizenUpdateResponseDto();
         citizenUpdateResponseDto.setName(citizen.getName());
         citizenUpdateResponseDto.setSurname(citizen.getSurname());
