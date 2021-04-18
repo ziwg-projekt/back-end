@@ -1,5 +1,6 @@
 package pl.ziwg.backend.controller;
 
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,8 @@ import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.entity.Citizen;
 import pl.ziwg.backend.service.CitizenService;
 
+import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -50,13 +53,16 @@ public class CitizenController {
     public ResponseEntity<List<Map<String, Object>>> getCitizenAppointments(@PathVariable String pesel) {
         Citizen citizen = citizenService.findByPesel(pesel)
                 .orElseThrow(() -> new ResourceNotFoundException(pesel, "citizen"));
-        List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(citizen.getAppointments(), Arrays.asList("citizen"));
+        List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(
+                citizen.getAppointments(), Arrays.asList("citizen"));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Update citizen data")
     @PutMapping("/{pesel}")
-    public ResponseEntity<CitizenUpdateResponseDto> updateCitizenData(@RequestBody final CitizenUpdateDto citizenDataDto,
-                                                                      @PathVariable final String pesel) {
+    public ResponseEntity<CitizenUpdateResponseDto> updateCitizenData(
+            @RequestBody @Valid final CitizenUpdateDto citizenDataDto,
+            @PathVariable final String pesel) {
         return new ResponseEntity<>(citizenService.updateCitizenData(citizenDataDto, pesel), HttpStatus.OK);
     }
 }
