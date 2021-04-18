@@ -1,13 +1,22 @@
 package pl.ziwg.backend.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import pl.ziwg.backend.model.enumerates.AppointmentState;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -24,7 +33,8 @@ public class Appointment {
     private long id;
 
     @NotNull
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm", timezone = "Europe/Warsaw")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", shape = JsonFormat.Shape.STRING, timezone = "Europe/Warsaw")
+    @ApiModelProperty(required = true, example = "2021-08-20 12:00")
     private LocalDateTime date;
 
     @NotNull

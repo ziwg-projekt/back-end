@@ -1,21 +1,30 @@
 package pl.ziwg.backend.controller;
 
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import pl.ziwg.backend.dto.CitizenUpdateDto;
+import pl.ziwg.backend.dto.CitizenUpdateResponseDto;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.entity.Citizen;
-import pl.ziwg.backend.model.enumerates.CitizenState;
 import pl.ziwg.backend.service.CitizenService;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/v1/citizens")
@@ -41,10 +50,19 @@ public class CitizenController {
     }
 
     @GetMapping("/{pesel}/appointments")
-    public ResponseEntity<List<Map<String, Object>>> getCitizenAppointments(@PathVariable String pesel){
+    public ResponseEntity<List<Map<String, Object>>> getCitizenAppointments(@PathVariable String pesel) {
         Citizen citizen = citizenService.findByPesel(pesel)
                 .orElseThrow(() -> new ResourceNotFoundException(pesel, "citizen"));
-        List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(citizen.getAppointments(), Arrays.asList("citizen"));
+        List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(
+                citizen.getAppointments(), Arrays.asList("citizen"));
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Update citizen data")
+    @PutMapping("/{pesel}")
+    public ResponseEntity<CitizenUpdateResponseDto> updateCitizenData(
+            @RequestBody @Valid final CitizenUpdateDto citizenDataDto,
+            @PathVariable final String pesel) {
+        return new ResponseEntity<>(citizenService.updateCitizenData(citizenDataDto, pesel), HttpStatus.OK);
     }
 }
