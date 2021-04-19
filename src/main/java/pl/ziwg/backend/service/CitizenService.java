@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import pl.ziwg.backend.dto.CitizenUpdateDto;
 import pl.ziwg.backend.dto.CitizenUpdateResponseDto;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.model.entity.Address;
 import pl.ziwg.backend.model.entity.Citizen;
+import pl.ziwg.backend.model.entity.Hospital;
 import pl.ziwg.backend.model.repository.CitizenRepository;
 
 import javax.transaction.Transactional;
@@ -22,10 +24,12 @@ import java.util.Optional;
 @NoArgsConstructor
 public class CitizenService {
     private CitizenRepository citizenRepository;
+    private HospitalService hospitalService;
 
     @Autowired
-    public CitizenService(CitizenRepository citizenRepository) {
+    public CitizenService(CitizenRepository citizenRepository, HospitalService hospitalService) {
         this.citizenRepository = citizenRepository;
+        this.hospitalService = hospitalService;
     }
 
     public Page<Citizen> findAllFromPage(Pageable pageable) {
@@ -64,7 +68,9 @@ public class CitizenService {
             citizen.setSurname(citizenUpdateDto.getSurname());
         }
         if (Objects.nonNull(citizenUpdateDto.getAddress())) {
-            citizen.setAddress(citizenUpdateDto.getAddress());
+            final Address address = new Address(citizenUpdateDto.getAddress().getCity(),
+                    citizenUpdateDto.getAddress().getStreet(), citizenUpdateDto.getAddress().getStreetNumber());
+            citizen.setAddress(address);
         }
         if (Objects.nonNull(citizenUpdateDto.getEmail())) {
             citizen.setEmail(citizenUpdateDto.getEmail());
@@ -75,8 +81,10 @@ public class CitizenService {
         if (Objects.nonNull(citizenUpdateDto.getState())) {
             citizen.setState(citizenUpdateDto.getState());
         }
-        if (Objects.nonNull(citizenUpdateDto.getHospital())) {
-            citizen.setHospital(citizenUpdateDto.getHospital());
+        if (Objects.nonNull(citizenUpdateDto.getHospitalId())) {
+            final Hospital hospital = hospitalService.findById(citizenUpdateDto.getHospitalId())
+                    .orElseThrow(() -> new ResourceNotFoundException(citizenUpdateDto.getHospitalId(), "hospitalId"));
+            citizen.setHospital(hospital);
         }
         citizenRepository.save(citizen);
         return mapFrom(citizen);
