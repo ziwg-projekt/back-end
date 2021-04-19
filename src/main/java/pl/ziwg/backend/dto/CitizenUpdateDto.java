@@ -28,9 +28,9 @@ public class CitizenUpdateDto {
     @Email
     private String email;
 
-    private Address address;
+    private AddressUpdateDto address;
 
-    private Hospital hospital;
+    private Long hospitalId;
 
     private CitizenState state;
 }

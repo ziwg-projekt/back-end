@@ -7,6 +7,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pl.ziwg.backend.dto.AppointmentDto;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.entity.Appointment;
 import pl.ziwg.backend.model.enumerates.AppointmentState;
@@ -46,9 +47,8 @@ public class AppointmentController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Appointment> newAppointment(@Valid @RequestBody Appointment newAppointment) {
-        newAppointment.setState(AppointmentState.CONFIRMED);
-        return new ResponseEntity<>(appointmentService.save(newAppointment), HttpStatus.CREATED);
+    public ResponseEntity<Appointment> newAppointment(@Valid @RequestBody final AppointmentDto newAppointment) {
+        return new ResponseEntity<>(appointmentService.saveDto(newAppointment), HttpStatus.CREATED);
     }
 }
 
