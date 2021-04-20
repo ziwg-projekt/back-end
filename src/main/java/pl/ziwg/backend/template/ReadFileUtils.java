@@ -1,23 +1,19 @@
 package pl.ziwg.backend.template;
 
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class ReadFileUtils {
     private static final String MESSAGE_WITH_VERIFICATION_CODE_TEMPLATE_PATH =
-            "src/main/java/pl/ziwg/backend/template/email/message_with_verification_code_template.html";
+            "/email/message_with_verification_code_template.html";
 
     private static final String MESSAGE_WITH_PASSWORD_REMINDER_TEMPLATE_PATH =
-            "src/main/java/pl/ziwg/backend/template/email/message_with_password_reminder_template.html";
+            "/email/message_with_password_reminder_template.html";
 
     private static final String MESSAGE_WITH_VACCINATION_DATE_TEMPLATE_PATH =
-            "src/main/java/pl/ziwg/backend/template/email/message_with_vaccination_date_template.html";
+            "/email/message_with_vaccination_date_template.html";
 
-    public static String getVerificationCodeMessage(final String name, final String verificationCode) {
+    public String getVerificationCodeMessage(final String name, final String verificationCode) {
         String content = readFromFile(MESSAGE_WITH_VERIFICATION_CODE_TEMPLATE_PATH);
         String message = "";
         if (Objects.nonNull(content)) {
@@ -26,7 +22,7 @@ public class ReadFileUtils {
         return message;
     }
 
-    public static String getPasswordReminderMessage(final String name, final String passwordReminder) {
+    public String getPasswordReminderMessage(final String name, final String passwordReminder) {
         String content = readFromFile(MESSAGE_WITH_PASSWORD_REMINDER_TEMPLATE_PATH);
         String message = "";
         if (Objects.nonNull(content)) {
@@ -35,7 +31,7 @@ public class ReadFileUtils {
         return message;
     }
 
-    public static String getVaccinationDateMessage(final String name, final String vaccinationDate) {
+    public String getVaccinationDateMessage(final String name, final String vaccinationDate) {
         String content = readFromFile(MESSAGE_WITH_VACCINATION_DATE_TEMPLATE_PATH);
         String message = "";
         if (Objects.nonNull(content)) {
@@ -44,14 +40,11 @@ public class ReadFileUtils {
         return message;
     }
 
-    public static String readFromFile(String path) {
-        final File file = new File(path);
-        String content = null;
+    public String readFromFile(String path) {
         try {
-            content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+            return new String(this.getClass().getResourceAsStream(path).readAllBytes());
         } catch (IOException e) {
-            e.printStackTrace();
+            return "";
         }
-        return content;
     }
 }

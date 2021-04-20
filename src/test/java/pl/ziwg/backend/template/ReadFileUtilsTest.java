@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ReadFileUtilsTest {
+    private ReadFileUtils readFileUtils = new ReadFileUtils();
     @Test
     public void shouldCorrectlyReplaceNameAndVerificationCode() {
         //given
@@ -12,9 +13,9 @@ public class ReadFileUtilsTest {
         String name = "Jan";
         String path = "src/test/java/pl/ziwg/backend/template/email/message_with_verification_code_template_test.html";
         //when
-        String message = ReadFileUtils.getVerificationCodeMessage(name, token);
+        String message = readFileUtils.getVerificationCodeMessage(name, token);
         //then
-        assertThat(message).isEqualTo(ReadFileUtils.readFromFile(path));
+        assertThat(message).isEqualTo(readFileUtils.readFromFile(path));
     }
 
     @Test
@@ -24,9 +25,9 @@ public class ReadFileUtilsTest {
         String name = "Jan";
         String path = "src/test/java/pl/ziwg/backend/template/email/message_with_password_reminder_template_test.html";
         //when
-        String message = ReadFileUtils.getPasswordReminderMessage(name, token);
+        String message = readFileUtils.getPasswordReminderMessage(name, token);
         //then
-        assertThat(message).isEqualTo(ReadFileUtils.readFromFile(path));
+        assertThat(message).isEqualTo(readFileUtils.readFromFile(path));
     }
 
     @Test
@@ -36,8 +37,8 @@ public class ReadFileUtilsTest {
         String name = "Jan";
         String path = "src/test/java/pl/ziwg/backend/template/email/message_with_vaccination_date_template_test.html";
         //when
-        String message = ReadFileUtils.getVaccinationDateMessage(name, date);
+        String message = readFileUtils.getVaccinationDateMessage(name, date);
         //then
-        assertThat(message).isEqualTo(ReadFileUtils.readFromFile(path));
+        assertThat(message).isEqualTo(readFileUtils.readFromFile(path));
     }
 }
