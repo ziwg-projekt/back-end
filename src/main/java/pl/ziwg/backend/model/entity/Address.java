@@ -67,8 +67,14 @@ public class Address  {
         GeocodeRepository geocodeRepository = new GeocodeRepositoryImpl(System.getenv("OPENCAGEDATA_API_KEY"));
         GeocodeResponse response = geocodeRepository.query(city + " " + street + " " + streetNumber);
         if(Objects.nonNull(response.getResults())) {
-            this.longitude = response.getResults().get(0).getGeometry().getLongitude();
-            this.latitude = response.getResults().get(0).getGeometry().getLatitude();
+            if(response.getResults().isEmpty()){
+                this.longitude = 0;
+                this.latitude = 0;
+            }
+            else {
+                this.longitude = response.getResults().get(0).getGeometry().getLongitude();
+                this.latitude = response.getResults().get(0).getGeometry().getLatitude();
+            }
         }
     }
 
