@@ -60,7 +60,7 @@ public class Citizen {
     private CitizenState state;
 
     @JsonIgnore
-    @OneToMany(mappedBy="citizen", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy="citizen", fetch = FetchType.EAGER,  orphanRemoval = true)
     private Set<Appointment> appointments;
 
     @JsonIgnore

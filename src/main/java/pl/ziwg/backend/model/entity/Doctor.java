@@ -27,7 +27,7 @@ public class Doctor {
     private Hospital hospital;
 
     @JsonIgnore
-    @OneToMany(mappedBy="doctor")
+    @OneToMany(mappedBy="doctor", orphanRemoval = true)
     private Set<Appointment> appointments;
 
     public Doctor(Hospital hospital){
