@@ -1,11 +1,13 @@
 package pl.ziwg.backend.template;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ReadFileUtilsTest {
     private ReadFileUtils readFileUtils = new ReadFileUtils();
+    @Disabled
     @Test
     public void shouldCorrectlyReplaceNameAndVerificationCode() {
         //given
@@ -17,7 +19,7 @@ public class ReadFileUtilsTest {
         //then
         assertThat(message).isEqualTo(readFileUtils.readFromFile(path));
     }
-
+    @Disabled
     @Test
     public void shouldCorrectlyReplaceNameAndPasswordReminder() {
         //given
@@ -29,7 +31,7 @@ public class ReadFileUtilsTest {
         //then
         assertThat(message).isEqualTo(readFileUtils.readFromFile(path));
     }
-
+    @Disabled
     @Test
     public void shouldCorrectlyReplaceNameAndVaccinationDate() {
         //given
