@@ -210,3 +210,60 @@ Odbywa się tak samo jak logowanie admina i obywatela, lecz zwracany jest JWT z 
     ]
 }
 ```
+
+# Logika wizyt
+
+## Wizyty do wyświetlenia dla obywatela 
+
+Wszystkie wolne terminy szczepień (appointments) w szpitalu o danym id - GET na `/api/v1/hospitals/1/appointments?page=0&size=2`, można zdefiniować stronę i rozmiar strony, żeby to jakoś sensownie wyglądało przy większej liczbie wizyt, w odpowiedzi jest info o paginacji:
+```
+    "pageable": {
+        "sort": {
+            "sorted": false,
+            "unsorted": true,
+            "empty": true
+        },
+        "offset": 0,
+        "pageSize": 2,
+        "pageNumber": 0,
+        "paged": true,
+        "unpaged": false
+    },
+    "last": false,
+    "totalPages": 4,
+    "totalElements": 7,
+    "number": 0,
+    "sort": {
+        "sorted": false,
+        "unsorted": true,
+        "empty": true
+    },
+    "size": 2,
+    "first": true,
+    "numberOfElements": 2,
+    "empty": false
+```
+Można pominąć parametry paginacji wysyłając po prostu GET na `/api/v1/hospitals/1/appointments`, wtedy zostaną zwrócone wszystkie wizyty.
+
+
+## Wizyty do wyświetlenia dla szpitala
+Dla szpitala będą zwracane wszystkie terminy szczepień (nawet te zajęte), wystarczy GET na `/api/v1/users/self/appointments` z uprawnieniami szpitala (przed tym trzeba się oczywiście zalogować), szpital jest wyciągany z kontekstu i zwracane są wszystkie terminy (i wolne i zajęte). Możliwa jest paginacja taka jak opisana wyżej, zgodnie z tymi samymi zasadami.
+
+## Zapisanie na termin szczepienia
+Obywatel może się zapisać na dany termin szczepienia. W tym celu PATCH na `/api/v1/appointments/{id}/actions/enroll` zgodnie z danym ID terminu szczepienia. Dostępne oczywiście po zalogowaniu i posiadaniu uprawnień obywatela. 
+
+## Wprowadzanie szczepionek do systemu
+Szczepionki można wprowadzić do systemu wysyłając POST na `/api/v1/users/self/vaccines` w formacie:
+```
+[
+    {
+    "code": "xddddddd",
+    "company_name": "AstraZeneca"
+    },
+    {
+    "code": "xdddsgfddddd",
+    "company_name": "Johnson&Johnson"
+    }
+]
+```
+Czyli lista JSONków, muszą być oczywiście walidne nazwy firm no i trzeba być zalogowanym na szpital, inaczej szczepionka nie zostanie dodana do systemu. Poprawnie sformatowane szczepionki zostają wprowadzone do systemu, automatycznie tworzą się wizyty (obecnie dla uproszczenia w godzinach 7-15 w dni powszednie, zależnie od liczby lekarzy) i na te wizyty mogą się zapisywać obywatele.
