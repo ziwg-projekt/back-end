@@ -1,5 +1,6 @@
 package pl.ziwg.backend.controller;
 
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,12 +9,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import pl.ziwg.backend.dto.HospitalDto;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.entity.Appointment;
-import pl.ziwg.backend.model.entity.Company;
 import pl.ziwg.backend.model.entity.Hospital;
-import pl.ziwg.backend.model.entity.User;
 import pl.ziwg.backend.service.AppointmentService;
 import pl.ziwg.backend.service.HospitalService;
 
@@ -80,8 +80,10 @@ public class HospitalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
-    public ResponseEntity<Hospital> newHospital(@Valid @RequestBody Hospital newHospital) {
+    @ApiOperation(value = "Create new hospital and user for this hospital")
+    public ResponseEntity<Hospital> newHospital(@Valid @RequestBody final HospitalDto newHospital) {
         return new ResponseEntity<>(hospitalService.save(newHospital), HttpStatus.CREATED);
     }
 

@@ -8,17 +8,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-import pl.ziwg.backend.dto.AppointmentDto;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.entity.Appointment;
 import pl.ziwg.backend.model.entity.User;
 import pl.ziwg.backend.model.enumerates.AppointmentState;
+import pl.ziwg.backend.notificator.email.EmailSubject;
 import pl.ziwg.backend.security.jwt.service.UserPrinciple;
 import pl.ziwg.backend.service.AppointmentService;
+import pl.ziwg.backend.service.EmailService;
 import pl.ziwg.backend.service.UserService;
 
-import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -26,11 +31,14 @@ import java.util.Optional;
 public class AppointmentController {
     private AppointmentService appointmentService;
     private UserService userService;
+    private EmailService emailService;
 
     @Autowired
-    public AppointmentController(AppointmentService appointmentService, UserService userService) {
+    public AppointmentController(AppointmentService appointmentService, UserService userService,
+                                 EmailService emailService) {
         this.appointmentService = appointmentService;
         this.userService = userService;
+        this.emailService = emailService;
     }
 
     @GetMapping("")
@@ -65,6 +73,8 @@ public class AppointmentController {
         appointment.setState(AppointmentState.ASSIGNED);
         appointment.setCitizen(user.getCitizen());
         appointmentService.save(appointment);
+        emailService.sendVisitConfirmation(user.getCitizen().getEmail(), parseDate(appointment.getDate()),
+                EmailSubject.REGISTRATION_FOR_VACCINATION, user.getCitizen().getName());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -79,6 +89,11 @@ public class AppointmentController {
         else{
             throw new ResourceNotFoundException("id", "user");
         }
+    }
+
+    private String parseDate(LocalDateTime time) {
+        return String.format("%d.%d.%d %d:%d", time.getDayOfMonth(), time.getMonthValue(), time.getYear(),
+                time.getHour(), time.getMinute());
     }
 
 }
