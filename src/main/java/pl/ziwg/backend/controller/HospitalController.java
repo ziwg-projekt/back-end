@@ -6,11 +6,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.EntityToMapConverter;
+import pl.ziwg.backend.model.entity.Appointment;
 import pl.ziwg.backend.model.entity.Company;
 import pl.ziwg.backend.model.entity.Hospital;
+import pl.ziwg.backend.model.entity.User;
+import pl.ziwg.backend.service.AppointmentService;
 import pl.ziwg.backend.service.HospitalService;
 
 import javax.validation.Valid;
@@ -23,10 +27,12 @@ import java.util.Optional;
 @RequestMapping("/api/v1/hospitals")
 public class HospitalController {
     private HospitalService hospitalService;
+    private AppointmentService appointmentService;
 
     @Autowired
-    public HospitalController(HospitalService hospitalService) {
+    public HospitalController(HospitalService hospitalService, AppointmentService appointmentService) {
         this.hospitalService = hospitalService;
+        this.appointmentService = appointmentService;
     }
 
     @GetMapping("")
@@ -77,6 +83,14 @@ public class HospitalController {
     @PostMapping("")
     public ResponseEntity<Hospital> newHospital(@Valid @RequestBody Hospital newHospital) {
         return new ResponseEntity<>(hospitalService.save(newHospital), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}/appointments")
+    public ResponseEntity<Page<Appointment>> getAppointments(@PathVariable Long id, @PageableDefault(size = Integer.MAX_VALUE) Pageable pageRequest){
+        Hospital hospital = hospitalService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "hospital"));
+        Page<Appointment> appointments = appointmentService.findAllAvailableFromHospitalByPage(hospital, pageRequest);
+        return new ResponseEntity<>(appointments, HttpStatus.OK);
     }
 
 }
