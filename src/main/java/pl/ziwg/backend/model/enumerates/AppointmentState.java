@@ -1,6 +1,8 @@
 package pl.ziwg.backend.model.enumerates;
 
 public enum AppointmentState {
-    CONFIRMED,
-    CANCELLED
+    AVAILABLE,
+    ASSIGNED,
+    MADE,
+    NOT_MADE
 }

@@ -1,21 +1,24 @@
 package pl.ziwg.backend.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import pl.ziwg.backend.dto.VaccineDto;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.EntityToMapConverter;
-import pl.ziwg.backend.model.entity.Address;
-import pl.ziwg.backend.model.entity.Citizen;
-import pl.ziwg.backend.model.entity.Company;
-import pl.ziwg.backend.model.entity.User;
+import pl.ziwg.backend.model.entity.*;
 import pl.ziwg.backend.model.enumerates.UserType;
 import pl.ziwg.backend.security.jwt.service.UserPrinciple;
+import pl.ziwg.backend.service.AppointmentService;
 import pl.ziwg.backend.service.HospitalService;
 import pl.ziwg.backend.service.UserService;
 
+import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +29,12 @@ import java.util.Optional;
 public class UserController {
     private UserService userService;
     private HospitalService hospitalService;
+    private AppointmentService appointmentService;
 
-    public UserController(UserService userService, HospitalService hospitalService){
+    public UserController(UserService userService, HospitalService hospitalService, AppointmentService appointmentService){
         this.userService = userService;
         this.hospitalService = hospitalService;
+        this.appointmentService = appointmentService;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -66,6 +71,16 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+
+    @PreAuthorize("hasRole('HOSPITAL')")
+    @PostMapping("/self/vaccines")
+    public ResponseEntity<List<VaccineDto>> addVaccines(@Valid @RequestBody List<VaccineDto> vaccinesDto){
+        User user = getUserFromContext();
+        List<VaccineDto> vaccines = appointmentService.createAppointments(user.getHospital(), vaccinesDto);
+        return new ResponseEntity<>(vaccines, HttpStatus.OK);
+    }
+
+
     private User getUserFromContext(){
         UserPrinciple up = (UserPrinciple) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
@@ -77,4 +92,14 @@ public class UserController {
             throw new ResourceNotFoundException("id", "user");
         }
     }
+
+    @PreAuthorize("hasRole('HOSPITAL')")
+    @GetMapping("/self/appointments")
+    public ResponseEntity<Page<Appointment>> getAppointments(@PageableDefault(size = Integer.MAX_VALUE) Pageable pageRequest){
+        User user = getUserFromContext();
+        Page<Appointment> appointments = appointmentService.findAllFromHospitalByPage(user.getHospital(), pageRequest);
+        return new ResponseEntity<>(appointments, HttpStatus.OK);
+    }
+
+
 }

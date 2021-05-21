@@ -31,8 +31,8 @@ public class VaccineService {
         return vaccineRepository.findAll();
     }
 
-    public List<Vaccine> findAllAvailableFromHospital(Hospital hospital){
-        return vaccineRepository.findByHospitalAndState(hospital, VaccineState.AVAILABLE);
+    public List<Vaccine> findAllFromHospitalByState(Hospital hospital, VaccineState vaccineState){
+        return vaccineRepository.findByHospitalAndState(hospital, vaccineState);
     }
 
     public List<Vaccine> findAllFromGivenCompanyFromHospital(Hospital hospital, Company company){

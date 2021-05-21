@@ -8,12 +8,12 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
 @Table(name = "doctor")
 @Getter
-@ToString
 @Setter
 @NoArgsConstructor
 public class Doctor {
@@ -30,10 +30,19 @@ public class Doctor {
     @OneToMany(mappedBy="doctor", orphanRemoval = true)
     private Set<Appointment> appointments;
 
+    @JsonIgnore
+    private LocalDateTime lastAppointmentDate;
+
     public Doctor(Hospital hospital){
         this.hospital = hospital;
+        this.lastAppointmentDate = LocalDateTime.now();
     }
 
-
-
+    @Override
+    public String toString() {
+        return "Doctor{" +
+                "id=" + id +
+                ", lastAppointmentDate=" + lastAppointmentDate +
+                '}';
+    }
 }

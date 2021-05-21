@@ -17,5 +17,5 @@ public interface VaccineRepository extends JpaRepository<Vaccine, Long> {
     Page<Vaccine> findAll(Pageable pageable);
     Optional<Vaccine> findByCode(String code);
     List<Vaccine> findByHospitalAndState(Hospital hospital, VaccineState state);
-    List<Vaccine> findAllByHospitalAndCompany(Hospital hospital, Company comnpany);
+    List<Vaccine> findAllByHospitalAndCompany(Hospital hospital, Company company);
 }
