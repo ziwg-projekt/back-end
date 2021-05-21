@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pl.ziwg.backend.BackendApplication;
+import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.model.entity.Address;
 import pl.ziwg.backend.model.entity.Appointment;
 import pl.ziwg.backend.model.entity.Company;
 import pl.ziwg.backend.model.repository.CompanyRepository;
@@ -33,6 +35,12 @@ public class CompanyService {
 
     public Optional<Company> findById(Long id){
         return companyRepository.findById(id);
+    }
+
+    public Company findByName(String name){
+        Company company = companyRepository.findByName(name)
+                .orElseThrow(() -> new ResourceNotFoundException(name, "company"));
+        return company;
     }
 
     public Company save(Company vaccine) {

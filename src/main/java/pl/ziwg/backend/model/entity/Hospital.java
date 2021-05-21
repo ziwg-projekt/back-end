@@ -1,10 +1,14 @@
 package pl.ziwg.backend.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.apache.tomcat.jni.Local;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -41,6 +45,7 @@ public class Hospital {
     @OneToOne()
     private User user;
 
+
     public Hospital(String name, Address address){
         this.name = name;
         this.address = address;
@@ -52,7 +57,6 @@ public class Hospital {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", address=" + address +
-                ", user=" + user +
                 '}';
     }
 }
