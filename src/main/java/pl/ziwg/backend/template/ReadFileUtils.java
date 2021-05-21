@@ -13,6 +13,9 @@ public class ReadFileUtils {
     private static final String MESSAGE_WITH_VACCINATION_DATE_TEMPLATE_PATH =
             "/email/message_with_vaccination_date_template.html";
 
+    private static final String MESSAGE_WITH_VISIT_COMFIRMATION_TEMPLATE_PATH =
+            "/email/message_with_visit_confirmation_template.html";
+
     public String getVerificationCodeMessage(final String name, final String verificationCode) {
         String content = readFromFile(MESSAGE_WITH_VERIFICATION_CODE_TEMPLATE_PATH);
         String message = "";
@@ -33,6 +36,15 @@ public class ReadFileUtils {
 
     public String getVaccinationDateMessage(final String name, final String vaccinationDate) {
         String content = readFromFile(MESSAGE_WITH_VACCINATION_DATE_TEMPLATE_PATH);
+        String message = "";
+        if (Objects.nonNull(content)) {
+            message = content.replace("[name]", name).replace("[date]", vaccinationDate);
+        }
+        return message;
+    }
+
+    public String getVisitConfirmationMessage(final String name, final String vaccinationDate) {
+        String content = readFromFile(MESSAGE_WITH_VISIT_COMFIRMATION_TEMPLATE_PATH);
         String message = "";
         if (Objects.nonNull(content)) {
             message = content.replace("[name]", name).replace("[date]", vaccinationDate);
