@@ -7,6 +7,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import pl.ziwg.backend.BackendApplication;
+import pl.ziwg.backend.dto.VaccineDto;
 import pl.ziwg.backend.externalapi.governmentapi.Person;
 import pl.ziwg.backend.externalapi.governmentapi.PersonRegister;
 import pl.ziwg.backend.model.entity.*;
@@ -58,34 +59,7 @@ public class AfterStartupConfiguration {
         createCitizen();
         createHospital();
         createDoctors();
-        createVaccines();
         createAppointment();
-    }
-
-    private void createVaccines(){
-        List<String> codes = new ArrayList<>(Arrays.asList("2342", "2455", "2445", "4676", "24421", "35424", "13", "2445"));
-        List<Company> companies = companyService.findAll();
-        Optional<User> user = userService.findByUsername(hospitalUsername);
-        if(user.isPresent()) {
-            Hospital hospital = user.get().getHospital();
-            if (hospital == null) {
-                log.warn("Hospital doesn't exists in system!");
-            }
-            else if(hospital.getVaccines().isEmpty()){
-                for(String code : codes){
-                    Company company = companies.get(random.nextInt(companies.size()));
-                    Vaccine vaccine = new Vaccine(code, company, hospital);
-                    vaccine.setState(randomEnum(VaccineState.class));
-                    vaccineService.save(vaccine);
-                    log.info("Add vaccine with code '" + code + "' for hospital!");
-                }
-            }
-            else{
-                log.info("No vaccines where added, hospital has got some vaccines!");
-            }
-        } else{
-            log.warn("User hospital doesn't exists in system!");
-        }
     }
 
     private static <T extends Enum<?>> T randomEnum(Class<T> clazz){
@@ -94,7 +68,15 @@ public class AfterStartupConfiguration {
     }
 
     private void createAppointment(){
-        //TODO: create exemplary appointment
+        Hospital hospital = userService.findByUsername(hospitalUsername).get().getHospital();
+        List<VaccineDto> vaccines = Arrays.asList(new VaccineDto("824842", "Pfizer"),
+                new VaccineDto("242243444", "Pfizer"),
+                new VaccineDto("5768875", "AstraZeneca"),
+                new VaccineDto("35765", "Johnson&Johnson"),
+                new VaccineDto("469897", "AstraZeneca"),
+                new VaccineDto("357357", "Johnson&Johnson"),
+                new VaccineDto("548558", "Johnson&Johnson"));
+        appointmentService.createAppointments(hospital, vaccines);
     }
 
 
@@ -131,7 +113,8 @@ public class AfterStartupConfiguration {
             }
             else if (hospital.getDoctors().isEmpty()) {
                 doctorService.save(new Doctor(hospital));
-                log.info("Add doctor for hospital!");
+                doctorService.save(new Doctor(hospital));
+                log.info("Add doctors for hospital!");
             } else {
                 log.info("No doctor was added, hospital has got some doctors!");
             }

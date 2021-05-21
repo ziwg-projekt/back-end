@@ -4,10 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import pl.ziwg.backend.model.entity.Address;
-import pl.ziwg.backend.model.entity.Company;
-import pl.ziwg.backend.model.entity.Hospital;
-import pl.ziwg.backend.model.entity.Vaccine;
+import pl.ziwg.backend.model.entity.*;
 import pl.ziwg.backend.model.repository.HospitalRepository;
 
 import java.util.*;
@@ -26,6 +23,7 @@ public class HospitalService {
         this.companyService = companyService;
         this.vaccineService = vaccineService;
     }
+
 
     public Hospital save(Hospital hospital) {
         return hospitalRepository.save(hospital);
@@ -57,12 +55,13 @@ public class HospitalService {
             for(Vaccine vaccine : vaccines){
                 switch(vaccine.getState()){
                     case AVAILABLE:
+                    case ASSIGNED_TO_APPOINTMENT:
                         available++;
                         break;
                     case GIVEN:
                         given++;
                         break;
-                    case ASSIGNED:
+                    case ASSIGNED_TO_CITIZEN:
                         assigned++;
                         break;
                 }

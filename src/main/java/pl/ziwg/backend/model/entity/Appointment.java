@@ -24,7 +24,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "appointment")
 @Getter
-@ToString
 @Setter
 @NoArgsConstructor
 public class Appointment {
@@ -37,21 +36,41 @@ public class Appointment {
     @ApiModelProperty(required = true, example = "2021-08-20 12:00")
     private LocalDateTime date;
 
-    @NotNull
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "vaccine")
     private Vaccine vaccine;
 
-    @NotNull
     @ManyToOne()
-    @JoinColumn(name = "citizen", referencedColumnName = "pesel", nullable = false)
+    @JoinColumn(name = "citizen", referencedColumnName = "pesel")
     private Citizen citizen;
 
-    @NotNull
     @ManyToOne()
-    @JoinColumn(name = "doctor", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "doctor", referencedColumnName = "id")
     private Doctor doctor;
 
     private AppointmentState state;
 
+    @ManyToOne()
+    private Hospital hospital;
+
+
+    public Appointment(LocalDateTime date, Vaccine vaccine, Doctor doctor) {
+        this.date = date;
+        this.vaccine = vaccine;
+        this.doctor = doctor;
+        this.hospital = doctor.getHospital();
+        this.state = AppointmentState.AVAILABLE;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Appointment{" +
+                "id=" + id +
+                ", date=" + date +
+                ", citizen=" + citizen +
+                ", doctor=" + doctor +
+                ", state=" + state +
+                '}';
+    }
 }
