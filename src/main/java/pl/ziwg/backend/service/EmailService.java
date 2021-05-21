@@ -38,4 +38,10 @@ public class EmailService {
         emailSender.sendMail(mail, message, subject);
     }
 
+    public void sendVisitConfirmation(@Email @NotNull final String mail, @NotNull final String vaccinationDate,
+                                    final EmailSubject subject, @NotNull final String name) {
+        final String message = readFileUtils.getVisitConfirmationMessage(name, vaccinationDate);
+        emailSender.sendMail(mail, message, subject);
+    }
+
 }
