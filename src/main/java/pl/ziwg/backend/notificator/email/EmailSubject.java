@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum EmailSubject {
     VERIFICATION_CODE("Kod weryfikacyjny"),
     PASSWORD_REMINDER("Przypomnienie hasła"),
-    VACCINATION_DATE("Termin szczepienia");
+    VACCINATION_DATE("Termin szczepienia"),
+    REGISTRATION_FOR_VACCINATION("Zapis na szczepienie");
 
     private final String subject;
 
