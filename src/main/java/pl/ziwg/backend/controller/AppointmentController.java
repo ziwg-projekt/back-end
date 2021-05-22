@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pl.ziwg.backend.dto.VaccineDto;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.entity.Appointment;
 import pl.ziwg.backend.model.entity.User;
 import pl.ziwg.backend.model.enumerates.AppointmentState;
+import pl.ziwg.backend.model.enumerates.VaccineState;
 import pl.ziwg.backend.notificator.email.EmailSubject;
 import pl.ziwg.backend.security.jwt.service.UserPrinciple;
 import pl.ziwg.backend.service.AppointmentService;
@@ -59,6 +61,7 @@ public class AppointmentController {
         Appointment appointment = appointmentService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
         appointment.setState(AppointmentState.AVAILABLE);
+        appointment.getVaccine().setState(VaccineState.AVAILABLE);
         appointmentService.save(appointment);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -66,11 +69,12 @@ public class AppointmentController {
     @PreAuthorize("hasRole('CITIZEN')")
     @PatchMapping("/{id}/actions/enroll")
     public ResponseEntity<Appointment> enroll(@PathVariable Long id) {
-        User user = getUserFromContext();
+        User user = userService.getUserFromContext();
         Appointment appointment = appointmentService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
 
         appointment.setState(AppointmentState.ASSIGNED);
+        appointment.getVaccine().setState(VaccineState.ASSIGNED_TO_CITIZEN);
         appointment.setCitizen(user.getCitizen());
         appointmentService.save(appointment);
         emailService.sendVisitConfirmation(user.getCitizen().getEmail(), parseDate(appointment.getDate()),
@@ -78,16 +82,35 @@ public class AppointmentController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-
-    private User getUserFromContext(){
-        UserPrinciple up = (UserPrinciple) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
-        Optional<User> optionalUser = userService.findById(up.getId());
-        if(optionalUser.isPresent()){
-            return optionalUser.get();
+    @PreAuthorize("hasRole('HOSPITAL')")
+    @PatchMapping("/{id}/actions/made")
+    public ResponseEntity<Appointment> markAsMade(@PathVariable Long id) {
+        Appointment appointment = appointmentService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
+        if(appointment.getHospital().equals(userService.getUserFromContext().getHospital())) {
+            appointment.setState(AppointmentState.MADE);
+            appointment.getVaccine().setState(VaccineState.GIVEN);
+            appointmentService.save(appointment);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         else{
-            throw new ResourceNotFoundException("id", "user");
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @PreAuthorize("hasRole('HOSPITAL')")
+    @PatchMapping("/{id}/actions/not-made")
+    public ResponseEntity<Appointment> markAsNotCame(@PathVariable Long id) {
+        Appointment appointment = appointmentService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
+        if(appointment.getHospital().equals(userService.getUserFromContext().getHospital())) {
+            VaccineDto vaccine = new VaccineDto(appointment.getVaccine().getCode(), appointment.getVaccine().getCompany().getName());
+            appointmentService.delete(id);
+            appointmentService.createAppointment(userService.getUserFromContext().getHospital(), vaccine);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        else{
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
     }
 

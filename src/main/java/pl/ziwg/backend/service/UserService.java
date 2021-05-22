@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.ziwg.backend.BackendApplication;
@@ -15,6 +16,7 @@ import pl.ziwg.backend.model.repository.DoctorRepository;
 import pl.ziwg.backend.model.repository.HospitalRepository;
 import pl.ziwg.backend.model.repository.RoleRepository;
 import pl.ziwg.backend.model.repository.UserRepository;
+import pl.ziwg.backend.security.jwt.service.UserPrinciple;
 
 import javax.transaction.Transactional;
 import java.util.*;
@@ -90,6 +92,18 @@ public class UserService {
 
     private void saveUser(User user){
         userRepository.save(user);
+    }
+
+    public User getUserFromContext(){
+        UserPrinciple up = (UserPrinciple) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        Optional<User> optionalUser = findById(up.getId());
+        if(optionalUser.isPresent()){
+            return optionalUser.get();
+        }
+        else{
+            throw new ResourceNotFoundException("id", "user");
+        }
     }
 
 

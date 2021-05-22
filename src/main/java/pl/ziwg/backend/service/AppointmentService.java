@@ -18,11 +18,9 @@ import pl.ziwg.backend.model.repository.AppointmentRepository;
 
 import javax.persistence.EntityExistsException;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,42 +66,60 @@ public class AppointmentService {
         return appointmentRepository.findAllByCitizen(citizen);
     }
 
+    public Page<Appointment> findAllByHospitalAndStateIn(Hospital hospital, Collection<AppointmentState> states, Pageable pageRequest){
+        return appointmentRepository.findAllByHospitalAndStateIn(hospital, states, pageRequest);
+    }
+
+    public void delete(Long id){
+        appointmentRepository.deleteById(id);
+    }
+
     public Appointment save(Appointment appointment) {
         return appointmentRepository.save(appointment);
     }
 
     public List<VaccineDto> createAppointments(Hospital hospital, List<VaccineDto> vaccinesDto){
         for(VaccineDto vaccine : vaccinesDto){
-            log.info("Assigning vaccine with code " + vaccine.getCode() + " from company " + vaccine.getCompanyName() + " to appointment");
-            List<Doctor> doctors = new ArrayList<>(hospital.getDoctors());
-            doctors.sort(Comparator.comparing(Doctor::getLastAppointmentDate));
-            Doctor doctor = doctors.get(0);
-            LocalDateTime appointmentDate;
-            LocalDateTime lastAppointmentDate = doctor.getLastAppointmentDate();
-            if (lastAppointmentDate.getHour() >= 15) {
-                appointmentDate = getAvailableInNextDay(lastAppointmentDate);
-            } else {
-                appointmentDate = lastAppointmentDate.plusMinutes(5);
-            }
-            doctor.setLastAppointmentDate(appointmentDate);
-            doctorService.save(doctor);
-            Vaccine newVaccine = new Vaccine(vaccine.getCode(), companyService.findByName(vaccine.getCompanyName()), hospital);
-            newVaccine.setState(VaccineState.ASSIGNED_TO_APPOINTMENT);
-            Appointment appointment = new Appointment(appointmentDate, newVaccine, doctor);
-            newVaccine.setAppointment(appointment);
-            try {
-                save(appointment);
-                log.info("Create appointment - " + appointment + " with vaccine " + vaccine.toString());
-            } catch (Exception e){
-                log.error("Vaccine with code " + vaccine.getCode() + " already exists, not added");
-            }
-
+            createAppointment(hospital, vaccine);
         }
-
         return vaccinesDto;
     }
 
-    public LocalDateTime getAvailableInNextDay(LocalDateTime last){
+    public void createAppointment(Hospital hospital, VaccineDto vaccine){
+        log.info("Assigning vaccine with code " + vaccine.getCode() + " from company " + vaccine.getCompanyName() + " to appointment");
+        List<Doctor> doctors = new ArrayList<>(hospital.getDoctors());
+        doctors.sort(Comparator.comparing(Doctor::getLastAppointmentDate));
+        Doctor doctor = getAppropriateDoctor(hospital);
+        LocalDateTime appointmentDate = doctor.getLastAppointmentDate();
+        doctor.setLastAppointmentDate(getAppointmentDate(appointmentDate));
+        doctorService.save(doctor);
+        Vaccine newVaccine = new Vaccine(vaccine.getCode(), companyService.findByName(vaccine.getCompanyName()), hospital);
+        newVaccine.setState(VaccineState.ASSIGNED_TO_APPOINTMENT);
+        Appointment appointment = new Appointment(appointmentDate, newVaccine, doctor);
+        newVaccine.setAppointment(appointment);
+        try {
+            save(appointment);
+            log.info("Create appointment - " + appointment + " with vaccine " + vaccine.toString());
+        } catch (Exception e){
+            log.error("Vaccine with code " + vaccine.getCode() + " already exists, not added");
+        }
+    }
+
+    private Doctor getAppropriateDoctor(Hospital hospital){
+        List<Doctor> doctors = new ArrayList<>(hospital.getDoctors());
+        doctors.sort(Comparator.comparing(Doctor::getLastAppointmentDate));
+        return doctors.get(0);
+    }
+    private LocalDateTime getAppointmentDate(LocalDateTime lastAppointmentDate){
+        LocalDateTime appointmentDate;
+        if (lastAppointmentDate.getHour() >= 15) {
+            appointmentDate = getAvailableInNextDay(lastAppointmentDate);
+        } else {
+            appointmentDate = lastAppointmentDate.plusMinutes(5);
+        }
+        return appointmentDate;
+    }
+    private LocalDateTime getAvailableInNextDay(LocalDateTime last){
         LocalDateTime localDateTime = LocalDateTime.of(last.getYear(),
                 last.getMonth(), last.getDayOfMonth(), 7, 0, 0);
         if(last.getDayOfWeek() == DayOfWeek.FRIDAY){
