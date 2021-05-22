@@ -14,10 +14,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.ziwg.backend.dto.HospitalCitizenRegisterDto;
 import pl.ziwg.backend.exception.IncorrectRegistrationCodeException;
 import pl.ziwg.backend.exception.NotSupportedCommunicationChannelException;
 import pl.ziwg.backend.exception.PeselDoesNotExistsException;
 import pl.ziwg.backend.exception.RegistrationCodeExpiredException;
+import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.exception.TokenDoesNotExistsException;
 import pl.ziwg.backend.exception.UserAlreadyRegisteredException;
 import pl.ziwg.backend.exception.UsernameNotAvailableException;
@@ -37,6 +39,7 @@ import pl.ziwg.backend.model.entity.Hospital;
 import pl.ziwg.backend.model.entity.Role;
 import pl.ziwg.backend.model.entity.RoleName;
 import pl.ziwg.backend.model.entity.User;
+import pl.ziwg.backend.model.enumerates.CitizenState;
 import pl.ziwg.backend.model.repository.CitizenRepository;
 import pl.ziwg.backend.model.repository.HospitalRepository;
 import pl.ziwg.backend.model.repository.RoleRepository;
@@ -46,6 +49,7 @@ import pl.ziwg.backend.notificator.email.EmailSubject;
 import pl.ziwg.backend.security.RegistrationCode;
 import pl.ziwg.backend.security.VerificationEntry;
 import pl.ziwg.backend.security.jwt.JwtProvider;
+import pl.ziwg.backend.security.jwt.service.UserPrinciple;
 
 import javax.transaction.Transactional;
 import java.util.Collections;
@@ -116,6 +120,18 @@ public class AuthenticationService {
         log.info("Current verification list = " + verificationEntryList.toString());
     }
 
+    public void registerCitizenByHospital(final String registrationToken, final HospitalCitizenRegisterDto userData) {
+        log.info("Current verification list = " + verificationEntryList.toString());
+        Person person = getPersonByRegistrationToken(registrationToken);
+        checkIfUsernameAvailable(userData.getUsername());
+        final Address address = new Address(userData.getCity(), userData.getStreet(), userData.getStreetNumber());
+        final Citizen citizen = createCitizen(userData, address, person);
+        userService.saveCitizen(userData.getUsername(), userData.getPassword(), citizen);
+        log.info("Successful registration for user citizen with pesel '" + person.getPesel() + "', username + '" + userData.getUsername());
+        verificationEntryList.remove(person);
+        log.info("Current verification list = " + verificationEntryList.toString());
+    }
+
     public void registerHospital(HospitalRegistrationRequestBody hospitalData){
         checkIfUsernameAvailable(hospitalData.getUsername());
         Address address = new Address(hospitalData.getCity(), hospitalData.getStreet(), hospitalData.getStreetNumber());
@@ -176,6 +192,30 @@ public class AuthenticationService {
         checkIfRegistrationCodeIsCorrect(entry.getValue().getRegistrationCode(), registrationCode);
         checkIfRegistrationCodeExpired(entry.getValue().getRegistrationCode());
     }
+    private Citizen createCitizen(final HospitalCitizenRegisterDto hospitalCitizenRegisterDto, final Address address,
+                                  final Person person) {
+        final Citizen citizen = new Citizen();
+        citizen.setEmail(hospitalCitizenRegisterDto.getEmail());
+        citizen.setName(person.getName());
+        citizen.setSurname(person.getSurname());
+        citizen.setPesel(person.getPesel());
+        citizen.setAddress(address);
+        citizen.setPhoneNumber(hospitalCitizenRegisterDto.getPhoneNumber());
+        citizen.setState(CitizenState.WAITING);
+        citizen.setHospital(getUserFromContext().getHospital());
+        return citizen;
+    }
+
+    private User getUserFromContext() {
+        final UserPrinciple up = (UserPrinciple)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        final Optional<User> optionalUser = userService.findById(up.getId());
+        if (optionalUser.isPresent()) {
+            return optionalUser.get();
+        } else {
+            throw new ResourceNotFoundException("id", "user");
+        }
+    }
+
 
     public void sendCodeThroughChosenCommunicationChannel(Person person, CommunicationChannelType communicationChannelType, String code){
         log.info("Sending registration code '" + code + "' to citizen with pesel '"  + person.getPesel() + "' via " + communicationChannelType.toString());

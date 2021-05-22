@@ -3,9 +3,9 @@ package pl.ziwg.backend.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import pl.ziwg.backend.dto.HospitalCitizenRegisterDto;
 import pl.ziwg.backend.jsonbody.request.*;
 import pl.ziwg.backend.jsonbody.response.AllowRegistrationResponse;
 import pl.ziwg.backend.jsonbody.response.JwtResponse;
@@ -42,6 +42,14 @@ public class AuthenticationController {
     @ResponseStatus(HttpStatus.OK)
     public void registerCitizen(@Valid @RequestBody CitizenRegistrationRequestBody userData, @RequestParam String token){
         authenticationService.registerCitizen(token, userData);
+    }
+
+    @PreAuthorize("hasRole('HOSPITAL')")
+    @PostMapping("/registration/hospital/citizen/register")
+    @ResponseStatus(HttpStatus.OK)
+    public void registerCitizenByHospital(@Valid @RequestBody final HospitalCitizenRegisterDto userData,
+                                          @RequestParam final String token){
+        authenticationService.registerCitizenByHospital(token, userData);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
