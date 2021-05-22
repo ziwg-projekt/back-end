@@ -75,6 +75,8 @@ public class AfterStartupConfiguration {
                 new VaccineDto("35765", "Johnson&Johnson"),
                 new VaccineDto("469897", "AstraZeneca"),
                 new VaccineDto("357357", "Johnson&Johnson"),
+                new VaccineDto("68587", "Moderna"),
+                new VaccineDto("5846734", "Moderna"),
                 new VaccineDto("548558", "Johnson&Johnson"));
         appointmentService.createAppointments(hospital, vaccines);
     }
@@ -136,7 +138,7 @@ public class AfterStartupConfiguration {
     }
 
     private void createCompanies(){
-        List<String> companies = new ArrayList<>(Arrays.asList("Pfizer", "AstraZeneca", "Johnson&Johnson"));
+        List<String> companies = new ArrayList<>(Arrays.asList("Pfizer", "AstraZeneca", "Johnson&Johnson", "Moderna"));
         for(String company : companies){
             companyService.addIfNotExists(company);
         }
