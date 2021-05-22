@@ -1,5 +1,6 @@
 package pl.ziwg.backend.controller;
 
+import org.hibernate.validator.constraints.pl.PESEL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import pl.ziwg.backend.dto.VaccineDto;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.exception.UserTypeException;
 import pl.ziwg.backend.model.entity.Appointment;
+import pl.ziwg.backend.model.entity.Citizen;
 import pl.ziwg.backend.model.entity.User;
 import pl.ziwg.backend.model.enumerates.AppointmentState;
 import pl.ziwg.backend.model.enumerates.UserType;
@@ -26,6 +28,7 @@ import pl.ziwg.backend.model.enumerates.VaccineState;
 import pl.ziwg.backend.notificator.email.EmailSubject;
 import pl.ziwg.backend.security.jwt.service.UserPrinciple;
 import pl.ziwg.backend.service.AppointmentService;
+import pl.ziwg.backend.service.CitizenService;
 import pl.ziwg.backend.service.EmailService;
 import pl.ziwg.backend.service.UserService;
 
@@ -39,13 +42,15 @@ public class AppointmentController {
     private AppointmentService appointmentService;
     private UserService userService;
     private EmailService emailService;
+    private CitizenService citizenService;
 
     @Autowired
     public AppointmentController(AppointmentService appointmentService, UserService userService,
-                                 EmailService emailService) {
+                                 EmailService emailService, CitizenService citizenService) {
         this.appointmentService = appointmentService;
         this.userService = userService;
         this.emailService = emailService;
+        this.citizenService = citizenService;
     }
 
     @GetMapping("")
@@ -92,9 +97,12 @@ public class AppointmentController {
 
     @PreAuthorize("hasRole('HOSPITAL')")
     @PatchMapping("/{id}/hospital/actions/enroll")
-    public ResponseEntity<Appointment> enrollByHospital(@PathVariable final Long id, @RequestParam final Long userId) {
-        final User user = userService.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(userId, "user"));
+    public ResponseEntity<Appointment> enrollByHospital(@PathVariable final Long id,
+                                                        @RequestParam @PESEL final String pesel) {
+        final Citizen citizen = citizenService.findByPesel(pesel)
+                .orElseThrow(() -> new ResourceNotFoundException(pesel, "pesel"));
+        final User user = userService.findById(citizen.getUser().getId())
+                .orElseThrow(() -> new ResourceNotFoundException(citizen.getUser().getId(), "user"));
         if (UserType.CITIZEN != user.getUserType()) {
             throw new UserTypeException("Given user id must belong to the citizen");
         }
