@@ -12,6 +12,7 @@ import pl.ziwg.backend.dto.VaccineDto;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.entity.*;
+import pl.ziwg.backend.model.enumerates.AppointmentState;
 import pl.ziwg.backend.model.enumerates.UserType;
 import pl.ziwg.backend.security.jwt.service.UserPrinciple;
 import pl.ziwg.backend.service.AppointmentService;
@@ -19,10 +20,7 @@ import pl.ziwg.backend.service.HospitalService;
 import pl.ziwg.backend.service.UserService;
 
 import javax.validation.Valid;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -54,7 +52,7 @@ public class UserController {
     @PreAuthorize("hasRole('CITIZEN') || hasRole('HOSPITAL')")
     @GetMapping("/self/address")
     public ResponseEntity<Address> getUserAddress(){
-        User user = getUserFromContext();
+        User user = userService.getUserFromContext();
         if(user.getUserType().equals(UserType.CITIZEN)){
             return new ResponseEntity<>(user.getCitizen().getAddress(), HttpStatus.OK);
         }
@@ -66,38 +64,44 @@ public class UserController {
     @PreAuthorize("hasRole('HOSPITAL')")
     @GetMapping("/self/vaccines")
     public ResponseEntity<List<Map<String, Object>>> getVaccines(){
-        User user = getUserFromContext();
+        User user = userService.getUserFromContext();
         List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(user.getHospital().getVaccines(), Arrays.asList("appointment"));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
-    @PreAuthorize("hasRole('HOSPITAL')")
     @PostMapping("/self/vaccines")
     public ResponseEntity<List<VaccineDto>> addVaccines(@Valid @RequestBody List<VaccineDto> vaccinesDto){
-        User user = getUserFromContext();
+        User user = userService.getUserFromContext();
         List<VaccineDto> vaccines = appointmentService.createAppointments(user.getHospital(), vaccinesDto);
         return new ResponseEntity<>(vaccines, HttpStatus.OK);
     }
 
 
-    private User getUserFromContext(){
-        UserPrinciple up = (UserPrinciple) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
-        Optional<User> optionalUser = userService.findById(up.getId());
-        if(optionalUser.isPresent()){
-            return optionalUser.get();
-        }
-        else{
-            throw new ResourceNotFoundException("id", "user");
-        }
-    }
-
     @PreAuthorize("hasRole('HOSPITAL')")
     @GetMapping("/self/appointments")
-    public ResponseEntity<Page<Appointment>> getAppointments(@PageableDefault(size = Integer.MAX_VALUE) Pageable pageRequest){
-        User user = getUserFromContext();
-        Page<Appointment> appointments = appointmentService.findAllFromHospitalByPage(user.getHospital(), pageRequest);
+    public ResponseEntity<Page<Appointment>> getAppointments(@PageableDefault(size = Integer.MAX_VALUE) Pageable pageRequest,
+                                                             @RequestParam(required = false) Optional<Boolean> made,
+                                                             @RequestParam(required = false) Optional<Boolean> assigned,
+                                                             @RequestParam(required = false) Optional<Boolean> available){
+        User user = userService.getUserFromContext();
+        Collection<AppointmentState> states = new ArrayList<>(Arrays.asList(AppointmentState.ASSIGNED, AppointmentState.AVAILABLE, AppointmentState.MADE));
+        if(made.isPresent()) {
+            if (!made.get()) {
+                states.remove(AppointmentState.MADE);
+            }
+        }
+        if(assigned.isPresent()) {
+            if (!assigned.get()) {
+                states.remove(AppointmentState.ASSIGNED);
+            }
+        }
+        if(available.isPresent()) {
+            if (!available.get()) {
+                states.remove(AppointmentState.AVAILABLE);
+            }
+        }
+        Page<Appointment> appointments = appointmentService.findAllByHospitalAndStateIn(user.getHospital(), states, pageRequest);
         return new ResponseEntity<>(appointments, HttpStatus.OK);
     }
 
