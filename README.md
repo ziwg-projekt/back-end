@@ -247,7 +247,16 @@ Można pominąć parametry paginacji wysyłając po prostu GET na `/api/v1/hospi
 
 
 ## Wizyty do wyświetlenia dla szpitala
-Dla szpitala będą zwracane wszystkie terminy szczepień (nawet te zajęte), wystarczy GET na `/api/v1/users/self/appointments` z uprawnieniami szpitala (przed tym trzeba się oczywiście zalogować), szpital jest wyciągany z kontekstu i zwracane są wszystkie terminy (i wolne i zajęte). Możliwa jest paginacja taka jak opisana wyżej, zgodnie z tymi samymi zasadami.
+Dla szpitala będą zwracane wszystkie terminy szczepień (nawet te zajęte), wystarczy GET na `/api/v1/users/self/appointments` z uprawnieniami szpitala (przed tym trzeba się oczywiście zalogować), szpital jest wyciągany z kontekstu i zwracane są wszystkie terminy (i wolne i zajęte). Możliwa jest paginacja taka jak opisana wyżej, zgodnie z tymi samymi zasadami.  
+
+Wprowadzone został dodatkowe opcje, domyślnie zwracane są wizyty o wszystkich stanach (AVAILABLE, ASSIGNED, MADE). Żeby to zmodyfikować wystarczy ustawić odpowiednią wartość logiczną, np. wysyłając zapytanie na endpoint poniżej dostaniemy wszystkie wizyty oprócz wizyt ze statusem AVAILABLE (domyślnie wszystkie są na `true`):
+```
+http://localhost:8080/api/v1/users/self/appointments?available=false&made=true&assigned=true
+```
+Można też oczywiście dodać paginację i nie trzeba zawierać wszystkich parametrów jako, że domyślnie są ustawione na `true`:
+```
+http://localhost:8080/api/v1/users/self/appointments?available=false&page=0&size=2
+```
 
 ## Zapisanie na termin szczepienia
 Obywatel może się zapisać na dany termin szczepienia. W tym celu PATCH na `/api/v1/appointments/{id}/actions/enroll` zgodnie z danym ID terminu szczepienia. Dostępne oczywiście po zalogowaniu i posiadaniu uprawnień obywatela. 
@@ -267,3 +276,10 @@ Szczepionki można wprowadzić do systemu wysyłając POST na `/api/v1/users/sel
 ]
 ```
 Czyli lista JSONków, muszą być oczywiście walidne nazwy firm no i trzeba być zalogowanym na szpital, inaczej szczepionka nie zostanie dodana do systemu. Poprawnie sformatowane szczepionki zostają wprowadzone do systemu, automatycznie tworzą się wizyty (obecnie dla uproszczenia w godzinach 7-15 w dni powszednie, zależnie od liczby lekarzy) i na te wizyty mogą się zapisywać obywatele.
+
+## Zmiana statusu szczepienia
+Dwa endpointy dla szpitala. W zależności od czego czy szczepienie się uda bądź nie uda (np. pacjent nie przyjdzie) to klika odpowiedni button. Żeby oznaczyć jako wykonane to PATCH na  `/api/v1/appointments/{id}/actions/made`, a żeby oznaczyć jako niewykonane to PATCH na  `/api/v1/appointments/{id}/actions/not-made`, tworzy się wtedy kolejna wizyta ze statusem AVAILABLE, w miejsce tej która się nie odbyła, z tą samą dawką szczepionki.
+
+## Dodawanie lekarzy 
+Wysyłając POST na `/api/v1/doctors` można dodać lekarzy do szpitala. 
+
