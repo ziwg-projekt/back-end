@@ -78,32 +78,42 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasRole('HOSPITAL')")
+    @PreAuthorize("hasRole('CITIZEN') || hasRole('HOSPITAL')")
     @GetMapping("/self/appointments")
     public ResponseEntity<Page<Appointment>> getAppointments(@PageableDefault(size = Integer.MAX_VALUE) Pageable pageRequest,
                                                              @RequestParam(required = false) Optional<Boolean> made,
                                                              @RequestParam(required = false) Optional<Boolean> assigned,
                                                              @RequestParam(required = false) Optional<Boolean> available){
         User user = userService.getUserFromContext();
+        Page<Appointment> appointments = null;
+        Collection<AppointmentState> states = getAllRequiredStates(made, assigned, available);
+
+        if(user.getUserType().equals(UserType.HOSPITAL)) {
+            appointments = appointmentService.findAllByHospitalAndStateIn(user.getHospital(), states, pageRequest);
+        }
+        else if(user.getUserType().equals(UserType.CITIZEN)){
+            appointments = appointmentService.findAllCitizenAppointments(user.getCitizen(), states, pageRequest);
+        }
+        return new ResponseEntity<>(appointments, HttpStatus.OK);
+    }
+
+    private Collection<AppointmentState> getAllRequiredStates(Optional<Boolean> made, Optional<Boolean> assigned, Optional<Boolean> available){
         Collection<AppointmentState> states = new ArrayList<>(Arrays.asList(AppointmentState.ASSIGNED, AppointmentState.AVAILABLE, AppointmentState.MADE));
-        if(made.isPresent()) {
+        if (made.isPresent()) {
             if (!made.get()) {
                 states.remove(AppointmentState.MADE);
             }
         }
-        if(assigned.isPresent()) {
+        if (assigned.isPresent()) {
             if (!assigned.get()) {
                 states.remove(AppointmentState.ASSIGNED);
             }
         }
-        if(available.isPresent()) {
+        if (available.isPresent()) {
             if (!available.get()) {
                 states.remove(AppointmentState.AVAILABLE);
             }
         }
-        Page<Appointment> appointments = appointmentService.findAllByHospitalAndStateIn(user.getHospital(), states, pageRequest);
-        return new ResponseEntity<>(appointments, HttpStatus.OK);
+        return states;
     }
-
-
 }
