@@ -281,5 +281,5 @@ Czyli lista JSONków, muszą być oczywiście walidne nazwy firm no i trzeba by�
 Dwa endpointy dla szpitala. W zależności od czego czy szczepienie się uda bądź nie uda (np. pacjent nie przyjdzie) to klika odpowiedni button. Żeby oznaczyć jako wykonane to PATCH na  `/api/v1/appointments/{id}/actions/made`, a żeby oznaczyć jako niewykonane to PATCH na  `/api/v1/appointments/{id}/actions/not-made`, tworzy się wtedy kolejna wizyta ze statusem AVAILABLE, w miejsce tej która się nie odbyła, z tą samą dawką szczepionki.
 
 ## Dodawanie lekarzy 
-Wysyłając POST na `/api/v1/doctors` można dodać lekarzy do szpitala. 
+Wysyłając PUT na `/api/v1/doctors` można dodać lekarzy do szpitala. 
 
