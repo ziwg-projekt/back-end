@@ -41,15 +41,15 @@ public class AuthenticationController {
     @PostMapping("/registration/citizen/register")
     @ResponseStatus(HttpStatus.OK)
     public void registerCitizen(@Valid @RequestBody CitizenRegistrationRequestBody userData, @RequestParam String token){
-        authenticationService.registerCitizen(token, userData);
+        authenticationService.registerCitizenByToken(token, userData);
     }
 
     @PreAuthorize("hasRole('HOSPITAL')")
-    @PostMapping("/registration/hospital/citizen/register")
+    @PostMapping("/registration/hospital/citizen/{pesel}/register")
     @ResponseStatus(HttpStatus.OK)
-    public void registerCitizenByHospital(@Valid @RequestBody final HospitalCitizenRegisterDto userData,
-                                          @RequestParam final String token){
-        authenticationService.registerCitizenByHospital(token, userData);
+    public void registerCitizenByHospital(@Valid @RequestBody final CitizenRegistrationRequestBody userData,
+                                          @PathVariable final String pesel){
+        authenticationService.registerCitizenByHospital(pesel, userData);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

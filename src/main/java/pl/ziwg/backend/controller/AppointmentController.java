@@ -99,10 +99,6 @@ public class AppointmentController {
         return appointmentService.markAppointmentAsNotMade(id);
     }
 
-    private String parseDate(LocalDateTime time) {
-        return String.format("%d.%d.%d %d:%d", time.getDayOfMonth(), time.getMonthValue(), time.getYear(),
-                time.getHour(), time.getMinute());
-    }
 }
 
 

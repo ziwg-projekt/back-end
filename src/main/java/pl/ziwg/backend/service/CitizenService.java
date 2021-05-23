@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import pl.ziwg.backend.dto.CitizenUpdateDto;
 import pl.ziwg.backend.dto.CitizenUpdateResponseDto;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.externalapi.governmentapi.Person;
+import pl.ziwg.backend.externalapi.governmentapi.PersonRegister;
 import pl.ziwg.backend.model.entity.Address;
 import pl.ziwg.backend.model.entity.Citizen;
 import pl.ziwg.backend.model.entity.Hospital;
@@ -25,11 +27,13 @@ import java.util.Optional;
 public class CitizenService {
     private CitizenRepository citizenRepository;
     private HospitalService hospitalService;
+    private PersonRegister personRegister;
 
     @Autowired
-    public CitizenService(CitizenRepository citizenRepository, HospitalService hospitalService) {
+    public CitizenService(CitizenRepository citizenRepository, HospitalService hospitalService, PersonRegister personRegister) {
         this.citizenRepository = citizenRepository;
         this.hospitalService = hospitalService;
+        this.personRegister = personRegister;
     }
 
     public Page<Citizen> findAllFromPage(Pageable pageable) {
@@ -54,6 +58,10 @@ public class CitizenService {
 
     public boolean checkIfExistsByPesel(String pesel) {
         return citizenRepository.existsByPesel(pesel);
+    }
+
+    public Person getPersonByPeselFromGovernmentApi(String pesel){
+        return personRegister.getPersonByPesel(pesel);
     }
 
     public CitizenUpdateResponseDto updateCitizenData(final CitizenUpdateDto citizenUpdateDto,

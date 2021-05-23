@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pl.ziwg.backend.dto.CitizenUpdateDto;
 import pl.ziwg.backend.dto.CitizenUpdateResponseDto;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.externalapi.governmentapi.Person;
 import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.entity.Appointment;
 import pl.ziwg.backend.model.entity.Citizen;
@@ -45,12 +46,16 @@ public class CitizenController {
     }
 
     @GetMapping("/{pesel}")
-    public ResponseEntity<Citizen> getOne(@PathVariable String pesel) {
+    public ResponseEntity<Citizen> getRegisteredCitizen(@PathVariable String pesel) {
         Citizen citizen = citizenService.findByPesel(pesel)
                 .orElseThrow(() -> new ResourceNotFoundException(pesel, "citizen"));
         return new ResponseEntity<>(citizen, HttpStatus.OK);
     }
 
+    @GetMapping("/all/{pesel}")
+    public ResponseEntity<Person> getNotRegisteredCitizen(@PathVariable String pesel) {
+        return new ResponseEntity<>(citizenService.getPersonByPeselFromGovernmentApi(pesel), HttpStatus.OK);
+    }
     @GetMapping("/{pesel}/appointments")
     public ResponseEntity<Set<Appointment>> getCitizenAppointments(@PathVariable String pesel) {
         Citizen citizen = citizenService.findByPesel(pesel)
