@@ -74,7 +74,7 @@ public class UserController {
     public ResponseEntity<Map<String, Integer>> addVaccines(@Valid @RequestBody List<VaccineDto> vaccinesDto){
         User user = userService.getUserFromContext();
         int added = appointmentService.createAppointments(user.getHospital(), vaccinesDto);
-        return new ResponseEntity<>(Map.of("added_vaccines", added), HttpStatus.OK);
+        return new ResponseEntity<>(Map.of("added", added, "not_added", vaccinesDto.size() - added), HttpStatus.OK);
     }
 
 
