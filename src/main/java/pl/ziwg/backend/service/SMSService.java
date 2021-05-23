@@ -8,6 +8,8 @@ import pl.ziwg.backend.notificator.sms.SMSSender;
 
 import java.time.LocalDateTime;
 
+import static pl.ziwg.backend.template.ReadFileUtils.parseDate;
+
 @Service
 public class SMSService {
     private SMSSender smsSender;
@@ -47,16 +49,12 @@ public class SMSService {
         smsSender.sendMessage(number, message);
     }
 
-    private String parseDate(LocalDateTime time) {
-        return String.format("%s.%s.%d %s:%s",
-                Integer.toString(time.getDayOfMonth()).length() == 1 ?
-                        "0".concat(Integer.toString(time.getDayOfMonth())) : Integer.toString(time.getDayOfMonth()) ,
-                Integer.toString(time.getMonthValue()).length() == 1 ?
-                        "0".concat(Integer.toString(time.getMonthValue())) : Integer.toString(time.getMonthValue()),
-                time.getYear(),
-                Integer.toString(time.getHour()).length() == 1 ?
-                        "0".concat(Integer.toString(time.getHour())) : Integer.toString(time.getHour()),
-                Integer.toString(time.getMinute()).length() == 1 ?
-                        "0".concat(Integer.toString(time.getMinute())) : Integer.toString(time.getMinute()));
+    public void sendAppointmentReminder(String number, LocalDateTime vaccinationDate) {
+        String message = String.format(
+                "Przypominamy o umówionej wizycie na szczepienie dnia %s.%n%n Rejestracja szczepień",
+                parseDate(vaccinationDate)
+        );
+        smsSender.sendMessage(number, message);
     }
+
 }

@@ -1,10 +1,8 @@
 package pl.ziwg.backend.service;
 
-import com.github.javafaker.App;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +20,12 @@ import pl.ziwg.backend.model.enumerates.VaccineState;
 import pl.ziwg.backend.model.repository.AppointmentRepository;
 import pl.ziwg.backend.notificator.email.EmailSubject;
 
-import javax.persistence.EntityExistsException;
 import javax.transaction.Transactional;
 import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static pl.ziwg.backend.template.ReadFileUtils.parseDate;
 
 @Service
 @Transactional
@@ -274,18 +271,5 @@ public class AppointmentService {
         }
 
         return localDateTime;
-    }
-
-    private String parseDate(LocalDateTime time) {
-        return String.format("%s.%s.%d %s:%s",
-                Integer.toString(time.getDayOfMonth()).length() == 1 ?
-                        "0".concat(Integer.toString(time.getDayOfMonth())) : Integer.toString(time.getDayOfMonth()) ,
-                Integer.toString(time.getMonthValue()).length() == 1 ?
-                        "0".concat(Integer.toString(time.getMonthValue())) : Integer.toString(time.getMonthValue()),
-                time.getYear(),
-                Integer.toString(time.getHour()).length() == 1 ?
-                        "0".concat(Integer.toString(time.getHour())) : Integer.toString(time.getHour()),
-                Integer.toString(time.getMinute()).length() == 1 ?
-                        "0".concat(Integer.toString(time.getMinute())) : Integer.toString(time.getMinute()));
     }
 }
