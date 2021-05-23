@@ -120,5 +120,10 @@ public class CustomizedExceptionHandling extends ResponseEntityExceptionHandler 
         return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(VaccineAlreadyExistsException.class)
+    public ResponseEntity<ApiError> handleVaccineAlreadyExistsException(VaccineAlreadyExistsException exception) {
+        return new ResponseEntity<>(new ApiError(exception.getMessage(), exception.getClass().getSimpleName()), HttpStatus.BAD_REQUEST);
+    }
+
 
 }

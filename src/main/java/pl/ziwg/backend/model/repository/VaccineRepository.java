@@ -18,4 +18,6 @@ public interface VaccineRepository extends JpaRepository<Vaccine, Long> {
     Optional<Vaccine> findByCode(String code);
     List<Vaccine> findByHospitalAndState(Hospital hospital, VaccineState state);
     List<Vaccine> findAllByHospitalAndCompany(Hospital hospital, Company company);
+    Boolean existsByCode(String code);
+    void deleteByCode(String code);
 }

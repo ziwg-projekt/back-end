@@ -32,15 +32,10 @@ import java.util.Optional;
 @RequestMapping("/api/v1/appointments")
 public class AppointmentController {
     private AppointmentService appointmentService;
-    private UserService userService;
-    private EmailService emailService;
 
     @Autowired
-    public AppointmentController(AppointmentService appointmentService, UserService userService,
-                                 EmailService emailService) {
+    public AppointmentController(AppointmentService appointmentService) {
         this.appointmentService = appointmentService;
-        this.userService = userService;
-        this.emailService = emailService;
     }
 
     @GetMapping("")
@@ -50,74 +45,34 @@ public class AppointmentController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Appointment> getOne(@PathVariable Long id) {
-        Appointment appointment = appointmentService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
-        return new ResponseEntity<>(appointment, HttpStatus.OK);
+        return appointmentService.getAppointmentById(id);
     }
 
     @PreAuthorize("hasRole('CITIZEN')")
     @PatchMapping("/{id}/actions/cancel")
     public ResponseEntity<Appointment> cancel(@PathVariable Long id) {
-        Appointment appointment = appointmentService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
-        appointment.setState(AppointmentState.AVAILABLE);
-        appointment.getVaccine().setState(VaccineState.AVAILABLE);
-        appointmentService.save(appointment);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return appointmentService.cancelAppointmentByCitizen(id);
     }
 
     @PreAuthorize("hasRole('CITIZEN')")
     @PatchMapping("/{id}/actions/enroll")
     public ResponseEntity<Appointment> enroll(@PathVariable Long id) {
-        User user = userService.getUserFromContext();
-        Appointment appointment = appointmentService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
-
-        appointment.setState(AppointmentState.ASSIGNED);
-        appointment.getVaccine().setState(VaccineState.ASSIGNED_TO_CITIZEN);
-        appointment.setCitizen(user.getCitizen());
-        appointmentService.save(appointment);
-        emailService.sendVisitConfirmation(user.getCitizen().getEmail(), parseDate(appointment.getDate()),
-                EmailSubject.REGISTRATION_FOR_VACCINATION, user.getCitizen().getName());
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return appointmentService.enrollForTheAppointment(id);
     }
 
     @PreAuthorize("hasRole('HOSPITAL')")
     @PatchMapping("/{id}/actions/made")
     public ResponseEntity<Appointment> markAsMade(@PathVariable Long id) {
-        Appointment appointment = appointmentService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
-        if(appointment.getHospital().equals(userService.getUserFromContext().getHospital())) {
-            appointment.setState(AppointmentState.MADE);
-            appointment.getVaccine().setState(VaccineState.GIVEN);
-            appointmentService.save(appointment);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        else{
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+        return appointmentService.markAppointmentAsMade(id);
     }
 
     @PreAuthorize("hasRole('HOSPITAL')")
     @PatchMapping("/{id}/actions/not-made")
-    public ResponseEntity<Appointment> markAsNotCame(@PathVariable Long id) {
-        Appointment appointment = appointmentService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
-        if(appointment.getHospital().equals(userService.getUserFromContext().getHospital())) {
-            VaccineDto vaccine = new VaccineDto(appointment.getVaccine().getCode(), appointment.getVaccine().getCompany().getName());
-            appointmentService.delete(id);
-            appointmentService.createAppointment(userService.getUserFromContext().getHospital(), vaccine);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        else{
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<Appointment> markAppointmentAsNotMade(@PathVariable Long id) {
+        return appointmentService.markAppointmentAsNotMade(id);
     }
 
-    private String parseDate(LocalDateTime time) {
-        return String.format("%d.%d.%d %d:%d", time.getDayOfMonth(), time.getMonthValue(), time.getYear(),
-                time.getHour(), time.getMinute());
-    }
+
 
 }
 

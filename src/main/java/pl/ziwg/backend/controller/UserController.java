@@ -71,10 +71,10 @@ public class UserController {
 
 
     @PostMapping("/self/vaccines")
-    public ResponseEntity<List<VaccineDto>> addVaccines(@Valid @RequestBody List<VaccineDto> vaccinesDto){
+    public ResponseEntity<Map<String, Integer>> addVaccines(@Valid @RequestBody List<VaccineDto> vaccinesDto){
         User user = userService.getUserFromContext();
-        List<VaccineDto> vaccines = appointmentService.createAppointments(user.getHospital(), vaccinesDto);
-        return new ResponseEntity<>(vaccines, HttpStatus.OK);
+        int added = appointmentService.createAppointments(user.getHospital(), vaccinesDto);
+        return new ResponseEntity<>(Map.of("added_vaccines", added), HttpStatus.OK);
     }
 
 

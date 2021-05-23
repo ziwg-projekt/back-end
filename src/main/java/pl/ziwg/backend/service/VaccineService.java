@@ -1,9 +1,11 @@
 package pl.ziwg.backend.service;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import pl.ziwg.backend.BackendApplication;
 import pl.ziwg.backend.model.entity.Company;
 import pl.ziwg.backend.model.entity.Doctor;
 import pl.ziwg.backend.model.entity.Hospital;
@@ -17,6 +19,7 @@ import java.util.Optional;
 @Service
 public class VaccineService {
     private VaccineRepository vaccineRepository;
+    protected static final Logger log = Logger.getLogger(BackendApplication.class);
 
     @Autowired
     public VaccineService(VaccineRepository vaccineRepository) {
@@ -45,6 +48,16 @@ public class VaccineService {
 
     public Vaccine save(Vaccine vaccine) {
         return vaccineRepository.save(vaccine);
+    }
+
+    public Boolean checkIfExistsByCode(String code){
+        return vaccineRepository.existsByCode(code);
+    }
+
+    public void delete(String code){
+        log.info("Deleting vaccine with code " + code + ", total count: " + vaccineRepository.count());
+        vaccineRepository.deleteByCode(code);
+        log.info("Probably deleted vaccine with code " + code + ", total count: " + vaccineRepository.count());
     }
 
 }
