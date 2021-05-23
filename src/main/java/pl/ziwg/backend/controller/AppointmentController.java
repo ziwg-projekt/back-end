@@ -36,24 +36,16 @@ import java.util.Objects;
 @RequestMapping("/api/v1/appointments")
 public class AppointmentController {
     private AppointmentService appointmentService;
-<<<<<<< HEAD
-
-    @Autowired
-    public AppointmentController(AppointmentService appointmentService) {
-        this.appointmentService = appointmentService;
-=======
+    private CitizenService citizenService;
     private UserService userService;
     private EmailService emailService;
-    private CitizenService citizenService;
 
     @Autowired
-    public AppointmentController(AppointmentService appointmentService, UserService userService,
-                                 EmailService emailService, CitizenService citizenService) {
+    public AppointmentController(AppointmentService appointmentService, CitizenService citizenService, UserService userService, EmailService emailService) {
         this.appointmentService = appointmentService;
+        this.citizenService = citizenService;
         this.userService = userService;
         this.emailService = emailService;
-        this.citizenService = citizenService;
->>>>>>> 735f591a75dc23b9d1e3e7db4f9f8571e6679009
     }
 
     @GetMapping("")
@@ -75,23 +67,7 @@ public class AppointmentController {
     @PreAuthorize("hasRole('CITIZEN')")
     @PatchMapping("/{id}/actions/enroll")
     public ResponseEntity<Appointment> enroll(@PathVariable Long id) {
-<<<<<<< HEAD
         return appointmentService.enrollForTheAppointment(id);
-=======
-        User user = userService.getUserFromContext();
-        Appointment appointment = appointmentService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
-
-        appointment.setState(AppointmentState.ASSIGNED);
-        appointment.getVaccine().setState(VaccineState.ASSIGNED_TO_CITIZEN);
-        appointment.setCitizen(user.getCitizen());
-        appointmentService.save(appointment);
-        if (Objects.nonNull(user.getCitizen().getEmail())) {
-            emailService.sendVisitConfirmation(user.getCitizen().getEmail(), parseDate(appointment.getDate()),
-                    EmailSubject.REGISTRATION_FOR_VACCINATION, user.getCitizen().getName());
-        }
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PreAuthorize("hasRole('HOSPITAL')")
@@ -118,7 +94,6 @@ public class AppointmentController {
         }
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
->>>>>>> 735f591a75dc23b9d1e3e7db4f9f8571e6679009
     }
 
     @PreAuthorize("hasRole('HOSPITAL')")
@@ -133,8 +108,10 @@ public class AppointmentController {
         return appointmentService.markAppointmentAsNotMade(id);
     }
 
-
-
+    private String parseDate(LocalDateTime time) {
+        return String.format("%d.%d.%d %d:%d", time.getDayOfMonth(), time.getMonthValue(), time.getYear(),
+                time.getHour(), time.getMinute());
+    }
 }
 
 
