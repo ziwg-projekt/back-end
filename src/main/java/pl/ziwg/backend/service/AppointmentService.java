@@ -89,7 +89,7 @@ public class AppointmentService {
 
     public Appointment save(Appointment appointment) {
         Appointment newAppointment = appointmentRepository.save(appointment);
-        log.error("Appointment was saved - " + newAppointment);
+        log.info("Appointment was saved - " + newAppointment);
         return appointmentRepository.save(newAppointment);
     }
 
@@ -134,11 +134,7 @@ public class AppointmentService {
         Appointment appointment = getAppointmentByIdOrThrowException(id);
         log.info("Hospital " + user.getHospital() + " wants to mark appointment with id " + id + " as not made");
         if(appointment.getHospital().equals(user.getHospital())) {
-            VaccineDto vaccine = new VaccineDto(appointment.getVaccine().getCode(), appointment.getVaccine().getCompany().getName());
-            delete(id);
-            log.info("Marked appointment " + appointment + " as not made");
-            Appointment newAppointment = createAppointment(userService.getUserFromContext().getHospital(), vaccine);
-            log.info("Created new appointment instead of this which was not made - " + newAppointment);
+            Appointment newAppointment = createAppointmentInsteadOfTheOldOne(appointment, user.getHospital());
             return new ResponseEntity<>(newAppointment, HttpStatus.NO_CONTENT);
         }
         else{
@@ -195,6 +191,15 @@ public class AppointmentService {
         }
     }
 
+    public Appointment createAppointmentInsteadOfTheOldOne(Appointment oldAppointment, Hospital hospital){
+        VaccineDto vaccine = new VaccineDto(oldAppointment.getVaccine().getCode(), oldAppointment.getVaccine().getCompany().getName());
+        delete(oldAppointment.getId());
+        log.info("Delete appointment " + oldAppointment);
+        Appointment newAppointment = createAppointment(hospital, vaccine);
+        log.info("Created new appointment instead of this one which was deleted - " + newAppointment);
+        return newAppointment;
+    }
+
     public ResponseEntity<Appointment> getAppointmentById(Long id){
         Appointment appointment = getAppointmentByIdOrThrowException(id);
         return new ResponseEntity<>(appointment, HttpStatus.OK);
@@ -211,7 +216,7 @@ public class AppointmentService {
         return doctors.get(0);
     }
 
-    private LocalDateTime getAppointmentDate(LocalDateTime lastAppointmentDate){
+    public LocalDateTime getAppointmentDate(LocalDateTime lastAppointmentDate){
         LocalDateTime appointmentDate;
         if (lastAppointmentDate.getHour() >= 15) {
             appointmentDate = getAvailableInNextDay(lastAppointmentDate);
