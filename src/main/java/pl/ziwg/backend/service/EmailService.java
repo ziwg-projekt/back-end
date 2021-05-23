@@ -8,6 +8,7 @@ import pl.ziwg.backend.template.ReadFileUtils;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Service
 public class EmailService {
@@ -41,6 +42,12 @@ public class EmailService {
     public void sendVisitConfirmation(@Email @NotNull final String mail, @NotNull final String vaccinationDate,
                                     final EmailSubject subject, @NotNull final String name) {
         final String message = readFileUtils.getVisitConfirmationMessage(name, vaccinationDate);
+        emailSender.sendMail(mail, message, subject);
+    }
+
+    public void sendAppointmentReminder(@Email @NotNull final String mail, @NotNull final LocalDateTime vaccinationDate,
+                                      final EmailSubject subject) {
+        final String message = readFileUtils.getAppointmentReminderMessage(vaccinationDate);
         emailSender.sendMail(mail, message, subject);
     }
 
