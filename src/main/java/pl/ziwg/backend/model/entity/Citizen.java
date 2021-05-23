@@ -87,7 +87,6 @@ public class Citizen {
                 ", email='" + email + '\'' +
                 ", hospital=" + hospital +
                 ", state=" + state +
-                ", appointments=" + appointments +
                 ", user=" + EntityToMapConverter.getRepresentationWithoutChosenFields(user, Arrays.asList("citizen")) +
                 '}';
     }
