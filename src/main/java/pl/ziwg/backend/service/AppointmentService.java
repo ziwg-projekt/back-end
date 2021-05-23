@@ -160,17 +160,24 @@ public class AppointmentService {
         }
     }
 
-    public ResponseEntity<Appointment> enrollForTheAppointment(Long id){
+    public ResponseEntity<Appointment> enrollForTheAppointment(Long appointmentId){
         User user = userService.getUserFromContext();
-        log.info("User " + user.getCitizen() + " wants to enroll appointment with id " + id);
-        Appointment appointment = getAppointmentByIdOrThrowException(id);
+        return enrollCitizenForTheAppointment(user.getCitizen(), getAppointmentByIdOrThrowException(appointmentId));
+    }
+
+    private void updateAppointmentAfterEnroll(Appointment appointment, Citizen citizen){
         appointment.setState(AppointmentState.ASSIGNED);
         appointment.getVaccine().setState(VaccineState.ASSIGNED_TO_CITIZEN);
-        appointment.setCitizen(user.getCitizen());
+        appointment.setCitizen(citizen);
         save(appointment);
-        log.info("User " + user.getCitizen() + " is enrolled appointment " + appointment);
-        emailService.sendVisitConfirmation(user.getCitizen().getEmail(), parseDate(appointment.getDate()),
-                EmailSubject.REGISTRATION_FOR_VACCINATION, user.getCitizen().getName());
+    }
+
+    public ResponseEntity<Appointment> enrollCitizenForTheAppointment(Citizen citizen, Appointment appointment){
+        log.info("Citizen " + citizen + " wants to enroll appointment with id " + appointment.getId());
+        updateAppointmentAfterEnroll(appointment, citizen);
+        log.info("Citizen " + citizen + " is enrolled appointment " + appointment);
+        emailService.sendVisitConfirmation(citizen.getEmail(), parseDate(appointment.getDate()),
+                EmailSubject.REGISTRATION_FOR_VACCINATION, citizen.getName());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
