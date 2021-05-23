@@ -35,7 +35,7 @@ public class Vaccine implements Serializable {
     private VaccineState state;
 
     @JsonIgnore
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "vaccine")
+    @OneToOne(mappedBy = "vaccine")
     private Appointment appointment;
 
     public Vaccine(String code, Company company, Hospital hospital){

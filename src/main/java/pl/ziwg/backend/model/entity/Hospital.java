@@ -30,7 +30,7 @@ public class Hospital {
     private Address address;
 
     @JsonIgnore
-    @OneToMany(mappedBy="hospital", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy="hospital", fetch = FetchType.EAGER)
     private Set<Vaccine> vaccines;
 
     @JsonIgnore
