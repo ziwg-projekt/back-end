@@ -31,7 +31,6 @@ public class AppointmentsThread implements Runnable, DisposableBean {
         while(active){
             Thread.sleep(2000);
             for(Appointment appointment : appointmentService.findAll()){
-                System.out.println("gram");
                 if(appointment.getDate().isBefore(LocalDateTime.now()) && (appointment.getState().equals(AppointmentState.AVAILABLE))){
                     log.info("Past appointment with AVAILABLE state was found - " + appointment);
                     Hospital hospital = appointment.getHospital();
