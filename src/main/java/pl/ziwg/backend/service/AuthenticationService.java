@@ -109,27 +109,26 @@ public class AuthenticationService {
         return allowRegistration(entry);
     }
 
-    public void registerCitizen(String registrationToken, CitizenRegistrationRequestBody userData){
+    public void registerCitizenByToken(String registrationToken, CitizenRegistrationRequestBody userData){
         log.info("Current verification list = " + verificationEntryList.toString());
         Person person = getPersonByRegistrationToken(registrationToken);
-        checkIfUsernameAvailable(userData.getUsername());
-        Address address = new Address(userData.getCity(), userData.getStreet(), userData.getStreetNumber());
-        userService.saveCitizen(userData.getUsername(), userData.getPassword(), new Citizen(person, address));
+        registerPersonInSystem(person, userData);
         log.info("Successful registration for user citizen with pesel '" + person.getPesel() + "', username + '" + userData.getUsername());
         verificationEntryList.remove(person);
         log.info("Current verification list = " + verificationEntryList.toString());
     }
 
-    public void registerCitizenByHospital(final String registrationToken, final HospitalCitizenRegisterDto userData) {
-        log.info("Current verification list = " + verificationEntryList.toString());
-        Person person = getPersonByRegistrationToken(registrationToken);
+    public void registerPersonInSystem(Person person, CitizenRegistrationRequestBody userData){
         checkIfUsernameAvailable(userData.getUsername());
-        final Address address = new Address(userData.getCity(), userData.getStreet(), userData.getStreetNumber());
-        final Citizen citizen = createCitizen(userData, address, person);
-        userService.saveCitizen(userData.getUsername(), userData.getPassword(), citizen);
-        log.info("Successful registration for user citizen with pesel '" + person.getPesel() + "', username + '" + userData.getUsername());
-        verificationEntryList.remove(person);
-        log.info("Current verification list = " + verificationEntryList.toString());
+        Address address = new Address(userData.getCity(), userData.getStreet(), userData.getStreetNumber());
+        userService.saveCitizen(userData.getUsername(), userData.getPassword(), new Citizen(person, address));
+    }
+
+    public void registerCitizenByHospital(final String pesel, final CitizenRegistrationRequestBody userData) {
+        checkIfAlreadyRegistered(pesel);
+        Person person = personRegister.getPersonByPesel(pesel);
+        registerPersonInSystem(person, userData);
+        log.info("Successful registration by hospital for user citizen with pesel '" + person.getPesel() + "', username + '" + userData.getUsername());
     }
 
     public void registerHospital(HospitalRegistrationRequestBody hospitalData){
@@ -192,6 +191,7 @@ public class AuthenticationService {
         checkIfRegistrationCodeIsCorrect(entry.getValue().getRegistrationCode(), registrationCode);
         checkIfRegistrationCodeExpired(entry.getValue().getRegistrationCode());
     }
+
     private Citizen createCitizen(final HospitalCitizenRegisterDto hospitalCitizenRegisterDto, final Address address,
                                   final Person person) {
         final Citizen citizen = new Citizen();
