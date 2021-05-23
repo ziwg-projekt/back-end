@@ -10,12 +10,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pl.ziwg.backend.BackendApplication;
-import pl.ziwg.backend.dto.AppointmentDto;
+import pl.ziwg.backend.dto.HospitalEnrollDto;
 import pl.ziwg.backend.dto.VaccineDto;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.exception.UserTypeException;
 import pl.ziwg.backend.exception.VaccineAlreadyExistsException;
 import pl.ziwg.backend.model.entity.*;
 import pl.ziwg.backend.model.enumerates.AppointmentState;
+import pl.ziwg.backend.model.enumerates.UserType;
 import pl.ziwg.backend.model.enumerates.VaccineState;
 import pl.ziwg.backend.model.repository.AppointmentRepository;
 import pl.ziwg.backend.notificator.email.EmailSubject;
@@ -38,12 +40,13 @@ public class AppointmentService {
     private CompanyService companyService;
     private UserService userService;
     private EmailService emailService;
+    private SMSService smsService;
     protected static final Logger log = Logger.getLogger(BackendApplication.class);
 
     @Autowired
     public AppointmentService(AppointmentRepository appointmentRepository, VaccineService vaccineService,
                               CitizenService citizenService, DoctorService doctorService, CompanyService companyService,
-                              UserService userService, EmailService emailService) {
+                              UserService userService, EmailService emailService, SMSService smsService) {
         this.appointmentRepository = appointmentRepository;
         this.vaccineService = vaccineService;
         this.citizenService = citizenService;
@@ -51,6 +54,7 @@ public class AppointmentService {
         this.companyService = companyService;
         this.userService = userService;
         this.emailService = emailService;
+        this.smsService = smsService;
     }
 
     public Page<Appointment> findAllFromPage(Pageable pageable){
@@ -165,6 +169,21 @@ public class AppointmentService {
         return enrollCitizenForTheAppointment(user.getCitizen(), getAppointmentByIdOrThrowException(appointmentId));
     }
 
+    public ResponseEntity<Appointment> enrollForTheAppointment(Long appointmentId,
+                                                               HospitalEnrollDto hospitalEnrollDto) {
+        final Citizen citizen = citizenService.findByPesel(hospitalEnrollDto.getPesel())
+                .orElseThrow(() -> new ResourceNotFoundException(hospitalEnrollDto.getPesel(), "pesel"));
+        final User user = userService.findById(citizen.getUser().getId())
+                .orElseThrow(() -> new ResourceNotFoundException(citizen.getUser().getId(), "user"));
+        if (UserType.CITIZEN != user.getUserType()) {
+            throw new UserTypeException("Given user id must belong to the citizen");
+        }
+        final Appointment appointment = this.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException(appointmentId, "appointment"));
+
+        return this.enrollCitizenForTheAppointment(citizen, appointment);
+    }
+
     private void updateAppointmentAfterEnroll(Appointment appointment, Citizen citizen){
         appointment.setState(AppointmentState.ASSIGNED);
         appointment.getVaccine().setState(VaccineState.ASSIGNED_TO_CITIZEN);
@@ -172,12 +191,21 @@ public class AppointmentService {
         save(appointment);
     }
 
-    public ResponseEntity<Appointment> enrollCitizenForTheAppointment(Citizen citizen, Appointment appointment){
+    public ResponseEntity<Appointment> enrollCitizenForTheAppointment(final Citizen citizen,
+                                                                      final Appointment appointment) {
         log.info("Citizen " + citizen + " wants to enroll appointment with id " + appointment.getId());
         updateAppointmentAfterEnroll(appointment, citizen);
         log.info("Citizen " + citizen + " is enrolled appointment " + appointment);
         emailService.sendVisitConfirmation(citizen.getEmail(), parseDate(appointment.getDate()),
                 EmailSubject.REGISTRATION_FOR_VACCINATION, citizen.getName());
+        if (Objects.nonNull(citizen.getPhoneNumber())) {
+            try {
+                smsService.sendAppointmentConfirmation("+48".concat(citizen.getPhoneNumber()), appointment.getDate(),
+                        citizen.getAddress(), appointment.getVaccine().getCompany());
+            } catch (Exception e) {
+                log.error("Given number is not verified");
+            }
+        }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -249,7 +277,15 @@ public class AppointmentService {
     }
 
     private String parseDate(LocalDateTime time) {
-        return String.format("%d.%d.%d %d:%d", time.getDayOfMonth(), time.getMonthValue(), time.getYear(),
-                time.getHour(), time.getMinute());
+        return String.format("%s.%s.%d %s:%s",
+                Integer.toString(time.getDayOfMonth()).length() == 1 ?
+                        "0".concat(Integer.toString(time.getDayOfMonth())) : Integer.toString(time.getDayOfMonth()) ,
+                Integer.toString(time.getMonthValue()).length() == 1 ?
+                        "0".concat(Integer.toString(time.getMonthValue())) : Integer.toString(time.getMonthValue()),
+                time.getYear(),
+                Integer.toString(time.getHour()).length() == 1 ?
+                        "0".concat(Integer.toString(time.getHour())) : Integer.toString(time.getHour()),
+                Integer.toString(time.getMinute()).length() == 1 ?
+                        "0".concat(Integer.toString(time.getMinute())) : Integer.toString(time.getMinute()));
     }
 }
