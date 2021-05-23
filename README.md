@@ -283,3 +283,35 @@ Dwa endpointy dla szpitala. W zależności od czego czy szczepienie się uda bą
 ## Dodawanie lekarzy 
 Wysyłając PUT na `/api/v1/doctors` można dodać lekarzy do szpitala. 
 
+# Rejestracja obywateli z portalu szpitala
+## Rejestracja do systemu
+Get na `/api/v1/citizens/all/{pesel}` z danym PESEL (obywatel podaje go), w odpowiedzi są zwracane jego dane z rządowego API:
+```
+{
+    "name": "Anna",
+    "surname": "Zamojska",
+    "pesel": "56111245968",
+    "email": "aaa@aaa.aaa",
+    "phone_number": "767456123"
+}
+```
+Następnie POST na `/api/v1/auth/registration/hospital/citizen/{pesel}/register` z takim body:
+```
+{
+    "password": "123456",
+    "username": "testuserd",
+    "city": "Kraków",
+    "street": "Wrocławska",
+    "street_number": "19"
+}
+```
+I użytkownik jest zarejestrowany w systemie.
+
+## Rejestracja na szczepienie
+Post na `/api/v1/appointments//{id}/hospital/actions/enroll` z takim body:
+```
+{
+    "pesel": "56111245968"
+}
+```
+W odpowiedzi 204 jeśli pomyślnie, oczywiście trzeba być zalogowanym na szpital.
