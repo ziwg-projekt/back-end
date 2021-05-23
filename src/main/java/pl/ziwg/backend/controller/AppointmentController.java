@@ -84,16 +84,7 @@ public class AppointmentController {
         final Appointment appointment = appointmentService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
 
-        appointment.setState(AppointmentState.ASSIGNED);
-        appointment.getVaccine().setState(VaccineState.ASSIGNED_TO_CITIZEN);
-        appointment.setCitizen(user.getCitizen());
-        appointmentService.save(appointment);
-        if (Objects.nonNull(user.getCitizen().getEmail())) {
-            emailService.sendVisitConfirmation(user.getCitizen().getEmail(), parseDate(appointment.getDate()),
-                    EmailSubject.REGISTRATION_FOR_VACCINATION, user.getCitizen().getName());
-        }
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return appointmentService.enrollCitizenForTheAppointment(citizen, appointment);
     }
 
     @PreAuthorize("hasRole('HOSPITAL')")

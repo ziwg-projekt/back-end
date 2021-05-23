@@ -55,8 +55,6 @@ public class CitizenController {
     public ResponseEntity<Set<Appointment>> getCitizenAppointments(@PathVariable String pesel) {
         Citizen citizen = citizenService.findByPesel(pesel)
                 .orElseThrow(() -> new ResourceNotFoundException(pesel, "citizen"));
-        List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(
-                citizen.getAppointments(), Arrays.asList("citizen"));
         return new ResponseEntity<>(citizen.getAppointments(), HttpStatus.OK);
     }
 
