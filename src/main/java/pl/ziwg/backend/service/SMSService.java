@@ -44,12 +44,19 @@ public class SMSService {
                 hospitalAddress.getStreetNumber(),
                 hospitalAddress.getCity()
         );
-
         smsSender.sendMessage(number, message);
     }
 
     private String parseDate(LocalDateTime time) {
-        return String.format("%d.%d.%d %d:%d", time.getDayOfMonth(), time.getMonthValue(), time.getYear(),
-                time.getHour(), time.getMinute());
+        return String.format("%s.%s.%d %s:%s",
+                Integer.toString(time.getDayOfMonth()).length() == 1 ?
+                        "0".concat(Integer.toString(time.getDayOfMonth())) : Integer.toString(time.getDayOfMonth()) ,
+                Integer.toString(time.getMonthValue()).length() == 1 ?
+                        "0".concat(Integer.toString(time.getMonthValue())) : Integer.toString(time.getMonthValue()),
+                time.getYear(),
+                Integer.toString(time.getHour()).length() == 1 ?
+                        "0".concat(Integer.toString(time.getHour())) : Integer.toString(time.getHour()),
+                Integer.toString(time.getMinute()).length() == 1 ?
+                        "0".concat(Integer.toString(time.getMinute())) : Integer.toString(time.getMinute()));
     }
 }

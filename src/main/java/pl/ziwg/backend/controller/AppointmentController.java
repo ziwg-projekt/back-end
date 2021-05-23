@@ -74,17 +74,7 @@ public class AppointmentController {
     @PatchMapping("/{id}/hospital/actions/enroll")
     public ResponseEntity<Appointment> enrollByHospital(@PathVariable final Long id,
                                                         @RequestBody final HospitalEnrollDto hospitalEnrollDto) {
-        final Citizen citizen = citizenService.findByPesel(hospitalEnrollDto.getPesel())
-                .orElseThrow(() -> new ResourceNotFoundException(hospitalEnrollDto.getPesel(), "pesel"));
-        final User user = userService.findById(citizen.getUser().getId())
-                .orElseThrow(() -> new ResourceNotFoundException(citizen.getUser().getId(), "user"));
-        if (UserType.CITIZEN != user.getUserType()) {
-            throw new UserTypeException("Given user id must belong to the citizen");
-        }
-        final Appointment appointment = appointmentService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
-
-        return appointmentService.enrollCitizenForTheAppointment(citizen, appointment);
+        return appointmentService.enrollForTheAppointment(id, hospitalEnrollDto);
     }
 
     @PreAuthorize("hasRole('HOSPITAL')")
