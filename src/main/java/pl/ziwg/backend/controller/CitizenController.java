@@ -17,6 +17,7 @@ import pl.ziwg.backend.dto.CitizenUpdateDto;
 import pl.ziwg.backend.dto.CitizenUpdateResponseDto;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.model.EntityToMapConverter;
+import pl.ziwg.backend.model.entity.Appointment;
 import pl.ziwg.backend.model.entity.Citizen;
 import pl.ziwg.backend.service.CitizenService;
 
@@ -24,6 +25,7 @@ import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 @RestController
@@ -50,12 +52,12 @@ public class CitizenController {
     }
 
     @GetMapping("/{pesel}/appointments")
-    public ResponseEntity<List<Map<String, Object>>> getCitizenAppointments(@PathVariable String pesel) {
+    public ResponseEntity<Set<Appointment>> getCitizenAppointments(@PathVariable String pesel) {
         Citizen citizen = citizenService.findByPesel(pesel)
                 .orElseThrow(() -> new ResourceNotFoundException(pesel, "citizen"));
         List<Map<String, Object>> response = EntityToMapConverter.getListRepresentationWithoutChosenFields(
                 citizen.getAppointments(), Arrays.asList("citizen"));
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(citizen.getAppointments(), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Update citizen data")
