@@ -7,35 +7,53 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pl.ziwg.backend.dto.HospitalEnrollDto;
 import pl.ziwg.backend.dto.VaccineDto;
 import pl.ziwg.backend.exception.ResourceNotFoundException;
+import pl.ziwg.backend.exception.UserTypeException;
 import pl.ziwg.backend.model.entity.Appointment;
+import pl.ziwg.backend.model.entity.Citizen;
 import pl.ziwg.backend.model.entity.User;
 import pl.ziwg.backend.model.enumerates.AppointmentState;
+import pl.ziwg.backend.model.enumerates.UserType;
 import pl.ziwg.backend.model.enumerates.VaccineState;
 import pl.ziwg.backend.notificator.email.EmailSubject;
-import pl.ziwg.backend.security.jwt.service.UserPrinciple;
 import pl.ziwg.backend.service.AppointmentService;
+import pl.ziwg.backend.service.CitizenService;
 import pl.ziwg.backend.service.EmailService;
 import pl.ziwg.backend.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/appointments")
 public class AppointmentController {
     private AppointmentService appointmentService;
+<<<<<<< HEAD
 
     @Autowired
     public AppointmentController(AppointmentService appointmentService) {
         this.appointmentService = appointmentService;
+=======
+    private UserService userService;
+    private EmailService emailService;
+    private CitizenService citizenService;
+
+    @Autowired
+    public AppointmentController(AppointmentService appointmentService, UserService userService,
+                                 EmailService emailService, CitizenService citizenService) {
+        this.appointmentService = appointmentService;
+        this.userService = userService;
+        this.emailService = emailService;
+        this.citizenService = citizenService;
+>>>>>>> 735f591a75dc23b9d1e3e7db4f9f8571e6679009
     }
 
     @GetMapping("")
@@ -57,7 +75,50 @@ public class AppointmentController {
     @PreAuthorize("hasRole('CITIZEN')")
     @PatchMapping("/{id}/actions/enroll")
     public ResponseEntity<Appointment> enroll(@PathVariable Long id) {
+<<<<<<< HEAD
         return appointmentService.enrollForTheAppointment(id);
+=======
+        User user = userService.getUserFromContext();
+        Appointment appointment = appointmentService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
+
+        appointment.setState(AppointmentState.ASSIGNED);
+        appointment.getVaccine().setState(VaccineState.ASSIGNED_TO_CITIZEN);
+        appointment.setCitizen(user.getCitizen());
+        appointmentService.save(appointment);
+        if (Objects.nonNull(user.getCitizen().getEmail())) {
+            emailService.sendVisitConfirmation(user.getCitizen().getEmail(), parseDate(appointment.getDate()),
+                    EmailSubject.REGISTRATION_FOR_VACCINATION, user.getCitizen().getName());
+        }
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PreAuthorize("hasRole('HOSPITAL')")
+    @PatchMapping("/{id}/hospital/actions/enroll")
+    public ResponseEntity<Appointment> enrollByHospital(@PathVariable final Long id,
+                                                        @RequestBody final HospitalEnrollDto hospitalEnrollDto) {
+        final Citizen citizen = citizenService.findByPesel(hospitalEnrollDto.getPesel())
+                .orElseThrow(() -> new ResourceNotFoundException(hospitalEnrollDto.getPesel(), "pesel"));
+        final User user = userService.findById(citizen.getUser().getId())
+                .orElseThrow(() -> new ResourceNotFoundException(citizen.getUser().getId(), "user"));
+        if (UserType.CITIZEN != user.getUserType()) {
+            throw new UserTypeException("Given user id must belong to the citizen");
+        }
+        final Appointment appointment = appointmentService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
+
+        appointment.setState(AppointmentState.ASSIGNED);
+        appointment.getVaccine().setState(VaccineState.ASSIGNED_TO_CITIZEN);
+        appointment.setCitizen(user.getCitizen());
+        appointmentService.save(appointment);
+        if (Objects.nonNull(user.getCitizen().getEmail())) {
+            emailService.sendVisitConfirmation(user.getCitizen().getEmail(), parseDate(appointment.getDate()),
+                    EmailSubject.REGISTRATION_FOR_VACCINATION, user.getCitizen().getName());
+        }
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+>>>>>>> 735f591a75dc23b9d1e3e7db4f9f8571e6679009
     }
 
     @PreAuthorize("hasRole('HOSPITAL')")
