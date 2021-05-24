@@ -14,6 +14,7 @@ import pl.ziwg.backend.externalapi.governmentapi.PersonRegister;
 import pl.ziwg.backend.model.entity.Address;
 import pl.ziwg.backend.model.entity.Citizen;
 import pl.ziwg.backend.model.entity.Hospital;
+import pl.ziwg.backend.model.enumerates.CitizenState;
 import pl.ziwg.backend.model.repository.CitizenRepository;
 
 import javax.transaction.Transactional;
@@ -62,6 +63,10 @@ public class CitizenService {
 
     public Person getPersonByPeselFromGovernmentApi(String pesel){
         return personRegister.getPersonByPesel(pesel);
+    }
+
+    public long getAmountOfVaccinatedCitizens(){
+        return findAll().stream().filter(e -> e.getState().equals(CitizenState.FINISHED)).count();
     }
 
     public CitizenUpdateResponseDto updateCitizenData(final CitizenUpdateDto citizenUpdateDto,

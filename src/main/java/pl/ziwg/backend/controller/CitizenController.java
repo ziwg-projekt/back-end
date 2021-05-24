@@ -45,6 +45,11 @@ public class CitizenController {
         return new ResponseEntity<>(citizenService.findAllFromPage(pageRequest), HttpStatus.OK);
     }
 
+    @GetMapping("/vaccinated")
+    public ResponseEntity<Map<String, Long>> getVaccinatedCount() {
+        return new ResponseEntity<>(Map.of("count", citizenService.getAmountOfVaccinatedCitizens()), HttpStatus.OK);
+    }
+
     @GetMapping("/{pesel}")
     public ResponseEntity<Citizen> getRegisteredCitizen(@PathVariable String pesel) {
         Citizen citizen = citizenService.findByPesel(pesel)

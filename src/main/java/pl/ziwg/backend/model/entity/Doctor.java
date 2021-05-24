@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import pl.ziwg.backend.service.AppointmentDateService;
+import pl.ziwg.backend.service.AppointmentService;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -36,27 +38,8 @@ public class Doctor {
 
     public Doctor(Hospital hospital){
         this.hospital = hospital;
-        LocalDateTime now = LocalDateTime.now();
-        if (now.getHour() < 7) {
-            this.nextAppointmentDate = LocalDateTime.of(now.getYear(),
-                    now.getMonth(), now.getDayOfMonth(), 7, 0, 0);
-        } else {
-            this.nextAppointmentDate = getAvailableInNextDay(now);
-        }
+        this.nextAppointmentDate = AppointmentDateService.getNextValidAppointmentDateFromGivenDate(LocalDateTime.now());
     }
-
-    private LocalDateTime getAvailableInNextDay(LocalDateTime last){
-        LocalDateTime localDateTime = LocalDateTime.of(last.getYear(),
-                last.getMonth(), last.getDayOfMonth(), 7, 0, 0);
-        if(last.getDayOfWeek() == DayOfWeek.FRIDAY){
-            localDateTime = localDateTime.plusDays(3);
-        } else{
-            localDateTime = localDateTime.plusDays(1);
-        }
-
-        return localDateTime;
-    }
-
 
     @Override
     public String toString() {

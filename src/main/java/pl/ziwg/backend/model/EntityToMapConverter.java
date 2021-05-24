@@ -2,15 +2,16 @@ package pl.ziwg.backend.model;
 
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import pl.ziwg.backend.BackendApplication;
 
 import java.lang.reflect.Field;
-import org.apache.log4j.Logger;
 
 import java.util.*;
 
 public class EntityToMapConverter {
-    protected static final Logger log = Logger.getLogger(EntityToMapConverter.class);
-
+    protected static final Logger log = LoggerFactory.getLogger(EntityToMapConverter.class);
     public static Map<String, Object> getRepresentationWithoutChosenFields(Object object, List<String> excludedFields){
         Map<String, Object> representation = new HashMap<>();
         if(object==null){

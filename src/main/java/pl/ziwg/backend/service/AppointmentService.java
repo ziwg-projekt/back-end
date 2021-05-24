@@ -1,6 +1,7 @@
 package pl.ziwg.backend.service;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import pl.ziwg.backend.exception.UserTypeException;
 import pl.ziwg.backend.exception.VaccineAlreadyExistsException;
 import pl.ziwg.backend.model.entity.*;
 import pl.ziwg.backend.model.enumerates.AppointmentState;
+import pl.ziwg.backend.model.enumerates.CitizenState;
 import pl.ziwg.backend.model.enumerates.UserType;
 import pl.ziwg.backend.model.enumerates.VaccineState;
 import pl.ziwg.backend.model.repository.AppointmentRepository;
@@ -38,7 +40,7 @@ public class AppointmentService {
     private UserService userService;
     private EmailService emailService;
     private SMSService smsService;
-    protected static final Logger log = Logger.getLogger(BackendApplication.class);
+    protected static final Logger log = LoggerFactory.getLogger(AppointmentService.class);
 
     @Autowired
     public AppointmentService(AppointmentRepository appointmentRepository, VaccineService vaccineService,
@@ -112,10 +114,10 @@ public class AppointmentService {
         if(vaccineService.checkIfExistsByCode(vaccine.getCode())){
             throw new VaccineAlreadyExistsException("Vaccine with code " + vaccine.getCode() + " already exists");
         }
-        Doctor doctor = getAppropriateDoctor(hospital);
+        Doctor doctor = getDoctorWithEarliestNextAppointmentDate(hospital);
         log.info("Choose doctor with id " + doctor.getId() + " and next appointment date " + doctor.getNextAppointmentDate() + " to vaccine " + vaccine);
         LocalDateTime appointmentDate = doctor.getNextAppointmentDate();
-        doctor.setNextAppointmentDate(getAppointmentDate(appointmentDate));
+        doctor.setNextAppointmentDate(AppointmentDateService.getNextAppointmentDate(appointmentDate));
         doctorService.save(doctor);
         Vaccine newVaccine = new Vaccine(vaccine.getCode(), companyService.findByName(vaccine.getCompanyName()), hospital);
         newVaccine.setState(VaccineState.ASSIGNED_TO_APPOINTMENT);
@@ -151,6 +153,7 @@ public class AppointmentService {
         if(appointment.getHospital().equals(user.getHospital())) {
             appointment.setState(AppointmentState.MADE);
             appointment.getVaccine().setState(VaccineState.GIVEN);
+            appointment.getCitizen().setState(CitizenState.FINISHED);
             log.info("Marked appointment " + appointment + " as made");
             save(appointment);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -242,34 +245,11 @@ public class AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException(id, "appointment"));
     }
 
-    private Doctor getAppropriateDoctor(Hospital hospital){
+    private Doctor getDoctorWithEarliestNextAppointmentDate(Hospital hospital){
         List<Doctor> doctors = new ArrayList<>(hospital.getDoctors());
         doctors.sort(Comparator.comparing(Doctor::getNextAppointmentDate));
         return doctors.get(0);
     }
 
-    public LocalDateTime getAppointmentDate(LocalDateTime lastAppointmentDate){
-        LocalDateTime appointmentDate;
-        if (lastAppointmentDate.getHour() >= 15) {
-            appointmentDate = getAvailableInNextDay(lastAppointmentDate);
-        } else if(lastAppointmentDate.getHour() < 7){
-            appointmentDate = LocalDateTime.of(lastAppointmentDate.getYear(),
-                    lastAppointmentDate.getMonth(), lastAppointmentDate.getDayOfMonth(), 7, 0, 0);
-        } else {
-            appointmentDate = lastAppointmentDate.plusMinutes(5);
-        }
-        return appointmentDate;
-    }
 
-    private LocalDateTime getAvailableInNextDay(LocalDateTime last){
-        LocalDateTime localDateTime = LocalDateTime.of(last.getYear(),
-                last.getMonth(), last.getDayOfMonth(), 7, 0, 0);
-        if(last.getDayOfWeek() == DayOfWeek.FRIDAY){
-            localDateTime = localDateTime.plusDays(3);
-        } else{
-            localDateTime = localDateTime.plusDays(1);
-        }
-
-        return localDateTime;
-    }
 }

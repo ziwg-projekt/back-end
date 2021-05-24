@@ -1,6 +1,7 @@
 package pl.ziwg.backend.service;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +22,7 @@ import java.util.*;
 
 @Service
 public class HospitalService {
-    protected static final Logger log = Logger.getLogger(BackendApplication.class);
+    protected static final Logger log = LoggerFactory.getLogger(HospitalService.class);
 
     private HospitalRepository hospitalRepository;
     private CompanyService companyService;

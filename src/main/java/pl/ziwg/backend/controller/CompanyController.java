@@ -1,6 +1,7 @@
 package pl.ziwg.backend.controller;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import pl.ziwg.backend.exception.ResourceNotFoundException;
 import pl.ziwg.backend.jsonbody.response.UploadFileResponse;
 import pl.ziwg.backend.model.EntityToMapConverter;
 import pl.ziwg.backend.model.entity.*;
+import pl.ziwg.backend.notificator.sms.SMSSender;
 import pl.ziwg.backend.service.CompanyService;
 import pl.ziwg.backend.service.FileStorageService;
 
@@ -29,7 +31,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/companies")
 public class CompanyController {
-    protected static final Logger log = Logger.getLogger(BackendApplication.class);
+    protected static final Logger log = LoggerFactory.getLogger(CompanyController.class);
 
     private CompanyService companyService;
     private FileStorageService fileStorageService;

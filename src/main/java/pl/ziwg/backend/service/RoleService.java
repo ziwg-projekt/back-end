@@ -1,6 +1,7 @@
 package pl.ziwg.backend.service;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.ziwg.backend.BackendApplication;
@@ -12,7 +13,7 @@ import java.util.Optional;
 
 @Service
 public class RoleService {
-    protected static final Logger log = Logger.getLogger(BackendApplication.class);
+    protected static final Logger log = LoggerFactory.getLogger(RoleService.class);
     private RoleRepository roleRepository;
 
     @Autowired

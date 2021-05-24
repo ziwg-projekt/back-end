@@ -5,9 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import pl.ziwg.backend.model.enumerates.AppointmentState;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -53,6 +52,9 @@ public class Appointment {
     @ManyToOne()
     private Hospital hospital;
 
+    @JsonIgnore
+    private boolean ifReminded;
+
 
     public Appointment(LocalDateTime date, Vaccine vaccine, Doctor doctor) {
         this.date = date;
@@ -60,6 +62,7 @@ public class Appointment {
         this.doctor = doctor;
         this.hospital = doctor.getHospital();
         this.state = AppointmentState.AVAILABLE;
+        this.ifReminded = false;
     }
 
 

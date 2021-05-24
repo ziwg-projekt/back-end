@@ -1,18 +1,20 @@
 package pl.ziwg.backend.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
+import pl.ziwg.backend.BackendApplication;
 import pl.ziwg.backend.exception.UnexpectedResponseFormatException;
 import pl.ziwg.backend.service.AuthenticationService;
 import pl.ziwg.backend.service.UserService;
@@ -39,7 +41,7 @@ public class AuthenticationTest {
         this.restTemplate = restTemplate;
     }
 
-    protected static final Logger log = Logger.getLogger(AuthenticationService.class);
+    protected static final Logger log = LoggerFactory.getLogger(AuthenticationTest.class);
 
     private String pesel = "94040743567";
     private String pesel_2 = "81071149213";

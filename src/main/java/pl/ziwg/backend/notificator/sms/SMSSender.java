@@ -33,7 +33,11 @@ public class SMSSender {
             throw new RuntimeException("account SID or Auth id were not loaded");
         }
 
-        Message.creator(new PhoneNumber(phoneNumber), new PhoneNumber(myPhoneNumber), message).create();
-        log.info("sms sent successfully");
+        try {
+            Message.creator(new PhoneNumber(phoneNumber), new PhoneNumber(myPhoneNumber), message).create();
+            log.info("sms sent successfully");
+        } catch (Exception e){
+            log.info("SMS not sent cause of " + e.getMessage());
+        }
     }
 }

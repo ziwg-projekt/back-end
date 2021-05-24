@@ -1,6 +1,7 @@
 package pl.ziwg.backend.configuration;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -21,7 +22,7 @@ import java.util.*;
 
 @Component
 public class AfterStartupConfiguration {
-    protected static final Logger log = Logger.getLogger(BackendApplication.class);
+    protected static final Logger log = LoggerFactory.getLogger(AfterStartupConfiguration.class);
     private static final SecureRandom random = new SecureRandom();
     private String hospitalUsername = "first_hospital";
 

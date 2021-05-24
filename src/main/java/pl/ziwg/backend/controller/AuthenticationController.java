@@ -59,7 +59,6 @@ public class AuthenticationController {
         authenticationService.registerHospital(hospitalData);
     }
 
-
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> loginUser(@Valid @RequestBody LoginRequestBody userData){
         return authenticationService.loginUser(userData);

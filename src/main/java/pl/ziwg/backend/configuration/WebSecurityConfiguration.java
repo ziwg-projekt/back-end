@@ -89,6 +89,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter imple
             "/swagger-ui/**",
             "/api/v1/auth/**",
             "/api/v1/hospitals/**",
+            "/api/v1/citizens/**",
             "/api/v1/users/**",
             "/api/v1/addresses/**",
             "/api/v1/companies/**"
