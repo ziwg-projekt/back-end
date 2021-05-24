@@ -211,9 +211,21 @@ Odbywa się tak samo jak logowanie admina i obywatela, lecz zwracany jest JWT z 
 }
 ```
 
-# Logika wizyt
+# Ogólne
 
-## Wizyty do wyświetlenia dla obywatela 
+## Dodawanie lekarzy 
+Wysyłając PUT na `/api/v1/doctors` można dodać lekarzy do szpitala. 
+
+## Statystyki co do zaszczepionych
+Get na `/api/v1/citizens/vaccinated` i dostajemy info o ogólnej liczbie zaszczepionych:
+```
+{
+    "count": "2424"
+}
+```
+# Logika szczepień
+
+## Szczepienia do wyświetlenia dla obywatela 
 
 Wszystkie wolne terminy szczepień (appointments) w szpitalu o danym id - GET na `/api/v1/hospitals/1/appointments?page=0&size=2`, można zdefiniować stronę i rozmiar strony, żeby to jakoś sensownie wyglądało przy większej liczbie wizyt, w odpowiedzi jest info o paginacji:
 ```
@@ -258,7 +270,7 @@ Można też oczywiście dodać paginację i nie trzeba zawierać wszystkich para
 http://localhost:8080/api/v1/users/self/appointments?available=false&page=0&size=2
 ```
 
-## Zapisanie na termin szczepienia
+## Zapisanie na szczepienie
 Obywatel może się zapisać na dany termin szczepienia. W tym celu PATCH na `/api/v1/appointments/{id}/actions/enroll` zgodnie z danym ID terminu szczepienia. Dostępne oczywiście po zalogowaniu i posiadaniu uprawnień obywatela. 
 
 ## Wprowadzanie szczepionek do systemu
@@ -279,9 +291,6 @@ Czyli lista JSONków, muszą być oczywiście walidne nazwy firm no i trzeba by�
 
 ## Zmiana statusu szczepienia
 Dwa endpointy dla szpitala. W zależności od czego czy szczepienie się uda bądź nie uda (np. pacjent nie przyjdzie) to klika odpowiedni button. Żeby oznaczyć jako wykonane to PATCH na  `/api/v1/appointments/{id}/actions/made`, a żeby oznaczyć jako niewykonane to PATCH na  `/api/v1/appointments/{id}/actions/not-made`, tworzy się wtedy kolejna wizyta ze statusem AVAILABLE, w miejsce tej która się nie odbyła, z tą samą dawką szczepionki.
-
-## Dodawanie lekarzy 
-Wysyłając PUT na `/api/v1/doctors` można dodać lekarzy do szpitala. 
 
 # Rejestracja obywateli z portalu szpitala
 ## Rejestracja do systemu
