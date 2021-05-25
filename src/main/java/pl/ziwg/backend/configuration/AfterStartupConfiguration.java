@@ -105,6 +105,7 @@ public class AfterStartupConfiguration {
             Address address = new Address("Wroclaw", "Nowowiejska", "13");
             userService.saveHospital(hospitalUsername, password,  new Hospital("Szpital na Nowowiejskiej", address));
         }
+        userService.saveHospital("zielinskiego_szpital", password,  new Hospital("Szpital na Zielińskiego",  new Address("Wroclaw", "Zielinskiego", "49")));
     }
 
     private void createDoctors(){
