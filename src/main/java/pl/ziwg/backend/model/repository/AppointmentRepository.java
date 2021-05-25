@@ -15,7 +15,7 @@ import java.util.List;
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
     Page<Appointment> findAll(Pageable pageable);
     Page<Appointment> findAllByHospital(Hospital hospital, Pageable pageable);
-    Page<Appointment> findAllByCitizen(Citizen citizen, Collection<AppointmentState> states, Pageable pageRequest);
+    Page<Appointment> findAllByCitizenAndStateIn(Citizen citizen, Collection<AppointmentState> states, Pageable pageRequest);
     Page<Appointment> findAllByHospitalAndState(Hospital hospital, AppointmentState state, Pageable pageRequest);
     Page<Appointment> findAllByHospitalAndStateIn(Hospital hospital, Collection<AppointmentState> states, Pageable pageRequest);
 }

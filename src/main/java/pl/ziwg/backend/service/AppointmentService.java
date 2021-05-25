@@ -77,7 +77,7 @@ public class AppointmentService {
     }
 
     public Page<Appointment> findAllCitizenAppointments(Citizen citizen, Collection<AppointmentState> states, Pageable pageRequest){
-        return appointmentRepository.findAllByCitizen(citizen, states, pageRequest);
+        return appointmentRepository.findAllByCitizenAndStateIn(citizen, states, pageRequest);
     }
 
     public Page<Appointment> findAllByHospitalAndStateIn(Hospital hospital, Collection<AppointmentState> states, Pageable pageRequest){
