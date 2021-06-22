@@ -5,32 +5,6 @@
 
 [Endpointy w Swagger UI](http://23.102.47.94:8080/swagger-ui/)
 
-# Dev Info
-
-Żeby dostać się do mysqla:
-```
-docker exec -it mysql_container mysql -u root -p
-```
-Żeby wykonać skrypt z przykładowymi danymi:
-```
-docker exec -it mysql_container mysql -u root -p -e "use ziwg_db; $(cat /var/lib/jenkins/workspace/backend-pipeline/script.txt)"
-```
-Publiczne IP maszyny:
-```
-23.102.47.94
-```
-Logowanie:
-```
-Login: azureuser
-Hasło: GIsyXTB6DzqhJ7YWLKUX
-```
-
-Credentiale do roota w MySQL:
-```
-Login: root
-Hasło: admin12345@@
-```
-
 # Testowi użytkownicy
 Można tworzyć ich samemu, ale obecnie w systemie jest też po jednym przykładowym użytkowniku każdego typu
 - admin - username - `admin`, hasło - `adminpassword`,
