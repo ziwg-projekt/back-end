@@ -225,6 +225,25 @@ Get na `/api/v1/citizens/vaccinated` i dostajemy info o ogólnej liczbie zaszcze
 ```
 # Logika szczepień
 
+## Statystyki szczepień dla szpitala
+Aby uzyskać statystyki szczepień należy wysłać POSTa na `/{id}/vaccines/stats`, a serwer w odpowiedzi wyśle:
+```
+[
+    {
+       "company": "Pfizer",
+       "available": 5,
+       "assigned": 24,
+       "given": 23
+    },
+    ...
+    {
+       "company": "Moderna",
+       "available": 64,
+       "assigned": 242,
+       "given": 253
+    },
+]
+```
 ## Szczepienia do wyświetlenia dla obywatela 
 
 Wszystkie wolne terminy szczepień (appointments) w szpitalu o danym id - GET na `/api/v1/hospitals/1/appointments?page=0&size=2`, można zdefiniować stronę i rozmiar strony, żeby to jakoś sensownie wyglądało przy większej liczbie wizyt, w odpowiedzi jest info o paginacji:
